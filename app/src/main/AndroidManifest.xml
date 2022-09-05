@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.flatcode.littletasks">
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:name=".MyApplication"
+        android:allowBackup="true"
+        android:icon="@drawable/logo"
+        android:label="@string/app_name"
+        android:roundIcon="@drawable/logo"
+        android:supportsRtl="false"
+        android:theme="@style/OneTheme"
+        android:usesCleartextTraffic="true"
+        tools:replace="android:supportsRtl"
+        tools:targetApi="33">
+        <activity
+            android:name=".Activity.SplashActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".Activity.MainActivity" />
+        <activity android:name=".Activity.ObjectsPlanActivity" />
+        <activity android:name=".Activity.ObjectsActivity" />
+        <activity android:name=".Activity.ObjectEditActivity" />
+        <activity android:name=".Activity.ObjectAddActivity" />
+        <activity android:name=".Activity.PlanEditActivity" />
+        <activity android:name=".Activity.PlanAddActivity" />
+        <activity android:name=".Activity.PlansActivity" />
+        <activity android:name=".Activity.TaskAddActivity" />
+        <activity android:name=".Activity.ProfileEditActivity" />
+        <activity android:name=".Activity.ProfileActivity" />
+        <activity android:name=".Activity.TaskEditActivity" />
+        <activity android:name=".Activity.CategoryAddActivity" />
+        <activity android:name=".Auth.ForgetPasswordActivity" />
+        <activity android:name=".Auth.LoginActivity" />
+        <activity android:name=".Auth.RegisterActivity" />
+        <activity android:name=".Auth.AuthActivity" />
+        <activity android:name=".Activity.CategoryTasksActivity" />
+        <activity android:name=".Activity.FavoritesActivity" />
+        <activity android:name=".Activity.ObjectsToPlanActivity" />
+        <activity android:name=".Activity.PrivacyPolicyActivity" />
+        <activity android:name=".Activity.CategoryEditActivity" />
+        <activity android:name=".Activity.CategoriesActivity" />
+        <activity
+            android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
+            android:theme="@style/Base.Theme.AppCompat" />
+
+    </application>
+
+</manifest>
