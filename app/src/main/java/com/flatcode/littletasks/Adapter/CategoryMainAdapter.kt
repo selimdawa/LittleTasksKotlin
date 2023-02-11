@@ -20,11 +20,7 @@ class CategoryMainAdapter(private val context: Context?, var list: ArrayList<Cat
     private var binding: ItemCategoryBinding? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        binding = ItemCategoryBinding.inflate(
-            LayoutInflater.from(
-                context
-            ), parent, false
-        )
+        binding = ItemCategoryBinding.inflate(LayoutInflater.from(context), parent, false)
         return ViewHolder(binding!!.root)
     }
 
@@ -33,8 +29,10 @@ class CategoryMainAdapter(private val context: Context?, var list: ArrayList<Cat
         val id = DATA.EMPTY + item!!.id
         val name = DATA.EMPTY + item.name
         val image = DATA.EMPTY + item.image
+
         VOID.GlideImage(false, context, image, holder.image)
         VOID.GlideBlur(false, context, image, holder.imageBlur, 50)
+
         if (name == DATA.EMPTY) {
             holder.name.visibility = View.GONE
         } else {

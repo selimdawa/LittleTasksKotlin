@@ -27,19 +27,15 @@ class SettingsFragment : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+        savedInstanceState: Bundle?,
+    ): View {
         // Inflate the layout for this fragment
-        binding = FragmentSettingsBinding.inflate(
-            LayoutInflater.from(
-                context
-            ), container, false
-        )
+        binding = FragmentSettingsBinding.inflate(LayoutInflater.from(context), container, false)
         binding!!.recyclerView.setHasFixedSize(true)
         list = ArrayList()
         adapter = SettingAdapter(context, list!!)
         binding!!.recyclerView.adapter = adapter
-        binding!!.toolbar.item.setOnClickListener { v: View? ->
+        binding!!.toolbar.item.setOnClickListener {
             VOID.IntentExtra(
                 context, CLASS.PROFILE, DATA.PROFILE_ID, DATA.FirebaseUserUid
             )

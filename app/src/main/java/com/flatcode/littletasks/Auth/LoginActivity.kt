@@ -5,7 +5,6 @@ import android.content.Context
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Patterns
-import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.Unit.CLASS
@@ -30,25 +29,28 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         val view = binding!!.root
         setContentView(view)
+
         VOID.Logo(baseContext, binding!!.logo)
         VOID.Intro(baseContext, binding!!.background, binding!!.backWhite, binding!!.backBlack)
+
         auth = FirebaseAuth.getInstance()
         dialog = ProgressDialog(this)
         dialog!!.setTitle("Please wait...")
         dialog!!.setCanceledOnTouchOutside(false)
-        binding!!.forget.setOnClickListener { v: View? ->
+
+        binding!!.forget.setOnClickListener {
             VOID.Intent1(
                 context,
                 CLASS.FORGET_PASSWORD
             )
         }
-        binding!!.noAccount.setOnClickListener { v: View? ->
+        binding!!.noAccount.setOnClickListener {
             VOID.Intent1(
                 context,
                 CLASS.REGISTER
             )
         }
-        binding!!.loginBtn.setOnClickListener { v: View? -> validateDate() }
+        binding!!.loginBtn.setOnClickListener { validateDate() }
     }
 
     private var email = ""
@@ -81,11 +83,10 @@ class LoginActivity : AppCompatActivity() {
                     context,
                     CLASS.MAIN
                 )
-            }
-                .addOnFailureListener { e: Exception ->
-                    dialog!!.dismiss()
-                    Toast.makeText(context, DATA.EMPTY + e.message, Toast.LENGTH_SHORT).show()
-                }.addOnCompleteListener { task: Task<AuthResult?>? -> dialog!!.show() }
+            }.addOnFailureListener { e: Exception ->
+                dialog!!.dismiss()
+                Toast.makeText(context, DATA.EMPTY + e.message, Toast.LENGTH_SHORT).show()
+            }.addOnCompleteListener { task: Task<AuthResult?>? -> dialog!!.show() }
         } catch (e: Exception) {
             dialog!!.dismiss()
             Toast.makeText(context, DATA.EMPTY + e.message, Toast.LENGTH_SHORT).show()

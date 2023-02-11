@@ -19,14 +19,10 @@ class CategoriesFragment : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View? {
         // Inflate the layout for this fragment
-        binding = FragmentCategoriesBinding.inflate(
-            LayoutInflater.from(
-                context
-            ), container, false
-        )
+        binding = FragmentCategoriesBinding.inflate(LayoutInflater.from(context), container, false)
 
         //binding.recyclerCategory.setHasFixedSize(true);
         list = ArrayList()

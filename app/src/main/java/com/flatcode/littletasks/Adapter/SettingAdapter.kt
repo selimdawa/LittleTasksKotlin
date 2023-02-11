@@ -45,7 +45,7 @@ class SettingAdapter(private val context: Context?, private val list: ArrayList<
         } else {
             holder.number.visibility = View.GONE
         }
-        holder.item.setOnClickListener { view: View? ->
+        holder.item.setOnClickListener {
             if (type != null) {
                 if (type == DATA.PLANS) {
                     VOID.IntentExtra(context, CLASS.PLANS, DATA.NEW_PLAN, DATA.EMPTY + false)

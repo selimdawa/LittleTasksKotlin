@@ -16,11 +16,10 @@ class AuthActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         THEME.setThemeOfApp(context)
         super.onCreate(savedInstanceState)
-        val binding = ActivityAuthBinding.inflate(
-            layoutInflater
-        )
+        val binding = ActivityAuthBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
+
         VOID.Logo(baseContext, binding.logo)
         VOID.Intro(baseContext, binding.background, binding.backWhite, binding.backBlack)
         binding.loginBtn.setOnClickListener { v: View? -> VOID.Intent1(context, CLASS.LOGIN) }

@@ -18,7 +18,6 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:paddingHorizontal="5dp"
-            android:text=""
             android:textColor="?colorError"
             android:textSize="18sp"
             android:textStyle="bold" />

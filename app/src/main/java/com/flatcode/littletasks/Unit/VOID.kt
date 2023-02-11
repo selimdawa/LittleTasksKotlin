@@ -152,7 +152,7 @@ object VOID {
 
     fun shareApp(context: Context?) {
         val shareIntent = Intent(Intent.ACTION_SEND)
-        shareIntent.setType("text/plain")
+        shareIntent.type = "text/plain"
         shareIntent.putExtra(Intent.EXTRA_SUBJECT, "share app")
         shareIntent.putExtra(
             Intent.EXTRA_TEXT,

@@ -12,7 +12,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
-import com.etebarian.meowbottomnavigation.MeowBottomNavigation
 import com.flatcode.littletasks.Fragment.CategoriesFragment
 import com.flatcode.littletasks.Fragment.HomeFragment
 import com.flatcode.littletasks.Fragment.SettingsFragment
@@ -26,6 +25,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import meow.bottomnavigation.MeowBottomNavigation
 import java.util.*
 
 class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
@@ -57,6 +57,7 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
         } else if (sharedPreferences.getString(DATA.COLOR_OPTION, "NIGHT_ONE") == "NIGHT_ONE") {
             binding!!.toolbar.mode.setBackgroundResource(R.drawable.moon)
         }
+
         meowBottomNavigation = binding!!.bottomNavigation
         meowBottomNavigation!!.add(MeowBottomNavigation.Model(1, R.drawable.ic_settings))
         meowBottomNavigation!!.add(MeowBottomNavigation.Model(2, R.drawable.ic_home))
