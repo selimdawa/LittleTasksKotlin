@@ -10,9 +10,11 @@ import android.net.Uri
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
+import com.google.firebase.database.*
 import android.webkit.MimeTypeMap
 import android.widget.ImageView
 import android.widget.TextView
+import com.flatcode.littletasks.BuildConfig
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.PreferenceManager
@@ -24,7 +26,6 @@ import com.flatcode.littletasks.Model.Plan
 import com.flatcode.littletasks.Model.Task
 import com.flatcode.littletasks.R
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.*
 import com.theartofdev.edmodo.cropper.CropImage
 import com.theartofdev.edmodo.cropper.CropImageView
 import jp.wasabeef.glide.transformations.BlurTransformation
