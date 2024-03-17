@@ -4,7 +4,11 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.Filter
+import android.widget.Filterable
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.flatcode.littletasks.Filter.PlansFilter
 import com.flatcode.littletasks.Model.Plan
@@ -22,11 +26,7 @@ class PlanAdapter(private val context: Context, var list: ArrayList<Plan?>, isNe
     var isNew: Boolean
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        binding = ItemPlanBinding.inflate(
-            LayoutInflater.from(
-                context
-            ), parent, false
-        )
+        binding = ItemPlanBinding.inflate(LayoutInflater.from(context), parent, false)
         return ViewHolder(binding!!.root)
     }
 
@@ -35,33 +35,28 @@ class PlanAdapter(private val context: Context, var list: ArrayList<Plan?>, isNe
         val id = DATA.EMPTY + item!!.id
         val name = DATA.EMPTY + item.name
         val image = DATA.EMPTY + item.image
+
         VOID.GlideImage(false, context, image, holder.image)
+
         if (name == DATA.EMPTY) {
             holder.name.visibility = View.GONE
         } else {
             holder.name.visibility = View.VISIBLE
             holder.name.text = name
         }
+
         if (isNew) {
             holder.more.visibility = View.GONE
         } else {
             holder.more.visibility = View.VISIBLE
         }
-        holder.more.setOnClickListener { view: View? ->
-            VOID.morePlan(
-                context, item
-            )
-        }
-        holder.item.setOnClickListener { view: View? ->
+
+        holder.more.setOnClickListener { VOID.morePlan(context, item) }
+        holder.item.setOnClickListener {
             if (isNew) VOID.IntentExtra(
                 context, CLASS.CATEGORY_ADD, DATA.ID, id
             ) else VOID.IntentExtra2(
-                context,
-                CLASS.OBJECTS_PLAN,
-                DATA.ID,
-                id,
-                DATA.NAME,
-                name
+                context, CLASS.OBJECTS_PLAN, DATA.ID, id, DATA.NAME, name
             )
         }
     }
@@ -77,9 +72,7 @@ class PlanAdapter(private val context: Context, var list: ArrayList<Plan?>, isNe
         return filter!!
     }
 
-    inner class ViewHolder(view: View?) : RecyclerView.ViewHolder(
-        view!!
-    ) {
+    inner class ViewHolder(view: View?) : RecyclerView.ViewHolder(view!!) {
         var image: ImageView
         var more: ImageView
         var name: TextView

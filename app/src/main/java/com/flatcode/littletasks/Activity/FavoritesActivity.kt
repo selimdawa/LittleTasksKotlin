@@ -14,7 +14,11 @@ import com.flatcode.littletasks.R
 import com.flatcode.littletasks.Unit.DATA
 import com.flatcode.littletasks.Unit.THEME
 import com.flatcode.littletasks.databinding.ActivityFavoritesBinding
-import com.google.firebase.database.*
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.Query
+import com.google.firebase.database.ValueEventListener
 import java.text.MessageFormat
 
 class FavoritesActivity : AppCompatActivity() {
@@ -30,22 +34,24 @@ class FavoritesActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         THEME.setThemeOfApp(context)
         super.onCreate(savedInstanceState)
-        binding = ActivityFavoritesBinding.inflate(
-            layoutInflater
-        )
+        binding = ActivityFavoritesBinding.inflate(layoutInflater)
         val view = binding!!.root
         setContentView(view)
+
         tasksType = intent.getStringExtra(DATA.TASK_TYPE)
+
         if (tasksType == null) tasksType = DATA.TASKS_ALL
         type = DATA.TIMESTAMP
+
         binding!!.toolbar.nameSpace.setText(R.string.favorites)
-        binding!!.toolbar.back.setOnClickListener { v: View? -> onBackPressed() }
-        binding!!.toolbar.search.setOnClickListener { v: View? ->
+        binding!!.toolbar.back.setOnClickListener { onBackPressed() }
+        binding!!.toolbar.close.setOnClickListener { onBackPressed() }
+
+        binding!!.toolbar.search.setOnClickListener {
             binding!!.toolbar.toolbar.visibility = View.GONE
             binding!!.toolbar.toolbarSearch.visibility = View.VISIBLE
             DATA.searchStatus = true
         }
-        binding!!.toolbar.close.setOnClickListener { v: View? -> onBackPressed() }
         binding!!.toolbar.textSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
@@ -64,34 +70,25 @@ class FavoritesActivity : AppCompatActivity() {
         adapter = TaskAdapter(context, list!!)
         binding!!.recyclerView.adapter = adapter
         binding!!.recyclerViewReverse.adapter = adapter
-        binding!!.filter.all.setOnClickListener { v: View? ->
+
+        binding!!.filter.all.setOnClickListener {
             type = DATA.TIMESTAMP
             getData(type, binding!!.recyclerView, binding!!.recyclerViewReverse)
         }
-        binding!!.filter.points.setOnClickListener { v: View? ->
-            UpToDown(
-                binding!!.filter.a1, DATA.POINTS
-            )
+        binding!!.filter.points.setOnClickListener {
+            UpToDown(binding!!.filter.a1, DATA.POINTS)
         }
-        binding!!.filter.AVPoints.setOnClickListener { v: View? ->
-            UpToDown(
-                binding!!.filter.a2, DATA.AVAILABLE_POINTS
-            )
+        binding!!.filter.AVPoints.setOnClickListener {
+            UpToDown(binding!!.filter.a2, DATA.AVAILABLE_POINTS)
         }
-        binding!!.filter.add.setOnClickListener { v: View? ->
-            UpToDown(
-                binding!!.filter.a3, DATA.TIMESTAMP
-            )
+        binding!!.filter.add.setOnClickListener {
+            UpToDown(binding!!.filter.a3, DATA.TIMESTAMP)
         }
-        binding!!.filter.start.setOnClickListener { v: View? ->
-            UpToDown(
-                binding!!.filter.a4, DATA.START
-            )
+        binding!!.filter.start.setOnClickListener {
+            UpToDown(binding!!.filter.a4, DATA.START)
         }
-        binding!!.filter.end.setOnClickListener { v: View? ->
-            UpToDown(
-                binding!!.filter.a5, DATA.END
-            )
+        binding!!.filter.end.setOnClickListener {
+            UpToDown(binding!!.filter.a5, DATA.END)
         }
     }
 
@@ -131,20 +128,14 @@ class FavoritesActivity : AppCompatActivity() {
         })
     }
 
-    private fun getItems(
-        orderBy: String?,
-        recyclerView: RecyclerView,
-        recyclerView2: RecyclerView
-    ) {
+    private fun getItems(orderBy: String?, recyclerView: RecyclerView, RV2: RecyclerView) {
         val ref: Query = FirebaseDatabase.getInstance().getReference(DATA.TASKS)
         ref.orderByChild(orderBy!!).addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 list!!.clear()
                 var i = 0
                 for (snapshot in dataSnapshot.children) {
-                    val task = snapshot.getValue(
-                        Task::class.java
-                    )
+                    val task = snapshot.getValue(Task::class.java)
                     for (id in item!!) {
                         assert(task != null)
                         if (task!!.id == id) if (task.publisher == DATA.FirebaseUserUid)
@@ -170,9 +161,9 @@ class FavoritesActivity : AppCompatActivity() {
                     }
                 }
                 binding!!.toolbar.number.text = MessageFormat.format("( {0} )", i)
-                recyclerView2.visibility = View.GONE
+                RV2.visibility = View.GONE
                 binding!!.bar.visibility = View.GONE
-                if (!list!!.isEmpty()) {
+                if (list!!.isNotEmpty()) {
                     recyclerView.visibility = View.VISIBLE
                     binding!!.emptyText.visibility = View.GONE
                 } else {

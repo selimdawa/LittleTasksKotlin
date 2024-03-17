@@ -3,7 +3,12 @@ package com.flatcode.littletasks.Unit
 import android.app.Activity
 import android.app.Dialog
 import android.app.ProgressDialog
-import android.content.*
+import android.content.ActivityNotFoundException
+import android.content.ContentResolver
+import android.content.Context
+import android.content.DialogInterface
+import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
@@ -13,7 +18,6 @@ import android.view.WindowManager
 import android.webkit.MimeTypeMap
 import android.widget.ImageView
 import android.widget.TextView
-import com.flatcode.littletasks.BuildConfig
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.PreferenceManager
@@ -54,12 +58,8 @@ object VOID {
     }
 
     fun IntentExtra2(
-        context: Context?,
-        c: Class<*>?,
-        key: String?,
-        value: String?,
-        key2: String?,
-        value2: String?
+        context: Context?, c: Class<*>?, key: String?, value: String?,
+        key2: String?, value2: String?
     ) {
         val intent = Intent(context, c)
         intent.putExtra(key, value)
@@ -73,18 +73,15 @@ object VOID {
         dialog.setMessage("Deleting $name ...")
         dialog.show()
         val reference: DatabaseReference = FirebaseDatabase.getInstance().getReference(database!!)
-        reference.child(id!!).removeValue()
-            .addOnSuccessListener {
-                dialog.dismiss()
-                Toast.makeText(
-                    context,
-                    "The item has been deleted successfully...",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }.addOnFailureListener { e: Exception ->
-                dialog.dismiss()
-                Toast.makeText(context, "" + e.message, Toast.LENGTH_SHORT).show()
-            }
+        reference.child(id!!).removeValue().addOnSuccessListener {
+            dialog.dismiss()
+            Toast.makeText(
+                context, "The item has been deleted successfully...", Toast.LENGTH_SHORT
+            ).show()
+        }.addOnFailureListener { e: Exception ->
+            dialog.dismiss()
+            Toast.makeText(context, "" + e.message, Toast.LENGTH_SHORT).show()
+        }
     }
 
     fun GlideImage(isUser: Boolean, context: Context?, Url: String?, Image: ImageView) {
@@ -161,9 +158,9 @@ object VOID {
         shareIntent.putExtra(Intent.EXTRA_SUBJECT, "share app")
         shareIntent.putExtra(
             Intent.EXTRA_TEXT,
-            " Download the app now from Google Play " + " https://play.google.com/store/apps/details?id=" + BuildConfig.APPLICATION_ID
+            " Download the app now from Google Play " + " https://play.google.com/store/apps/details?id=" + context!!.packageName
         )
-        context!!.startActivity(Intent.createChooser(shareIntent, "Choose how to share"))
+        context.startActivity(Intent.createChooser(shareIntent, "Choose how to share"))
     }
 
     fun rateApp(context: Context?) {
@@ -221,7 +218,7 @@ object VOID {
 
     fun isFavorite(add: ImageView, TaskId: String?, UserId: String?) {
         val reference: DatabaseReference =
-            FirebaseDatabase.getInstance().getReference().child(DATA.FAVORITES).child(UserId!!)
+            FirebaseDatabase.getInstance().reference.child(DATA.FAVORITES).child(UserId!!)
         reference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.child(TaskId!!).exists()) {
@@ -239,11 +236,11 @@ object VOID {
 
     fun checkFavorite(image: ImageView, TaskId: String?) {
         if (image.tag == "add") {
-            FirebaseDatabase.getInstance().getReference().child(DATA.FAVORITES)
+            FirebaseDatabase.getInstance().reference.child(DATA.FAVORITES)
                 .child(DATA.FirebaseUserUid)
                 .child(TaskId!!).setValue(true)
         } else {
-            FirebaseDatabase.getInstance().getReference().child(DATA.FAVORITES)
+            FirebaseDatabase.getInstance().reference.child(DATA.FAVORITES)
                 .child(DATA.FirebaseUserUid)
                 .child(TaskId!!).removeValue()
         }
@@ -251,7 +248,7 @@ object VOID {
 
     fun isPlan(add: ImageView, ObjectId: String?, planId: String?) {
         val reference: DatabaseReference =
-            FirebaseDatabase.getInstance().getReference().child(DATA.PLANS)
+            FirebaseDatabase.getInstance().reference.child(DATA.PLANS)
                 .child(planId!!).child(DATA.AUTO_TASKS)
         reference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -270,11 +267,11 @@ object VOID {
 
     fun checkPlan(image: ImageView, ObjectId: String?, planId: String?) {
         if (image.tag == "add") {
-            FirebaseDatabase.getInstance().getReference().child(DATA.PLANS).child(planId!!)
+            FirebaseDatabase.getInstance().reference.child(DATA.PLANS).child(planId!!)
                 .child(DATA.AUTO_TASKS)
                 .child(ObjectId!!).setValue(true)
         } else {
-            FirebaseDatabase.getInstance().getReference().child(DATA.PLANS).child(planId!!)
+            FirebaseDatabase.getInstance().reference.child(DATA.PLANS).child(planId!!)
                 .child(DATA.AUTO_TASKS)
                 .child(ObjectId!!).removeValue()
         }
@@ -286,28 +283,19 @@ object VOID {
 
         //options to show in dialog
         val options = arrayOf("Edit", "Delete")
-
         //alert dialog
-        val builder = AlertDialog.Builder(
-            context!!
-        )
-        builder.setTitle("Choose Options").setItems(
-            options
-        ) { dialog: DialogInterface?, which: Int ->
-            //handle dialog option click
-            if (which == 0) {
-                //Edit clicked ,Open new activity to edit the book info
-                IntentExtra(context, CLASS.OBJECT_EDIT, DATA.ID, id)
-            } else if (which == 1) {
-                //Delete Clicked
-                dialogOptionDelete(
-                    context,
-                    DATA.OBJECTS,
-                    DATA.EMPTY + id,
-                    DATA.EMPTY + name
-                )
-            }
-        }.show()
+        val builder = AlertDialog.Builder(context!!)
+        builder.setTitle("Choose Options")
+            .setItems(options) { dialog: DialogInterface?, which: Int ->
+                //handle dialog option click
+                if (which == 0) {
+                    //Edit clicked ,Open new activity to edit the book info
+                    IntentExtra(context, CLASS.OBJECT_EDIT, DATA.ID, id)
+                } else if (which == 1) {
+                    //Delete Clicked
+                    dialogOptionDelete(context, DATA.OBJECTS, DATA.EMPTY + id, DATA.EMPTY + name)
+                }
+            }.show()
     }
 
     fun moreTask(context: Context?, item: Task?) {
@@ -330,30 +318,19 @@ object VOID {
         }
 
         //alert dialog
-        val builder = AlertDialog.Builder(
-            context!!
-        )
-        builder.setTitle("Choose Options").setItems(
-            options,
-            DialogInterface.OnClickListener { dialog: DialogInterface?, which: Int ->
+        val builder = AlertDialog.Builder(context!!)
+        builder.setTitle("Choose Options")
+            .setItems(options) { dialog: DialogInterface?, which: Int ->
                 //handle dialog option click
                 if (which == 0) {
                     //Edit clicked ,Open new activity to edit the book info
                     IntentExtra2(
-                        context,
-                        CLASS.TASK_EDIT,
-                        DATA.TASK_ID,
-                        id,
-                        DATA.CATEGORY_ID,
-                        category
+                        context, CLASS.TASK_EDIT, DATA.TASK_ID, id, DATA.CATEGORY_ID, category
                     )
                 } else if (which == 1) {
                     //Delete Clicked
                     dialogOptionDelete(
-                        context,
-                        DATA.TASKS,
-                        DATA.EMPTY + id,
-                        DATA.EMPTY + name
+                        context, DATA.TASKS, DATA.EMPTY + id, DATA.EMPTY + name
                     )
                 } else if (which == 2) {
                     //Delete Clicked
@@ -362,35 +339,29 @@ object VOID {
                     //Delete Clicked
                     EditTaskStatus(context, id, false, true)
                 }
-            }).show()
+            }.show()
     }
 
     private fun EditTaskStatus(
-        context: Context?,
-        taskId: String?,
-        startStatus: Boolean,
-        endStatus: Boolean
+        context: Context?, taskId: String?, startStatus: Boolean, endStatus: Boolean
     ) {
         val hashMap = HashMap<String?, Any>()
         if (startStatus) hashMap[DATA.START] = DATA.ZERO
         if (endStatus) hashMap[DATA.END] = DATA.ZERO
         val ref: DatabaseReference = FirebaseDatabase.getInstance().getReference(DATA.TASKS)
-        ref.child(taskId!!).updateChildren(hashMap)
-            .addOnSuccessListener {
-                if (startStatus) Toast.makeText(
-                    context,
-                    "Task started again...",
-                    Toast.LENGTH_SHORT
-                ).show()
-                if (endStatus) Toast.makeText(context, "Task did not End...", Toast.LENGTH_SHORT)
-                    .show()
-            }.addOnFailureListener { e: Exception ->
-                Toast.makeText(
-                    context,
-                    DATA.EMPTY + e.message,
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
+        ref.child(taskId!!).updateChildren(hashMap).addOnSuccessListener {
+            if (startStatus) Toast.makeText(
+                context, "Task started again...", Toast.LENGTH_SHORT
+            ).show()
+            if (endStatus) Toast.makeText(context, "Task did not End...", Toast.LENGTH_SHORT)
+                .show()
+        }.addOnFailureListener { e: Exception ->
+            Toast.makeText(
+                context,
+                DATA.EMPTY + e.message,
+                Toast.LENGTH_SHORT
+            ).show()
+        }
     }
 
     fun moreCategory(context: Context?, item: Category?) {
@@ -400,46 +371,31 @@ object VOID {
 
         //options to show in dialog
         val options = arrayOf("Add Task", "Edit", "Delete")
-
         //alert dialog
-        val builder = AlertDialog.Builder(
-            context!!
-        )
-        builder.setTitle("Choose Options").setItems(
-            options
-        ) { dialog: DialogInterface?, which: Int ->
-            //handle dialog option click
-            when (which) {
-                0 -> {
-                    IntentExtra2(
-                        context,
-                        CLASS.TASK_ADD,
-                        DATA.CATEGORY_ID,
-                        id,
-                        DATA.PLAN_ID,
-                        plan
-                    )
+        val builder = AlertDialog.Builder(context!!)
+        builder.setTitle("Choose Options")
+            .setItems(options) { dialog: DialogInterface?, which: Int ->
+                //handle dialog option click
+                when (which) {
+                    0 -> {
+                        IntentExtra2(
+                            context, CLASS.TASK_ADD, DATA.CATEGORY_ID, id, DATA.PLAN_ID, plan
+                        )
+                    }
+
+                    1 -> {
+                        IntentExtra2(
+                            context, CLASS.CATEGORY_EDIT, DATA.CATEGORY_ID, id, DATA.PLAN_ID, plan
+                        )
+                    }
+
+                    2 -> {
+                        dialogOptionDelete(
+                            context, DATA.CATEGORIES, DATA.EMPTY + id, DATA.EMPTY + name
+                        )
+                    }
                 }
-                1 -> {
-                    IntentExtra2(
-                        context,
-                        CLASS.CATEGORY_EDIT,
-                        DATA.CATEGORY_ID,
-                        id,
-                        DATA.PLAN_ID,
-                        plan
-                    )
-                }
-                2 -> {
-                    dialogOptionDelete(
-                        context,
-                        DATA.CATEGORIES,
-                        DATA.EMPTY + id,
-                        DATA.EMPTY + name
-                    )
-                }
-            }
-        }.show()
+            }.show()
     }
 
     fun morePlan(context: Context?, item: Plan?) {
@@ -448,28 +404,21 @@ object VOID {
 
         //options to show in dialog
         val options = arrayOf("Edit", "Delete")
-
         //alert dialog
-        val builder = AlertDialog.Builder(
-            context!!
-        )
-        builder.setTitle("Choose Options").setItems(
-            options
-        ) { dialog: DialogInterface?, which: Int ->
-            //handle dialog option click
-            if (which == 0) {
-                //Edit clicked ,Open new activity to edit the book info
-                IntentExtra(context, CLASS.PLAN_EDIT, DATA.ID, id)
-            } else if (which == 1) {
-                //Delete Clicked
-                dialogOptionDelete(
-                    context,
-                    DATA.PLANS,
-                    DATA.EMPTY + id,
-                    DATA.EMPTY + name
-                )
-            }
-        }.show()
+        val builder = AlertDialog.Builder(context!!)
+        builder.setTitle("Choose Options")
+            .setItems(options) { dialog: DialogInterface?, which: Int ->
+                //handle dialog option click
+                if (which == 0) {
+                    //Edit clicked ,Open new activity to edit the book info
+                    IntentExtra(context, CLASS.PLAN_EDIT, DATA.ID, id)
+                } else if (which == 1) {
+                    //Delete Clicked
+                    dialogOptionDelete(
+                        context, DATA.PLANS, DATA.EMPTY + id, DATA.EMPTY + name
+                    )
+                }
+            }.show()
     }
 
     fun dialogOptionDelete(context: Context?, database: String?, id: String?, name: String) {
@@ -489,12 +438,15 @@ object VOID {
             DATA.CATEGORIES -> {
                 title.text = MessageFormat.format("{0} Category?", Title)
             }
+
             DATA.OBJECTS -> {
                 title.text = MessageFormat.format("{0} Object?", Title)
             }
+
             DATA.TASKS -> {
                 title.text = MessageFormat.format("{0} Task?", Title)
             }
+
             DATA.PLANS -> {
                 title.text = MessageFormat.format("{0} Plan?", Title)
             }
@@ -533,9 +485,7 @@ object VOID {
             FirebaseDatabase.getInstance().getReference().child(DATA.TASKS).child(taskId!!)
         reference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                val item: Task = dataSnapshot.getValue(
-                    Task::class.java
-                )!!
+                val item: Task = dataSnapshot.getValue(Task::class.java)!!
                 if (item.timestamp != DATA.ZERO.toLong()) {
                     image.setImageResource(R.drawable.ic_star_unselected)
                     image.setOnClickListener {
@@ -560,11 +510,7 @@ object VOID {
                 if (item.end != DATA.ZERO.toLong()) {
                     image.setImageResource(R.drawable.ic_star_selected)
                     image.setOnClickListener {
-                        Toast.makeText(
-                            context,
-                            "Task Completed",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Toast.makeText(context, "Task Completed", Toast.LENGTH_SHORT).show()
                     }
                 }
             }

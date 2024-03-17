@@ -9,6 +9,8 @@
     <application
         android:name=".MyApplication"
         android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
         android:icon="@drawable/logo"
         android:label="@string/app_name"
         android:roundIcon="@drawable/logo"
@@ -19,38 +21,87 @@
         tools:targetApi="31">
         <activity
             android:name=".Activity.SplashActivity"
-            android:exported="true">
+            android:exported="true"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Activity.MainActivity" />
-        <activity android:name=".Activity.ObjectsPlanActivity" />
-        <activity android:name=".Activity.ObjectsActivity" />
-        <activity android:name=".Activity.ObjectEditActivity" />
-        <activity android:name=".Activity.ObjectAddActivity" />
-        <activity android:name=".Activity.PlanEditActivity" />
-        <activity android:name=".Activity.PlanAddActivity" />
-        <activity android:name=".Activity.PlansActivity" />
-        <activity android:name=".Activity.TaskAddActivity" />
-        <activity android:name=".Activity.ProfileEditActivity" />
-        <activity android:name=".Activity.ProfileActivity" />
-        <activity android:name=".Activity.TaskEditActivity" />
-        <activity android:name=".Activity.CategoryAddActivity" />
-        <activity android:name=".Auth.ForgetPasswordActivity" />
-        <activity android:name=".Auth.LoginActivity" />
-        <activity android:name=".Auth.RegisterActivity" />
-        <activity android:name=".Auth.AuthActivity" />
-        <activity android:name=".Activity.CategoryTasksActivity" />
-        <activity android:name=".Activity.FavoritesActivity" />
-        <activity android:name=".Activity.ObjectsToPlanActivity" />
-        <activity android:name=".Activity.PrivacyPolicyActivity" />
-        <activity android:name=".Activity.CategoryEditActivity" />
-        <activity android:name=".Activity.CategoriesActivity" />
+        <activity
+            android:name=".Activity.MainActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Activity.ObjectsPlanActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Activity.ObjectsActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Activity.ObjectEditActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Activity.ObjectAddActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Activity.PlanEditActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Activity.PlanAddActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Activity.PlansActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Activity.TaskAddActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Activity.ProfileEditActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Activity.ProfileActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Activity.TaskEditActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Activity.CategoryAddActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Auth.ForgetPasswordActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Auth.LoginActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Auth.RegisterActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Auth.AuthActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Activity.CategoryTasksActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Activity.FavoritesActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Activity.ObjectsToPlanActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Activity.PrivacyPolicyActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Activity.CategoryEditActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Activity.CategoriesActivity"
+            android:screenOrientation="portrait" />
+
         <activity
             android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/Base.Theme.AppCompat" />
 
     </application>

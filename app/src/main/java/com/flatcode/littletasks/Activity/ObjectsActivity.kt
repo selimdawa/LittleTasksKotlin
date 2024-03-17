@@ -32,21 +32,18 @@ class ObjectsActivity : AppCompatActivity() {
         binding = ActivityObjectsBinding.inflate(layoutInflater)
         val view = binding!!.root
         setContentView(view)
+
         binding!!.toolbar.nameSpace.setText(R.string.objects)
-        binding!!.toolbar.back.setOnClickListener { v: View? -> onBackPressed() }
+        binding!!.toolbar.back.setOnClickListener { onBackPressed() }
+        binding!!.toolbar.close.setOnClickListener { onBackPressed() }
         binding!!.add.add.setText(R.string.add_object)
-        binding!!.add.item.setOnClickListener { v: View? ->
-            VOID.Intent1(
-                context,
-                CLASS.OBJECT_ADD
-            )
-        }
-        binding!!.toolbar.search.setOnClickListener { v: View? ->
+        binding!!.add.item.setOnClickListener { VOID.Intent1(context, CLASS.OBJECT_ADD) }
+
+        binding!!.toolbar.search.setOnClickListener {
             binding!!.toolbar.toolbar.visibility = View.GONE
             binding!!.toolbar.toolbarSearch.visibility = View.VISIBLE
             DATA.searchStatus = true
         }
-        binding!!.toolbar.close.setOnClickListener { v: View? -> onBackPressed() }
         binding!!.toolbar.textSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
@@ -76,7 +73,7 @@ class ObjectsActivity : AppCompatActivity() {
                     if (item.publisher == DATA.FirebaseUserUid) list!!.add(item)
                 }
                 binding!!.bar.visibility = View.GONE
-                if (!list!!.isEmpty()) {
+                if (list!!.isNotEmpty()) {
                     binding!!.recyclerView.visibility = View.VISIBLE
                     binding!!.emptyText.visibility = View.GONE
                 } else {

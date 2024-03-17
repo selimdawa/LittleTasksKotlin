@@ -21,9 +21,7 @@ class ObjectAddActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         THEME.setThemeOfApp(context)
         super.onCreate(savedInstanceState)
-        binding = ActivityObjectAddBinding.inflate(
-            layoutInflater
-        )
+        binding = ActivityObjectAddBinding.inflate(layoutInflater)
         val view = binding!!.root
         setContentView(view)
         binding!!.toolbar.nameSpace.setText(R.string.add_new_object)
@@ -33,6 +31,7 @@ class ObjectAddActivity : AppCompatActivity() {
         list = ArrayList()
         adapter = ObjectAddAdapter(context, list!!)
         binding!!.recyclerView.adapter = adapter
+
         IdeaPosts()
     }
 

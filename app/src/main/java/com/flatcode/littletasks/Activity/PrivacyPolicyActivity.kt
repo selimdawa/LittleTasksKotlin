@@ -22,14 +22,14 @@ class PrivacyPolicyActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         THEME.setThemeOfApp(context)
         super.onCreate(savedInstanceState)
-        binding = ActivityPrivacyPolicyBinding.inflate(
-            layoutInflater
-        )
+        binding = ActivityPrivacyPolicyBinding.inflate(layoutInflater)
         val view = binding!!.root
         setContentView(view)
+
         binding!!.toolbar.nameSpace.setText(R.string.privacy_policy)
-        binding!!.toolbar.back.setOnClickListener { v: View? -> onBackPressed() }
+        binding!!.toolbar.back.setOnClickListener { onBackPressed() }
         binding!!.toolbar.search.visibility = View.GONE
+
         VOID.Logo(context, binding!!.logo)
     }
 

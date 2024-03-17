@@ -36,9 +36,11 @@ class PlanAddActivity : AppCompatActivity() {
         binding = ActivityPlanAddBinding.inflate(layoutInflater)
         val view = binding!!.root
         setContentView(view)
+
         dialog = ProgressDialog(context)
         dialog!!.setTitle("Please wait...")
         dialog!!.setCanceledOnTouchOutside(false)
+
         binding!!.toolbar.nameSpace.setText(R.string.add_new_plan)
         binding!!.toolbar.back.setOnClickListener { v: View? -> onBackPressed() }
         binding!!.editImage.setOnClickListener { v: View? -> VOID.CropImageWide(activity) }
@@ -77,11 +79,8 @@ class PlanAddActivity : AppCompatActivity() {
             }.addOnFailureListener { e: Exception ->
                 dialog!!.dismiss()
                 Toast.makeText(
-                    context,
-                    "Plan upload failed due to " + e.message,
-                    Toast.LENGTH_SHORT
-                )
-                    .show()
+                    context, "Plan upload failed due to " + e.message, Toast.LENGTH_SHORT
+                ).show()
             }
     }
 
@@ -95,15 +94,13 @@ class PlanAddActivity : AppCompatActivity() {
         hashMap[DATA.NAME] = DATA.EMPTY + title
         hashMap[DATA.IMAGE] = uploadedImageUrl
         assert(id != null)
-        ref.child(id!!).setValue(hashMap).addOnSuccessListener { unused: Void? ->
+        ref.child(id!!).setValue(hashMap).addOnSuccessListener {
             dialog!!.dismiss()
             Toast.makeText(context, "Successfully uploaded...", Toast.LENGTH_SHORT).show()
         }.addOnFailureListener { e: Exception ->
             dialog!!.dismiss()
             Toast.makeText(
-                context,
-                "Failure to upload to db due to :" + e.message,
-                Toast.LENGTH_SHORT
+                context, "Failure to upload to db due to :" + e.message, Toast.LENGTH_SHORT
             ).show()
         }
     }

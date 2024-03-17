@@ -13,8 +13,7 @@ import com.flatcode.littletasks.databinding.FragmentHomeBinding
 class HomeFragment : Fragment() {
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?,
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
     ): View {
         val binding = FragmentHomeBinding.inflate(LayoutInflater.from(context), container, false)
         binding.one.setOnClickListener {

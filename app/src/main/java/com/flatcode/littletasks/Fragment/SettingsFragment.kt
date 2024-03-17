@@ -6,7 +6,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.flatcode.littletasks.Adapter.SettingAdapter
-import com.flatcode.littletasks.Model.*
+import com.flatcode.littletasks.Model.Category
+import com.flatcode.littletasks.Model.OBJECT
+import com.flatcode.littletasks.Model.Plan
+import com.flatcode.littletasks.Model.Setting
+import com.flatcode.littletasks.Model.Task
+import com.flatcode.littletasks.Model.User
 import com.flatcode.littletasks.R
 import com.flatcode.littletasks.Unit.CLASS
 import com.flatcode.littletasks.Unit.DATA
@@ -17,7 +22,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import java.text.MessageFormat
-import java.util.*
+import java.util.Objects
 
 class SettingsFragment : Fragment() {
 
@@ -26,19 +31,18 @@ class SettingsFragment : Fragment() {
     private var adapter: SettingAdapter? = null
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?,
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
     ): View {
         // Inflate the layout for this fragment
         binding = FragmentSettingsBinding.inflate(LayoutInflater.from(context), container, false)
-        binding!!.recyclerView.setHasFixedSize(true)
+
+        //binding!!.recyclerView.setHasFixedSize(true)
         list = ArrayList()
         adapter = SettingAdapter(context, list!!)
         binding!!.recyclerView.adapter = adapter
+
         binding!!.toolbar.item.setOnClickListener {
-            VOID.IntentExtra(
-                context, CLASS.PROFILE, DATA.PROFILE_ID, DATA.FirebaseUserUid
-            )
+            VOID.IntentExtra(context, CLASS.PROFILE, DATA.PROFILE_ID, DATA.FirebaseUserUid)
         }
         return binding!!.root
     }
@@ -53,9 +57,7 @@ class SettingsFragment : Fragment() {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 C = 0
                 for (data in dataSnapshot.children) {
-                    val item = data.getValue(
-                        Category::class.java
-                    )!!
+                    val item = data.getValue(Category::class.java)!!
                     if (item.id != null) if (item.publisher == DATA.FirebaseUserUid) C++
                 }
                 nrPlans()
@@ -116,11 +118,10 @@ class SettingsFragment : Fragment() {
         reference.child(Objects.requireNonNull(DATA.FirebaseUserUid))
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    val item = snapshot.getValue(
-                        User::class.java
-                    )!!
+                    val item = snapshot.getValue(User::class.java)!!
                     val ProfileImage = item.profileImage
                     val Username = item.username
+
                     VOID.GlideImage(true, context, ProfileImage, binding!!.toolbar.imageProfile)
                     binding!!.toolbar.username.text = Username
                 }
@@ -165,9 +166,7 @@ class SettingsFragment : Fragment() {
                     var i = 0
                     var a = 0
                     for (snapshot in dataSnapshot.children) {
-                        val item = snapshot.getValue(
-                            Task::class.java
-                        )!!
+                        val item = snapshot.getValue(Task::class.java)!!
                         i = i + item.points
                         a = a + item.aVPoints
                     }

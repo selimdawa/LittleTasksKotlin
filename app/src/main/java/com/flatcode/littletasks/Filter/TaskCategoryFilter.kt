@@ -6,11 +6,9 @@ import com.flatcode.littletasks.Model.Task
 import java.util.*
 
 class TaskCategoryFilter(var list: ArrayList<Task?>, var adapter: TaskAdapter) : Filter() {
-
     override fun performFiltering(constraint: CharSequence): FilterResults {
         var constraint: CharSequence? = constraint
         val results = FilterResults()
-
         if (constraint != null && constraint.length > 0) {
             constraint = constraint.toString().uppercase(Locale.getDefault())
             val filter = ArrayList<Task?>()

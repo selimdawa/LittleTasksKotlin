@@ -39,15 +39,10 @@ class CategoryMainAdapter(private val context: Context?, var list: ArrayList<Cat
             holder.name.visibility = View.VISIBLE
             holder.name.text = name
         }
-        holder.more.setOnClickListener { view: View? ->
-            VOID.moreCategory(
-                context, item
-            )
-        }
-        holder.card.setOnClickListener { v: View? ->
-            VOID.IntentExtra2(
-                context, CLASS.CATEGORY_TASKS, DATA.ID, id, DATA.NAME, name
-            )
+
+        holder.more.setOnClickListener { VOID.moreCategory(context, item) }
+        holder.card.setOnClickListener {
+            VOID.IntentExtra2(context, CLASS.CATEGORY_TASKS, DATA.ID, id, DATA.NAME, name)
         }
     }
 
@@ -55,9 +50,7 @@ class CategoryMainAdapter(private val context: Context?, var list: ArrayList<Cat
         return list.size
     }
 
-    inner class ViewHolder(view: View?) : RecyclerView.ViewHolder(
-        view!!
-    ) {
+    inner class ViewHolder(view: View?) : RecyclerView.ViewHolder(view!!) {
         var image: ImageView
         var imageBlur: ImageView
         var more: ImageView

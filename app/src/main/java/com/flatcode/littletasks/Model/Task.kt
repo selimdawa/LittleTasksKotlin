@@ -11,7 +11,7 @@ class Task {
     var points = 0
     var aVPoints = 0
 
-    constructor() {}
+    constructor()
 
     constructor(
         name: String?, publisher: String?, id: String?, category: String?,

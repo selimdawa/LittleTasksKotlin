@@ -4,7 +4,11 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.Filter
+import android.widget.Filterable
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.flatcode.littletasks.Filter.TaskCategoryFilter
 import com.flatcode.littletasks.Model.Category
@@ -13,7 +17,11 @@ import com.flatcode.littletasks.Unit.DATA
 import com.flatcode.littletasks.Unit.GetTimeAgo
 import com.flatcode.littletasks.Unit.VOID
 import com.flatcode.littletasks.databinding.ItemTaskBinding
-import com.google.firebase.database.*
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.Query
+import com.google.firebase.database.ValueEventListener
 
 class TaskAdapter(private val context: Context, var list: ArrayList<Task?>) :
     RecyclerView.Adapter<TaskAdapter.ViewHolder>(), Filterable {
@@ -23,11 +31,7 @@ class TaskAdapter(private val context: Context, var list: ArrayList<Task?>) :
     private var filter: TaskCategoryFilter? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        binding = ItemTaskBinding.inflate(
-            LayoutInflater.from(
-                context
-            ), parent, false
-        )
+        binding = ItemTaskBinding.inflate(LayoutInflater.from(context), parent, false)
         return ViewHolder(binding!!.root)
     }
 
@@ -49,11 +53,13 @@ class TaskAdapter(private val context: Context, var list: ArrayList<Task?>) :
             holder.name.visibility = View.VISIBLE
             holder.name.text = name
         }
+
         holder.points.text = points
         holder.AVPoints.text = AVPoints
         val addTime = timestamp.toLong()
         val Add = GetTimeAgo.getMessageAgo(addTime, context)
         holder.add.text = Add
+
         if (start == "0") {
             holder.start.text = "-"
         } else {
@@ -61,6 +67,7 @@ class TaskAdapter(private val context: Context, var list: ArrayList<Task?>) :
             val Start = GetTimeAgo.getMessageAgo(startTime, context)
             holder.start.text = Start
         }
+
         if (end == "0") {
             holder.end.text = "-"
         } else {
@@ -68,15 +75,13 @@ class TaskAdapter(private val context: Context, var list: ArrayList<Task?>) :
             val End = GetTimeAgo.getMessageAgo(endTime, context)
             holder.end.text = End
         }
+
         getData(category, holder.category, holder.image)
         VOID.isFavorite(holder.favorites, id, publisher)
-        holder.favorites.setOnClickListener { v: View? -> VOID.checkFavorite(holder.favorites, id) }
+        holder.favorites.setOnClickListener { VOID.checkFavorite(holder.favorites, id) }
         VOID.isTask(context, holder.task, id)
-        holder.more.setOnClickListener { view: View? ->
-            VOID.moreTask(
-                context, item
-            )
-        }
+
+        holder.more.setOnClickListener { VOID.moreTask(context, item) }
     }
 
     override fun getItemCount(): Int {
@@ -90,9 +95,7 @@ class TaskAdapter(private val context: Context, var list: ArrayList<Task?>) :
         return filter!!
     }
 
-    inner class ViewHolder(view: View?) : RecyclerView.ViewHolder(
-        view!!
-    ) {
+    inner class ViewHolder(view: View?) : RecyclerView.ViewHolder(view!!) {
         var image: ImageView
         var favorites: ImageView
         var task: ImageView
@@ -127,9 +130,7 @@ class TaskAdapter(private val context: Context, var list: ArrayList<Task?>) :
             FirebaseDatabase.getInstance().getReference(DATA.CATEGORIES).child(categoryId)
         reference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                val item = dataSnapshot.getValue(
-                    Category::class.java
-                )!!
+                val item = dataSnapshot.getValue(Category::class.java)!!
                 name.text = item.name
                 VOID.GlideImage(false, context, item.image, image)
             }

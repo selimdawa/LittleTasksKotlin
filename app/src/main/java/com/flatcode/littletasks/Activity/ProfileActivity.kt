@@ -1,11 +1,12 @@
 package com.flatcode.littletasks.Activity
 
-import android.content.*
+import android.content.Context
 import android.os.Bundle
-import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.flatcode.littletasks.Model.*
+import com.flatcode.littletasks.Model.Task
+import com.flatcode.littletasks.Model.User
+import com.flatcode.littletasks.Unit.CLASS
 import com.flatcode.littletasks.Unit.DATA
 import com.flatcode.littletasks.Unit.THEME
 import com.flatcode.littletasks.Unit.VOID
@@ -28,15 +29,12 @@ class ProfileActivity : AppCompatActivity() {
         binding = ActivityProfileBinding.inflate(layoutInflater)
         val view = binding!!.root
         setContentView(view)
+
         val intent = intent
         profileId = intent.getStringExtra(DATA.PROFILE_ID)
-        binding!!.edit.setOnClickListener { v: View? ->
-            VOID.Intent1(
-                context,
-                ProfileEditActivity::class.java
-            )
-        }
-        binding!!.back.setOnClickListener { v: View? -> onBackPressed() }
+
+        binding!!.edit.setOnClickListener { VOID.Intent1(context, CLASS.PROFILE_EDIT) }
+        binding!!.back.setOnClickListener { onBackPressed() }
     }
 
     private fun init() {
@@ -51,11 +49,10 @@ class ProfileActivity : AppCompatActivity() {
         val reference = FirebaseDatabase.getInstance().getReference(DATA.USERS)
         reference.child(profileId!!).addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val item = snapshot.getValue(
-                    User::class.java
-                )!!
+                val item = snapshot.getValue(User::class.java)!!
                 val username = DATA.EMPTY + item.username
                 val profileImage = DATA.EMPTY + item.profileImage
+
                 binding!!.username.text = username
                 VOID.GlideImage(true, context, profileImage, binding!!.profile)
             }
@@ -70,9 +67,7 @@ class ProfileActivity : AppCompatActivity() {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 var i = 0
                 for (data in dataSnapshot.children) {
-                    val item = data.getValue(
-                        Task::class.java
-                    )!!
+                    val item = data.getValue(Task::class.java)!!
                     if (item.publisher == profileId) i++
                 }
                 text.text = MessageFormat.format("{0}{1}", DATA.EMPTY, i)

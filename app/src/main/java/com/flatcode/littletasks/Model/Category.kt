@@ -8,14 +8,10 @@ class Category {
     var plan: String? = null
     var timestamp: Long = 0
 
-    constructor() {}
+    constructor()
 
     constructor(
-        id: String?,
-        name: String?,
-        image: String?,
-        publisher: String?,
-        plan: String?,
+        id: String?, name: String?, image: String?, publisher: String?, plan: String?,
         timestamp: Long
     ) {
         this.id = id

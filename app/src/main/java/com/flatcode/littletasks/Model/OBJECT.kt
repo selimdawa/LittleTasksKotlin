@@ -7,7 +7,7 @@ class OBJECT {
     var points = 0
     var timestamp: Long = 0
 
-    constructor() {}
+    constructor()
 
     constructor(id: String?, name: String?, points: Int, publisher: String?, timestamp: Long) {
         this.id = id

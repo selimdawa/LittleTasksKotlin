@@ -14,9 +14,12 @@ import com.flatcode.littletasks.Unit.DATA
 import com.flatcode.littletasks.Unit.THEME
 import com.flatcode.littletasks.Unit.VOID
 import com.flatcode.littletasks.databinding.ActivityPageStaggeredBinding
-import com.google.firebase.database.*
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.Query
+import com.google.firebase.database.ValueEventListener
 import java.text.MessageFormat
-import java.util.*
 
 class CategoriesActivity : AppCompatActivity() {
 
@@ -28,28 +31,23 @@ class CategoriesActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         THEME.setThemeOfApp(context)
         super.onCreate(savedInstanceState)
-        binding = ActivityPageStaggeredBinding.inflate(
-            layoutInflater
-        )
+        binding = ActivityPageStaggeredBinding.inflate(layoutInflater)
         val view = binding!!.root
         setContentView(view)
+
         binding!!.toolbar.nameSpace.setText(R.string.categories)
-        binding!!.toolbar.back.setOnClickListener { v: View? -> onBackPressed() }
+        binding!!.toolbar.back.setOnClickListener { onBackPressed() }
+        binding!!.toolbar.close.setOnClickListener { onBackPressed() }
         binding!!.add.add.setText(R.string.add_category)
-        binding!!.add.item.setOnClickListener { v: View? ->
-            VOID.IntentExtra(
-                context,
-                CLASS.PLANS,
-                DATA.NEW_PLAN,
-                "true"
-            )
+        binding!!.add.item.setOnClickListener {
+            VOID.IntentExtra(context, CLASS.PLANS, DATA.NEW_PLAN, "true")
         }
-        binding!!.toolbar.search.setOnClickListener { v: View? ->
+
+        binding!!.toolbar.search.setOnClickListener {
             binding!!.toolbar.toolbar.visibility = View.GONE
             binding!!.toolbar.toolbarSearch.visibility = View.VISIBLE
             DATA.searchStatus = true
         }
-        binding!!.toolbar.close.setOnClickListener { v: View? -> onBackPressed() }
         binding!!.toolbar.textSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
@@ -76,18 +74,16 @@ class CategoriesActivity : AppCompatActivity() {
                 list!!.clear()
                 var i = 0
                 for (data in dataSnapshot.children) {
-                    val item = data.getValue(
-                        Category::class.java
-                    )!!
+                    val item = data.getValue(Category::class.java)!!
                     if (item.publisher == DATA.FirebaseUserUid) {
                         list!!.add(item)
                         i++
                     }
                 }
                 binding!!.toolbar.number.text = MessageFormat.format("( {0} )", i)
-                Collections.reverse(list)
+                list!!.reverse()
                 binding!!.bar.visibility = View.GONE
-                if (!list!!.isEmpty()) {
+                if (list!!.isNotEmpty()) {
                     binding!!.recyclerView.visibility = View.VISIBLE
                     binding!!.emptyText.visibility = View.GONE
                 } else {

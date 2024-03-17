@@ -16,7 +16,11 @@ import com.flatcode.littletasks.Unit.DATA
 import com.flatcode.littletasks.Unit.THEME
 import com.flatcode.littletasks.Unit.VOID
 import com.flatcode.littletasks.databinding.ActivityPageSwitchBinding
-import com.google.firebase.database.*
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.Query
+import com.google.firebase.database.ValueEventListener
 import java.text.MessageFormat
 
 class CategoryTasksActivity : AppCompatActivity() {
@@ -32,32 +36,28 @@ class CategoryTasksActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         THEME.setThemeOfApp(context)
         super.onCreate(savedInstanceState)
-        binding = ActivityPageSwitchBinding.inflate(
-            layoutInflater
-        )
+        binding = ActivityPageSwitchBinding.inflate(layoutInflater)
         val view = binding!!.root
         setContentView(view)
+
         val intent = intent
         id = intent.getStringExtra(DATA.ID)
         name = intent.getStringExtra(DATA.NAME)
+
         type = DATA.TIMESTAMP
         binding!!.toolbar.nameSpace.text = name
-        binding!!.toolbar.back.setOnClickListener { v: View? -> onBackPressed() }
+        binding!!.toolbar.back.setOnClickListener { onBackPressed() }
+        binding!!.toolbar.close.setOnClickListener { v: View? -> onBackPressed() }
         binding!!.add.add.setText(R.string.add_task)
-        binding!!.add.item.setOnClickListener { v: View? ->
-            VOID.IntentExtra(
-                context,
-                CLASS.TASK_ADD,
-                DATA.CATEGORY_ID,
-                id
-            )
+        binding!!.add.item.setOnClickListener {
+            VOID.IntentExtra(context, CLASS.TASK_ADD, DATA.CATEGORY_ID, id)
         }
-        binding!!.toolbar.search.setOnClickListener { v: View? ->
+
+        binding!!.toolbar.search.setOnClickListener {
             binding!!.toolbar.toolbar.visibility = View.GONE
             binding!!.toolbar.toolbarSearch.visibility = View.VISIBLE
             searchStatus = true
         }
-        binding!!.toolbar.close.setOnClickListener { v: View? -> onBackPressed() }
         binding!!.toolbar.textSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
@@ -76,35 +76,18 @@ class CategoryTasksActivity : AppCompatActivity() {
         adapter = TaskAdapter(context, list!!)
         binding!!.recyclerView.adapter = adapter
         binding!!.recyclerViewReverse.adapter = adapter
-        binding!!.filter.all.setOnClickListener { v: View? ->
+
+        binding!!.filter.all.setOnClickListener {
             type = DATA.TIMESTAMP
             getData(type, binding!!.recyclerView, binding!!.recyclerViewReverse)
         }
-        binding!!.filter.points.setOnClickListener { v: View? ->
-            UpToDown(
-                binding!!.filter.a1, DATA.POINTS
-            )
+        binding!!.filter.points.setOnClickListener { UpToDown(binding!!.filter.a1, DATA.POINTS) }
+        binding!!.filter.AVPoints.setOnClickListener {
+            UpToDown(binding!!.filter.a2, DATA.AVAILABLE_POINTS)
         }
-        binding!!.filter.AVPoints.setOnClickListener { v: View? ->
-            UpToDown(
-                binding!!.filter.a2, DATA.AVAILABLE_POINTS
-            )
-        }
-        binding!!.filter.add.setOnClickListener { v: View? ->
-            UpToDown(
-                binding!!.filter.a3, DATA.TIMESTAMP
-            )
-        }
-        binding!!.filter.start.setOnClickListener { v: View? ->
-            UpToDown(
-                binding!!.filter.a4, DATA.START
-            )
-        }
-        binding!!.filter.end.setOnClickListener { v: View? ->
-            UpToDown(
-                binding!!.filter.a5, DATA.END
-            )
-        }
+        binding!!.filter.add.setOnClickListener { UpToDown(binding!!.filter.a3, DATA.TIMESTAMP) }
+        binding!!.filter.start.setOnClickListener { UpToDown(binding!!.filter.a4, DATA.START) }
+        binding!!.filter.end.setOnClickListener { UpToDown(binding!!.filter.a5, DATA.END) }
     }
 
     private fun UpToDown(item: ImageView, Type: String?) {
@@ -133,9 +116,7 @@ class CategoryTasksActivity : AppCompatActivity() {
                 list!!.clear()
                 var i = 0
                 for (snapshot in dataSnapshot.children) {
-                    val item = snapshot.getValue(
-                        Task::class.java
-                    )!!
+                    val item = snapshot.getValue(Task::class.java)!!
                     if (item.category == id) if (item.publisher == DATA.FirebaseUserUid) {
                         list!!.add(item)
                         i++
@@ -144,7 +125,7 @@ class CategoryTasksActivity : AppCompatActivity() {
                 binding!!.toolbar.number.text = MessageFormat.format("( {0} )", i)
                 recyclerView2.visibility = View.GONE
                 binding!!.bar.visibility = View.GONE
-                if (!list!!.isEmpty()) {
+                if (list!!.isNotEmpty()) {
                     recyclerView.visibility = View.VISIBLE
                     binding!!.emptyText.visibility = View.GONE
                 } else {
@@ -159,16 +140,14 @@ class CategoryTasksActivity : AppCompatActivity() {
     }
 
     private val points: Unit
-        private get() {
+        get() {
             val ref = FirebaseDatabase.getInstance().getReference(DATA.TASKS)
             ref.addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     var i = 0
                     var a = 0
                     for (snapshot in dataSnapshot.children) {
-                        val item = snapshot.getValue(
-                            Task::class.java
-                        )!!
+                        val item = snapshot.getValue(Task::class.java)!!
                         if (item.category == id) {
                             i = i + item.points
                             a = a + item.aVPoints

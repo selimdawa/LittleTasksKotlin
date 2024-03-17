@@ -8,7 +8,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.text.TextUtils
-import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.Model.Plan
@@ -40,16 +39,19 @@ class PlanEditActivity : AppCompatActivity() {
         binding = ActivityPlanAddBinding.inflate(layoutInflater)
         val view = binding!!.root
         setContentView(view)
+
         val intent = intent
         id = intent.getStringExtra(DATA.ID)
+
         dialog = ProgressDialog(context)
         dialog!!.setTitle("Please wait")
         dialog!!.setCanceledOnTouchOutside(false)
+
         loadInfo()
         binding!!.toolbar.nameSpace.setText(R.string.edit_plan)
-        binding!!.toolbar.back.setOnClickListener { v: View? -> onBackPressed() }
-        binding!!.editImage.setOnClickListener { v: View? -> VOID.CropImageSquare(activity) }
-        binding!!.toolbar.ok.setOnClickListener { v: View? -> validateData() }
+        binding!!.toolbar.back.setOnClickListener { onBackPressed() }
+        binding!!.editImage.setOnClickListener { VOID.CropImageSquare(activity) }
+        binding!!.toolbar.ok.setOnClickListener { validateData() }
     }
 
     private var name = DATA.EMPTY
@@ -81,9 +83,7 @@ class PlanEditActivity : AppCompatActivity() {
             }.addOnFailureListener { e: Exception ->
                 dialog!!.dismiss()
                 Toast.makeText(
-                    context,
-                    "Failed to upload image due to " + e.message,
-                    Toast.LENGTH_SHORT
+                    context, "Failed to upload image due to " + e.message, Toast.LENGTH_SHORT
                 ).show()
             }
     }
@@ -114,6 +114,7 @@ class PlanEditActivity : AppCompatActivity() {
                 val item = snapshot.getValue(Plan::class.java)!!
                 val name = item.name
                 val image = item.image
+
                 VOID.GlideImage(true, context, image, binding!!.image)
                 binding!!.planEt.setText(name)
             }

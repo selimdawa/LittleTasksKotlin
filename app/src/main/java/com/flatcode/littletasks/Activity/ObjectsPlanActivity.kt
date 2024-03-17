@@ -14,7 +14,11 @@ import com.flatcode.littletasks.Unit.DATA
 import com.flatcode.littletasks.Unit.THEME
 import com.flatcode.littletasks.Unit.VOID
 import com.flatcode.littletasks.databinding.ActivityObjectsBinding
-import com.google.firebase.database.*
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.Query
+import com.google.firebase.database.ValueEventListener
 
 class ObjectsPlanActivity : AppCompatActivity() {
 
@@ -32,24 +36,22 @@ class ObjectsPlanActivity : AppCompatActivity() {
         binding = ActivityObjectsBinding.inflate(layoutInflater)
         val view = binding!!.root
         setContentView(view)
+
         id = intent.getStringExtra(DATA.ID)
         name = intent.getStringExtra(DATA.NAME)
+
         binding!!.toolbar.nameSpace.setText(R.string.objects_plan)
-        binding!!.toolbar.back.setOnClickListener { v: View? -> onBackPressed() }
-        binding!!.add.item.setOnClickListener { v: View? ->
-            VOID.IntentExtra(
-                context,
-                CLASS.OBJECT_TO_PLAN,
-                DATA.ID,
-                id
-            )
+        binding!!.toolbar.back.setOnClickListener { onBackPressed() }
+        binding!!.toolbar.close.setOnClickListener { onBackPressed() }
+        binding!!.add.item.setOnClickListener {
+            VOID.IntentExtra(context, CLASS.OBJECT_TO_PLAN, DATA.ID, id)
         }
-        binding!!.toolbar.search.setOnClickListener { v: View? ->
+
+        binding!!.toolbar.search.setOnClickListener {
             binding!!.toolbar.toolbar.visibility = View.GONE
             binding!!.toolbar.toolbarSearch.visibility = View.VISIBLE
             DATA.searchStatus = true
         }
-        binding!!.toolbar.close.setOnClickListener { v: View? -> onBackPressed() }
         binding!!.toolbar.textSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
@@ -72,9 +74,8 @@ class ObjectsPlanActivity : AppCompatActivity() {
     private val data: Unit
         get() {
             item = ArrayList()
-            val reference = FirebaseDatabase.getInstance().getReference(DATA.PLANS).child(
-                id!!
-            ).child(DATA.AUTO_TASKS)
+            val reference = FirebaseDatabase.getInstance().getReference(DATA.PLANS).child(id!!)
+                .child(DATA.AUTO_TASKS)
             reference.addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     (item as ArrayList<String?>).clear()
@@ -88,7 +89,7 @@ class ObjectsPlanActivity : AppCompatActivity() {
             })
         }
     private val items: Unit
-        private get() {
+        get() {
             val ref: Query = FirebaseDatabase.getInstance().getReference(DATA.OBJECTS)
             ref.addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {

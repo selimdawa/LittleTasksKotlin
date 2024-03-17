@@ -9,7 +9,11 @@ import com.flatcode.littletasks.Adapter.CategoryMainAdapter
 import com.flatcode.littletasks.Model.Category
 import com.flatcode.littletasks.Unit.DATA
 import com.flatcode.littletasks.databinding.FragmentCategoriesBinding
-import com.google.firebase.database.*
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.Query
+import com.google.firebase.database.ValueEventListener
 
 class CategoriesFragment : Fragment() {
 
@@ -18,8 +22,7 @@ class CategoriesFragment : Fragment() {
     var adapter: CategoryMainAdapter? = null
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?,
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
     ): View? {
         // Inflate the layout for this fragment
         binding = FragmentCategoriesBinding.inflate(LayoutInflater.from(context), container, false)
@@ -28,6 +31,7 @@ class CategoriesFragment : Fragment() {
         list = ArrayList()
         adapter = CategoryMainAdapter(context, list!!)
         binding!!.recyclerView.adapter = adapter
+
         return binding!!.root
     }
 
@@ -37,9 +41,7 @@ class CategoriesFragment : Fragment() {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 list!!.clear()
                 for (snapshot in dataSnapshot.children) {
-                    val item = snapshot.getValue(
-                        Category::class.java
-                    )!!
+                    val item = snapshot.getValue(Category::class.java)!!
                     if (item.publisher == DATA.FirebaseUserUid) list!!.add(item)
                 }
                 binding!!.bar.visibility = View.GONE

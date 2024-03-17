@@ -21,11 +21,7 @@ class SettingAdapter(private val context: Context?, private val list: ArrayList<
     private var binding: ItemSettingBinding? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        binding = ItemSettingBinding.inflate(
-            LayoutInflater.from(
-                context
-            ), parent, false
-        )
+        binding = ItemSettingBinding.inflate(LayoutInflater.from(context), parent, false)
         return ViewHolder(binding!!.root)
     }
 
@@ -37,14 +33,17 @@ class SettingAdapter(private val context: Context?, private val list: ArrayList<
         val number = item.number
         val to = item.c
         val type = item.type
+
         holder.name.text = name
         holder.image.setImageResource(image)
+
         if (number != 0) {
             holder.number.visibility = View.VISIBLE
             holder.number.text = MessageFormat.format("{0}{1}", DATA.EMPTY, number)
         } else {
             holder.number.visibility = View.GONE
         }
+
         holder.item.setOnClickListener {
             if (type != null) {
                 if (type == DATA.PLANS) {

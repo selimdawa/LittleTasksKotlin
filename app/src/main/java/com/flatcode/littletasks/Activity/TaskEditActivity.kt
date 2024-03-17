@@ -4,7 +4,6 @@ import android.app.ProgressDialog
 import android.content.Context
 import android.os.Bundle
 import android.text.TextUtils
-import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.Model.Category
@@ -33,17 +32,20 @@ class TaskEditActivity : AppCompatActivity() {
         binding = ActivityTaskAddBinding.inflate(layoutInflater)
         val view = binding!!.root
         setContentView(view)
+
         taskId = intent.getStringExtra(DATA.TASK_ID)
         categoryId = intent.getStringExtra(DATA.CATEGORY_ID)
+
         dialog = ProgressDialog(context)
         dialog!!.setTitle("Please wait...")
         dialog!!.setCanceledOnTouchOutside(false)
         loadBooksInfo()
         loadCategories()
+
         binding!!.toolbar.nameSpace.setText(R.string.edit_task)
-        binding!!.toolbar.back.setOnClickListener { v: View? -> onBackPressed() }
+        binding!!.toolbar.back.setOnClickListener { onBackPressed() }
         binding!!.name.setText(R.string.task_name)
-        binding!!.toolbar.ok.setOnClickListener { v: View? -> validateData() }
+        binding!!.toolbar.ok.setOnClickListener { validateData() }
     }
 
     private var name = DATA.EMPTY
@@ -71,7 +73,7 @@ class TaskEditActivity : AppCompatActivity() {
         hashMap[DATA.NAME] = DATA.EMPTY + name
         hashMap[DATA.POINTS] = point
         val ref = FirebaseDatabase.getInstance().getReference(DATA.TASKS)
-        ref.child(taskId!!).updateChildren(hashMap).addOnSuccessListener { unused: Void? ->
+        ref.child(taskId!!).updateChildren(hashMap).addOnSuccessListener {
             dialog!!.dismiss()
             Toast.makeText(context, "Task info updated...", Toast.LENGTH_SHORT).show()
         }.addOnFailureListener { e: Exception ->
@@ -84,11 +86,10 @@ class TaskEditActivity : AppCompatActivity() {
         val refBooks = FirebaseDatabase.getInstance().getReference(DATA.TASKS)
         refBooks.child(taskId!!).addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val item = snapshot.getValue(
-                    Task::class.java
-                )!!
+                val item = snapshot.getValue(Task::class.java)!!
                 val points = DATA.EMPTY + item.points
                 val title = DATA.EMPTY + item.name
+
                 binding!!.nameEt.setText(title)
                 binding!!.PointsEt.setText(points)
             }
@@ -103,11 +104,10 @@ class TaskEditActivity : AppCompatActivity() {
         )
         ref.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val item = snapshot.getValue(
-                    Category::class.java
-                )!!
+                val item = snapshot.getValue(Category::class.java)!!
                 val categoryImage = DATA.EMPTY + item.image
                 val categoryName = DATA.EMPTY + item.name
+
                 VOID.GlideImage(false, context, categoryImage, binding!!.image)
                 binding!!.category.text = categoryName
             }

@@ -28,20 +28,21 @@ class ObjectEditActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         THEME.setThemeOfApp(context)
         super.onCreate(savedInstanceState)
-        binding = ActivityObjectEditBinding.inflate(
-            layoutInflater
-        )
+        binding = ActivityObjectEditBinding.inflate(layoutInflater)
         val view = binding!!.root
         setContentView(view)
+
         id = intent.getStringExtra(DATA.ID)
+
         dialog = ProgressDialog(context)
         dialog!!.setTitle("Please wait")
         dialog!!.setCanceledOnTouchOutside(false)
+
         loadInfo()
         binding!!.toolbar.nameSpace.setText(R.string.edit_object)
-        binding!!.toolbar.back.setOnClickListener { v: View? -> onBackPressed() }
+        binding!!.toolbar.back.setOnClickListener { onBackPressed() }
         binding!!.name.setText(R.string.object_name)
-        binding!!.go.setOnClickListener { v: View? -> validateData() }
+        binding!!.go.setOnClickListener { validateData() }
     }
 
     private var name = DATA.EMPTY
@@ -61,12 +62,12 @@ class ObjectEditActivity : AppCompatActivity() {
     private fun Update() {
         dialog!!.setMessage("Updating Object...")
         dialog!!.show()
-        val point = points!!.toInt()
+        val point = points.toInt()
         val hashMap = HashMap<String?, Any>()
         hashMap[DATA.NAME] = DATA.EMPTY + name
         hashMap[DATA.POINTS] = point
         val reference = FirebaseDatabase.getInstance().getReference(DATA.OBJECTS)
-        reference.child(id!!).updateChildren(hashMap).addOnSuccessListener { unused: Void? ->
+        reference.child(id!!).updateChildren(hashMap).addOnSuccessListener {
             dialog!!.dismiss()
             Toast.makeText(context, "Object updated...", Toast.LENGTH_SHORT).show()
         }.addOnFailureListener { e: Exception ->
@@ -83,6 +84,7 @@ class ObjectEditActivity : AppCompatActivity() {
                 val item = snapshot.getValue(OBJECT::class.java)!!
                 val name = item.name
                 val points = item.points
+
                 binding!!.nameEt.setText(name)
                 binding!!.PointsEt.setText(MessageFormat.format("{0}{1}", DATA.EMPTY, points))
             }

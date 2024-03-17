@@ -31,16 +31,19 @@ class ObjectsToPlanActivity : AppCompatActivity() {
         binding = ActivityObjectsBinding.inflate(layoutInflater)
         val view = binding!!.root
         setContentView(view)
+
         id = intent.getStringExtra(DATA.ID)
+
         binding!!.toolbar.nameSpace.setText(R.string.add_object_to_plan)
-        binding!!.toolbar.back.setOnClickListener { v: View? -> onBackPressed() }
+        binding!!.toolbar.back.setOnClickListener { onBackPressed() }
+        binding!!.toolbar.close.setOnClickListener { onBackPressed() }
         binding!!.add.item.visibility = View.GONE
-        binding!!.toolbar.search.setOnClickListener { v: View? ->
+
+        binding!!.toolbar.search.setOnClickListener {
             binding!!.toolbar.toolbar.visibility = View.GONE
             binding!!.toolbar.toolbarSearch.visibility = View.VISIBLE
             DATA.searchStatus = true
         }
-        binding!!.toolbar.close.setOnClickListener { v: View? -> onBackPressed() }
         binding!!.toolbar.textSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
@@ -61,7 +64,7 @@ class ObjectsToPlanActivity : AppCompatActivity() {
     }
 
     private val items: Unit
-        private get() {
+        get() {
             val ref = FirebaseDatabase.getInstance().getReference(DATA.OBJECTS)
             ref.addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -71,7 +74,7 @@ class ObjectsToPlanActivity : AppCompatActivity() {
                         if (`object`.publisher == DATA.FirebaseUserUid) list!!.add(`object`)
                     }
                     binding!!.bar.visibility = View.GONE
-                    if (!list!!.isEmpty()) {
+                    if (list!!.isNotEmpty()) {
                         binding!!.recyclerView.visibility = View.VISIBLE
                         binding!!.emptyText.visibility = View.GONE
                     } else {

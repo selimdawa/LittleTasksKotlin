@@ -8,7 +8,7 @@ class Setting {
     var number = 0
     var c: Class<*>? = null
 
-    constructor() {}
+    constructor()
 
     constructor(id: String?, name: String?, image: Int, number: Int, c: Class<*>?) {
         this.id = id

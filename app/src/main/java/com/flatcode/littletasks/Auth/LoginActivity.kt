@@ -12,8 +12,6 @@ import com.flatcode.littletasks.Unit.DATA
 import com.flatcode.littletasks.Unit.THEME
 import com.flatcode.littletasks.Unit.VOID
 import com.flatcode.littletasks.databinding.ActivityLoginBinding
-import com.google.android.gms.tasks.Task
-import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 
 class LoginActivity : AppCompatActivity() {
@@ -38,18 +36,8 @@ class LoginActivity : AppCompatActivity() {
         dialog!!.setTitle("Please wait...")
         dialog!!.setCanceledOnTouchOutside(false)
 
-        binding!!.forget.setOnClickListener {
-            VOID.Intent1(
-                context,
-                CLASS.FORGET_PASSWORD
-            )
-        }
-        binding!!.noAccount.setOnClickListener {
-            VOID.Intent1(
-                context,
-                CLASS.REGISTER
-            )
-        }
+        binding!!.forget.setOnClickListener { VOID.Intent1(context, CLASS.FORGET_PASSWORD) }
+        binding!!.noAccount.setOnClickListener { VOID.Intent1(context, CLASS.REGISTER) }
         binding!!.loginBtn.setOnClickListener { validateDate() }
     }
 
@@ -78,15 +66,12 @@ class LoginActivity : AppCompatActivity() {
             auth!!.signInWithEmailAndPassword(email, password).addOnCanceledListener {
                 dialog!!.dismiss()
                 Toast.makeText(context, "Error!", Toast.LENGTH_SHORT).show()
-            }.addOnSuccessListener { authResult: AuthResult? ->
-                VOID.IntentClear(
-                    context,
-                    CLASS.MAIN
-                )
+            }.addOnSuccessListener {
+                VOID.IntentClear(context, CLASS.MAIN)
             }.addOnFailureListener { e: Exception ->
                 dialog!!.dismiss()
                 Toast.makeText(context, DATA.EMPTY + e.message, Toast.LENGTH_SHORT).show()
-            }.addOnCompleteListener { task: Task<AuthResult?>? -> dialog!!.show() }
+            }.addOnCompleteListener { dialog!!.show() }
         } catch (e: Exception) {
             dialog!!.dismiss()
             Toast.makeText(context, DATA.EMPTY + e.message, Toast.LENGTH_SHORT).show()

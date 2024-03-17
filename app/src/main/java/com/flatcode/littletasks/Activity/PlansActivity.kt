@@ -1,6 +1,6 @@
 package com.flatcode.littletasks.Activity
 
-import android.content.*
+import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -14,7 +14,11 @@ import com.flatcode.littletasks.Unit.DATA
 import com.flatcode.littletasks.Unit.THEME
 import com.flatcode.littletasks.Unit.VOID
 import com.flatcode.littletasks.databinding.ActivityPlansBinding
-import com.google.firebase.database.*
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.Query
+import com.google.firebase.database.ValueEventListener
 import java.text.MessageFormat
 
 class PlansActivity : AppCompatActivity() {
@@ -31,19 +35,22 @@ class PlansActivity : AppCompatActivity() {
         binding = ActivityPlansBinding.inflate(layoutInflater)
         val view = binding!!.root
         setContentView(view)
+
         val intent = intent
         newPlan = intent.getStringExtra(DATA.NEW_PLAN)
+
         binding!!.toolbar.nameSpace.setText(R.string.plans)
-        binding!!.toolbar.back.setOnClickListener { v: View? -> onBackPressed() }
+        binding!!.toolbar.back.setOnClickListener { onBackPressed() }
+        binding!!.toolbar.close.setOnClickListener { onBackPressed() }
         binding!!.add.add.setText(R.string.add_plan)
-        binding!!.add.item.setOnClickListener { v: View? -> VOID.Intent1(context, CLASS.PLAN_ADD) }
+        binding!!.add.item.setOnClickListener { VOID.Intent1(context, CLASS.PLAN_ADD) }
+
         if (newPlan == "true") isNew = true else if (newPlan == "false") isNew = false
-        binding!!.toolbar.search.setOnClickListener { v: View? ->
+        binding!!.toolbar.search.setOnClickListener {
             binding!!.toolbar.toolbar.visibility = View.GONE
             binding!!.toolbar.toolbarSearch.visibility = View.VISIBLE
             DATA.searchStatus = true
         }
-        binding!!.toolbar.close.setOnClickListener { v: View? -> onBackPressed() }
         binding!!.toolbar.textSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
@@ -64,7 +71,7 @@ class PlansActivity : AppCompatActivity() {
     }
 
     private val items: Unit
-        private get() {
+        get() {
             val ref: Query = FirebaseDatabase.getInstance().getReference(DATA.PLANS)
             ref.addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -79,7 +86,7 @@ class PlansActivity : AppCompatActivity() {
                     }
                     binding!!.toolbar.number.text = MessageFormat.format("( {0} )", i)
                     binding!!.bar.visibility = View.GONE
-                    if (!list!!.isEmpty()) {
+                    if (list!!.isNotEmpty()) {
                         binding!!.recyclerView.visibility = View.VISIBLE
                         binding!!.emptyText.visibility = View.GONE
                     } else {

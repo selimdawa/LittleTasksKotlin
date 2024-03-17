@@ -7,7 +7,7 @@ class Plan {
     var publisher: String? = null
     var timestamp: Long = 0
 
-    constructor() {}
+    constructor()
 
     constructor(id: String?, name: String?, image: String?, publisher: String?, timestamp: Long) {
         this.id = id

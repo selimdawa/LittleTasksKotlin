@@ -8,7 +8,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.text.TextUtils
-import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.Model.OBJECT
@@ -18,7 +17,11 @@ import com.flatcode.littletasks.Unit.DATA
 import com.flatcode.littletasks.Unit.THEME
 import com.flatcode.littletasks.Unit.VOID
 import com.flatcode.littletasks.databinding.ActivityCategoryAddBinding
-import com.google.firebase.database.*
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.UploadTask
 import com.theartofdev.edmodo.cropper.CropImage
@@ -35,19 +38,20 @@ class CategoryAddActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         THEME.setThemeOfApp(context)
         super.onCreate(savedInstanceState)
-        binding = ActivityCategoryAddBinding.inflate(
-            layoutInflater
-        )
+        binding = ActivityCategoryAddBinding.inflate(layoutInflater)
         val view = binding!!.root
         setContentView(view)
+
         planId = intent.getStringExtra(DATA.ID)
+
         dialog = ProgressDialog(context)
         dialog!!.setTitle("Please wait...")
         dialog!!.setCanceledOnTouchOutside(false)
+
         binding!!.toolbar.nameSpace.setText(R.string.add_new_category)
-        binding!!.toolbar.back.setOnClickListener { v: View? -> onBackPressed() }
-        binding!!.editImage.setOnClickListener { v: View? -> VOID.CropImageSquare(activity) }
-        binding!!.toolbar.ok.setOnClickListener { v: View? -> validateData() }
+        binding!!.toolbar.back.setOnClickListener { onBackPressed() }
+        binding!!.editImage.setOnClickListener { VOID.CropImageSquare(activity) }
+        binding!!.toolbar.ok.setOnClickListener { validateData() }
         PlanName()
     }
 
@@ -67,12 +71,11 @@ class CategoryAddActivity : AppCompatActivity() {
     }
 
     private fun PlanName() {
-        val reference = FirebaseDatabase.getInstance().getReference(DATA.PLANS).child(
-            planId!!
-        )
+        val reference = FirebaseDatabase.getInstance().getReference(DATA.PLANS).child(planId!!)
         reference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 val plan = dataSnapshot.getValue(Plan::class.java)!!
+
                 val planName = DATA.EMPTY + plan.name
                 binding!!.plan.text = planName
             }
@@ -98,9 +101,7 @@ class CategoryAddActivity : AppCompatActivity() {
             }.addOnFailureListener { e: Exception ->
                 dialog!!.dismiss()
                 Toast.makeText(
-                    context,
-                    "Category upload failed due to " + e.message,
-                    Toast.LENGTH_SHORT
+                    context, "Category upload failed due to " + e.message, Toast.LENGTH_SHORT
                 ).show()
             }
     }
@@ -116,16 +117,14 @@ class CategoryAddActivity : AppCompatActivity() {
         hashMap[DATA.PLAN] = DATA.EMPTY + planId
         hashMap[DATA.IMAGE] = uploadedImageUrl
         assert(id != null)
-        ref.child(id!!).setValue(hashMap).addOnSuccessListener { unused: Void? ->
+        ref.child(id!!).setValue(hashMap).addOnSuccessListener {
             dialog!!.dismiss()
             getItems(id)
             Toast.makeText(context, "Successfully uploaded...", Toast.LENGTH_SHORT).show()
         }.addOnFailureListener { e: Exception ->
             dialog!!.dismiss()
             Toast.makeText(
-                context,
-                "Failure to upload to db due to : " + e.message,
-                Toast.LENGTH_SHORT
+                context, "Failure to upload to db due to : " + e.message, Toast.LENGTH_SHORT
             ).show()
         }
     }
@@ -137,10 +136,7 @@ class CategoryAddActivity : AppCompatActivity() {
                 for (data in dataSnapshot.children) {
                     val `object` = data.getValue(OBJECT::class.java)!!
                     if (`object`.publisher == DATA.FirebaseUserUid) checkObject(
-                        `object`.id,
-                        categoryId,
-                        `object`.name,
-                        `object`.points
+                        `object`.id, categoryId, `object`.name, `object`.points
                     )
                 }
             }
@@ -150,9 +146,8 @@ class CategoryAddActivity : AppCompatActivity() {
     }
 
     private fun checkObject(objectId: String?, categoryId: String?, name: String?, points: Int) {
-        val reference = FirebaseDatabase.getInstance().getReference(DATA.PLANS).child(
-            planId!!
-        ).child(DATA.AUTO_TASKS)
+        val reference = FirebaseDatabase.getInstance().getReference(DATA.PLANS)
+            .child(planId!!).child(DATA.AUTO_TASKS)
         reference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.child(objectId!!).exists()) {

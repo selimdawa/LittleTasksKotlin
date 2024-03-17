@@ -8,7 +8,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.text.TextUtils
-import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.Model.Category
@@ -39,23 +38,24 @@ class CategoryEditActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         THEME.setThemeOfApp(context)
         super.onCreate(savedInstanceState)
-        binding = ActivityCategoryAddBinding.inflate(
-            layoutInflater
-        )
+        binding = ActivityCategoryAddBinding.inflate(layoutInflater)
         val view = binding!!.root
         setContentView(view)
+
         val intent = intent
         categoryId = intent.getStringExtra(DATA.CATEGORY_ID)
         planId = intent.getStringExtra(DATA.PLAN_ID)
+
         dialog = ProgressDialog(context)
         dialog!!.setTitle("Please wait")
         dialog!!.setCanceledOnTouchOutside(false)
         loadCategoryInfo()
         loadPlanInfo()
+
         binding!!.toolbar.nameSpace.setText(R.string.edit_category)
-        binding!!.toolbar.back.setOnClickListener { v: View? -> onBackPressed() }
-        binding!!.editImage.setOnClickListener { v: View? -> VOID.CropImageSquare(activity) }
-        binding!!.toolbar.ok.setOnClickListener { v: View? -> validateData() }
+        binding!!.toolbar.back.setOnClickListener { onBackPressed() }
+        binding!!.editImage.setOnClickListener { VOID.CropImageSquare(activity) }
+        binding!!.toolbar.ok.setOnClickListener { validateData() }
     }
 
     private var name = DATA.EMPTY
@@ -87,9 +87,7 @@ class CategoryEditActivity : AppCompatActivity() {
             }.addOnFailureListener { e: Exception ->
                 dialog!!.dismiss()
                 Toast.makeText(
-                    context,
-                    "Failed to upload image due to " + e.message,
-                    Toast.LENGTH_SHORT
+                    context, "Failed to upload image due to " + e.message, Toast.LENGTH_SHORT
                 ).show()
             }
     }
@@ -104,17 +102,14 @@ class CategoryEditActivity : AppCompatActivity() {
         }
         val reference = FirebaseDatabase.getInstance().getReference(DATA.CATEGORIES)
         reference.child(categoryId!!).updateChildren(hashMap)
-            .addOnSuccessListener { unused: Void? ->
+            .addOnSuccessListener {
                 dialog!!.dismiss()
                 Toast.makeText(context, "Category updated...", Toast.LENGTH_SHORT).show()
             }.addOnFailureListener { e: Exception ->
                 dialog!!.dismiss()
                 Toast.makeText(
-                    context,
-                    "Failed to update db duo to " + e.message,
-                    Toast.LENGTH_SHORT
-                )
-                    .show()
+                    context, "Failed to update db duo to " + e.message, Toast.LENGTH_SHORT
+                ).show()
             }
     }
 
@@ -122,11 +117,10 @@ class CategoryEditActivity : AppCompatActivity() {
         val reference = FirebaseDatabase.getInstance().getReference(DATA.CATEGORIES)
         reference.child(categoryId!!).addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val item = snapshot.getValue(
-                    Category::class.java
-                )!!
+                val item = snapshot.getValue(Category::class.java)!!
                 val name = item.name
                 val image = item.image
+
                 VOID.GlideImage(true, context, image, binding!!.image)
                 binding!!.categoryEt.setText(name)
             }
@@ -136,12 +130,11 @@ class CategoryEditActivity : AppCompatActivity() {
     }
 
     private fun loadPlanInfo() {
-        val reference = FirebaseDatabase.getInstance().getReference(DATA.PLANS).child(
-            planId!!
-        )
+        val reference = FirebaseDatabase.getInstance().getReference(DATA.PLANS).child(planId!!)
         reference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val item = snapshot.getValue(Plan::class.java)!!
+
                 val name = item.name
                 binding!!.plan.text = name
             }

@@ -31,11 +31,7 @@ class CategoriesAdapter(private val context: Context, var list: ArrayList<Catego
     private var filter: CategoriesFilter? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        binding = ItemCategoriesBinding.inflate(
-            LayoutInflater.from(
-                context
-            ), parent, false
-        )
+        binding = ItemCategoriesBinding.inflate(LayoutInflater.from(context), parent, false)
         return ViewHolder(binding!!.root)
     }
 
@@ -44,23 +40,21 @@ class CategoriesAdapter(private val context: Context, var list: ArrayList<Catego
         val id = DATA.EMPTY + item!!.id
         val name = DATA.EMPTY + item.name
         val image = DATA.EMPTY + item.image
+
         VOID.GlideImage(false, context, image, holder.image)
+
         if (name == DATA.EMPTY) {
             holder.name.visibility = View.GONE
         } else {
             holder.name.visibility = View.VISIBLE
             holder.name.text = name
         }
+
         nrBooks(holder.numer, id)
-        holder.more.setOnClickListener { v: View? ->
-            VOID.moreCategory(
-                context, item
-            )
-        }
-        holder.card.setOnClickListener { view: View? ->
-            VOID.IntentExtra2(
-                context, CLASS.CATEGORY_TASKS, DATA.ID, id, DATA.NAME, name
-            )
+        holder.more.setOnClickListener { VOID.moreCategory(context, item) }
+
+        holder.card.setOnClickListener {
+            VOID.IntentExtra2(context, CLASS.CATEGORY_TASKS, DATA.ID, id, DATA.NAME, name)
         }
     }
 
@@ -75,9 +69,7 @@ class CategoriesAdapter(private val context: Context, var list: ArrayList<Catego
         return filter!!
     }
 
-    inner class ViewHolder(view: View?) : RecyclerView.ViewHolder(
-        view!!
-    ) {
+    inner class ViewHolder(view: View?) : RecyclerView.ViewHolder(view!!) {
         var image: ImageView
         var more: ImageView
         var name: TextView
@@ -100,9 +92,7 @@ class CategoriesAdapter(private val context: Context, var list: ArrayList<Catego
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     var i = 0
                     for (snapshot in dataSnapshot.children) {
-                        val item = snapshot.getValue(
-                            Task::class.java
-                        )!!
+                        val item = snapshot.getValue(Task::class.java)!!
                         if (item.category == categoryId) i++
                     }
                     number.text = MessageFormat.format("{0}{1}", DATA.EMPTY, i)

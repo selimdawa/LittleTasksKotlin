@@ -4,7 +4,6 @@ import android.app.ProgressDialog
 import android.content.Context
 import android.os.Bundle
 import android.text.TextUtils
-import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.Model.Category
@@ -31,13 +30,17 @@ class TaskAddActivity : AppCompatActivity() {
         binding = ActivityTaskAddBinding.inflate(layoutInflater)
         val view = binding!!.root
         setContentView(view)
+
         categoryId = intent.getStringExtra(DATA.CATEGORY_ID)
+
         dialog = ProgressDialog(context)
         dialog!!.setTitle("Please wait...")
         dialog!!.setCanceledOnTouchOutside(false)
+
         binding!!.toolbar.nameSpace.setText(R.string.add_new_task)
-        binding!!.toolbar.back.setOnClickListener { v: View? -> onBackPressed() }
-        binding!!.toolbar.ok.setOnClickListener { v: View? -> validateData() }
+        binding!!.toolbar.back.setOnClickListener { onBackPressed() }
+        binding!!.toolbar.ok.setOnClickListener { validateData() }
+
         loadCategories()
     }
 
@@ -76,28 +79,22 @@ class TaskAddActivity : AppCompatActivity() {
         hashMap[DATA.START] = DATA.ZERO
         hashMap[DATA.END] = DATA.ZERO
         assert(id != null)
-        ref.child(id!!).setValue(hashMap).addOnSuccessListener { unused: Void? ->
+        ref.child(id!!).setValue(hashMap).addOnSuccessListener {
             dialog!!.dismiss()
             Toast.makeText(context, "Successfully uploaded...", Toast.LENGTH_SHORT).show()
         }.addOnFailureListener { e: Exception ->
             dialog!!.dismiss()
             Toast.makeText(
-                context,
-                "Failure to upload to db due to :" + e.message,
-                Toast.LENGTH_SHORT
+                context, "Failure to upload to db due to :" + e.message, Toast.LENGTH_SHORT
             ).show()
         }
     }
 
     private fun loadCategories() {
-        val ref = FirebaseDatabase.getInstance().getReference(DATA.CATEGORIES).child(
-            categoryId!!
-        )
+        val ref = FirebaseDatabase.getInstance().getReference(DATA.CATEGORIES).child(categoryId!!)
         ref.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val item = snapshot.getValue(
-                    Category::class.java
-                )!!
+                val item = snapshot.getValue(Category::class.java)!!
                 val categoryTitle = DATA.EMPTY + item.name
                 val categoryImage = DATA.EMPTY + item.image
                 binding!!.category.text = categoryTitle

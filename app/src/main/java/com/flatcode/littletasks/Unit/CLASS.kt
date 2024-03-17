@@ -1,10 +1,7 @@
 package com.flatcode.littletasks.Unit
 
 import com.flatcode.littletasks.Activity.*
-import com.flatcode.littletasks.Auth.AuthActivity
-import com.flatcode.littletasks.Auth.ForgetPasswordActivity
-import com.flatcode.littletasks.Auth.LoginActivity
-import com.flatcode.littletasks.Auth.RegisterActivity
+import com.flatcode.littletasks.Auth.*
 
 object CLASS {
     var MAIN: Class<*> = MainActivity::class.java
