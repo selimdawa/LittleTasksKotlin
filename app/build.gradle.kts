@@ -13,8 +13,8 @@ android {
         applicationId = "com.flatcode.littletasks"
         minSdk = 24
         targetSdk = 36
-        versionCode = 5
-        versionName = "1.26"
+        versionCode = 6
+        versionName = "1.30"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -78,5 +78,5 @@ dependencies {
     api("com.theartofdev.edmodo:android-image-cropper:2.8.0")           //Image Crop
     implementation("jp.wasabeef:glide-transformations:4.3.0")           //Image Blur
     //Bottom Navigation
-    implementation("com.etebarian:meow-bottom-navigation-java:1.2.0")   //Meow Bottom Navigation
+    implementation ("com.github.Foysalofficial:NafisBottomNav:5.0")     //Nafis Bottom Navigation
 }
