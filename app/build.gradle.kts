@@ -7,7 +7,9 @@ plugins {
 
 android {
     namespace = "com.flatcode.littletasks"
-    compileSdk = 36
+    compileSdk {
+        version = release(36)
+    }
 
     defaultConfig {
         applicationId = "com.flatcode.littletasks"
