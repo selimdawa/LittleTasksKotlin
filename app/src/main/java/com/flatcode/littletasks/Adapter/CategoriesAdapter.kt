@@ -80,7 +80,7 @@ class CategoriesAdapter(private val context: Context, var list: ArrayList<Catego
             image = binding!!.image
             name = binding!!.name
             more = binding!!.more
-            numer = binding!!.numer
+            numer = binding!!.number
             card = binding!!.card
         }
     }
