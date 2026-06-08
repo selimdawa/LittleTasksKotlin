@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.google.services)
-    id("kotlin-kapt")
+    alias(libs.plugins.google.ksp)
 }
 
 android {
@@ -17,29 +17,37 @@ android {
         applicationId = "com.flatcode.littletasks"
         minSdk = 24
         targetSdk = 36
-        versionCode = 6
-        versionName = "1.30"
+        versionCode = 7
+        versionName = "1.35"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-    signingConfigs {
-        create("release") {
-            storeFile = file("D:\\MyProjects\\Kotlin\\Little Tasks\\Little Tasks\\LittleTasks.jks")
-            storePassword = "00000000"
-            keyAlias = "LittleTasks"
-            keyPassword = "00000000"
-        }
-    }
+    //signingConfigs {
+    //    create("release") {
+    //        storeFile = file("D:\\MyProjects\\Kotlin\\Little Tasks\\Little Tasks\\LittleTasks.jks")
+    //        storePassword = "00000000"
+    //        keyAlias = "LittleTasks"
+    //        keyPassword = "00000000"
+    //    }
+    //}
     buildTypes {
-        getByName("release") {
-            signingConfig = signingConfigs.getByName("release")
-            isMinifyEnabled = true
-            isShrinkResources = true
+        release {
+            isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
             )
         }
     }
+    //buildTypes {
+    //    getByName("release") {
+    //        signingConfig = signingConfigs.getByName("release")
+    //        isMinifyEnabled = true
+    //        isShrinkResources = true
+    //        proguardFiles(
+    //            getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+    //        )
+    //    }
+    //}
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -77,8 +85,7 @@ dependencies {
     //Image
     implementation(libs.circleimageview)                //Circle Image
     implementation(libs.glide)                          //Glide Image
-    //noinspection KaptUsageInsteadOfKsp
-    kapt(libs.compiler)                                 //Glide Compiler
+    ksp(libs.glide.ksp)                                 //Glide Compiler
     implementation(libs.material.ripple)                //Ripple Effect
     api(libs.android.image.cropper)                     //Image Crop
     implementation(libs.glide.transformations)          //Image Blur
