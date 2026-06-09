@@ -29,8 +29,6 @@ class PrivacyPolicyActivity : AppCompatActivity() {
         binding!!.toolbar.nameSpace.setText(R.string.privacy_policy)
         binding!!.toolbar.back.setOnClickListener { onBackPressed() }
         binding!!.toolbar.search.visibility = View.GONE
-
-        VOID.Logo(context, binding!!.logo)
     }
 
     private fun privacyPolicy() {

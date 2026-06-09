@@ -31,7 +31,7 @@
                     android:layout_height="match_parent"
                     android:alpha="0.5"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/background_day" />
+                    android:src="@drawable/background" />
 
                 <TextView
                     android:layout_width="match_parent"
@@ -66,7 +66,7 @@
                     android:layout_height="match_parent"
                     android:alpha="0.5"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/background_day" />
+                    android:src="@drawable/background" />
 
                 <TextView
                     android:layout_width="match_parent"
@@ -101,7 +101,7 @@
                     android:layout_height="match_parent"
                     android:alpha="0.4"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/background_day" />
+                    android:src="@drawable/background" />
 
                 <TextView
                     android:layout_width="match_parent"
@@ -136,7 +136,7 @@
                     android:layout_height="match_parent"
                     android:alpha="0.5"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/background_day" />
+                    android:src="@drawable/background" />
 
                 <TextView
                     android:layout_width="match_parent"
