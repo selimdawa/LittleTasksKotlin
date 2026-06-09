@@ -12,8 +12,8 @@
     <string name="categories">Categories</string>
     <string name="plans">Plans</string>
     //Theme
-    <string name="day_theme">Day Mode</string>
-    <string name="night_theme">Night Mode</string>
+    <string name="basic_theme">Basic Theme</string>
+    <string name="sec_theme">Sec Theme</string>
     //Needed
     <string name="none_display">There are no items to display</string>
     <string name="add_new_object">Add New Object</string>
