@@ -2,16 +2,16 @@ package com.flatcode.littletasks.Unit
 
 import android.app.Activity
 import android.app.Dialog
-import android.app.ProgressDialog
 import android.content.ActivityNotFoundException
 import android.content.ContentResolver
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
-import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
+import android.os.Build
+import android.view.LayoutInflater
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
@@ -20,7 +20,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.preference.PreferenceManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.flatcode.littletasks.Model.Category
@@ -28,6 +27,10 @@ import com.flatcode.littletasks.Model.OBJECT
 import com.flatcode.littletasks.Model.Plan
 import com.flatcode.littletasks.Model.Task
 import com.flatcode.littletasks.R
+import com.flatcode.littletasks.databinding.DialogAboutAppBinding
+import com.flatcode.littletasks.databinding.DialogCloseAppBinding
+import com.flatcode.littletasks.databinding.DialogLogoutBinding
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -68,20 +71,34 @@ object VOID {
     }
 
     fun deleteItem(database: String?, context: Context?, id: String?, name: String) {
-        val dialog = ProgressDialog(context)
-        dialog.setTitle("Please wait")
-        dialog.setMessage("Deleting $name ...")
+        if (context == null || database == null || id == null) return
+
+        val dialog: AlertDialog = MaterialAlertDialogBuilder(context)
+            .setTitle("Please wait")
+            .setMessage("Deleting $name ...")
+            .setCancelable(false)
+            .create()
+
         dialog.show()
-        val reference: DatabaseReference = FirebaseDatabase.getInstance().getReference(database!!)
-        reference.child(id!!).removeValue().addOnSuccessListener {
-            dialog.dismiss()
-            Toast.makeText(
-                context, "The item has been deleted successfully...", Toast.LENGTH_SHORT
-            ).show()
-        }.addOnFailureListener { e: Exception ->
-            dialog.dismiss()
-            Toast.makeText(context, "" + e.message, Toast.LENGTH_SHORT).show()
-        }
+
+        FirebaseDatabase.getInstance().getReference(database)
+            .child(id)
+            .removeValue()
+            .addOnSuccessListener {
+                dialog.dismiss()
+                Toast.makeText(
+                    context,
+                    "The item has been deleted successfully...",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }.addOnFailureListener { e ->
+                dialog.dismiss()
+                Toast.makeText(
+                    context,
+                    e.localizedMessage ?: "Error deleting item",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
     }
 
     fun GlideImage(isUser: Boolean, context: Context?, Url: String?, Image: ImageView) {
@@ -95,7 +112,7 @@ object VOID {
             } else {
                 Glide.with(context!!).load(Url).placeholder(R.color.image_profile).into(Image)
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             Image.setImageResource(R.drawable.basic_book)
         }
     }
@@ -112,108 +129,154 @@ object VOID {
                 Glide.with(context!!).load(Url).placeholder(R.color.image_profile)
                     .apply(RequestOptions.bitmapTransform(BlurTransformation(level))).into(Image)
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             Image.setImageResource(R.drawable.basic_book)
         }
     }
 
-    fun closeApp(context: Context?, a: Activity?) {
-        val dialog = Dialog(context!!)
+    fun closeApp(activity: Activity?) {
+        if (activity == null || activity.isFinishing || activity.isDestroyed) return
+
+        val binding = DialogCloseAppBinding.inflate(LayoutInflater.from(activity))
+        val dialog = Dialog(activity)
+
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-        dialog.setContentView(R.layout.dialog_close_app)
+        dialog.setContentView(binding.root)
         dialog.setCancelable(true)
-        dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        val lp: WindowManager.LayoutParams = WindowManager.LayoutParams()
-        lp.copyFrom(dialog.window!!.attributes)
-        lp.width = WindowManager.LayoutParams.WRAP_CONTENT
-        lp.height = WindowManager.LayoutParams.WRAP_CONTENT
-        dialog.findViewById<View>(R.id.yes).setOnClickListener { a!!.finish() }
-        dialog.findViewById<View>(R.id.no).setOnClickListener { dialog.cancel() }
+
+        dialog.window?.let { window ->
+            window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            val lp = WindowManager.LayoutParams().apply {
+                copyFrom(window.attributes)
+                width = WindowManager.LayoutParams.WRAP_CONTENT
+                height = WindowManager.LayoutParams.WRAP_CONTENT
+            }
+            window.attributes = lp
+        }
+
+        binding.yes.setOnClickListener {
+            activity.finish()
+        }
+
+        binding.no.setOnClickListener {
+            dialog.cancel()
+        }
+
         dialog.show()
-        dialog.window!!.attributes = lp
     }
 
-    fun dialogLogout(context: Context?) {
-        val dialog = Dialog(context!!)
+    fun dialogLogout(activity: Activity?) {
+        if (activity == null || activity.isFinishing || activity.isDestroyed) return
+
+        val binding = DialogLogoutBinding.inflate(LayoutInflater.from(activity))
+        val dialog = Dialog(activity)
+
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-        dialog.setContentView(R.layout.dialog_logout)
+        dialog.setContentView(binding.root)
         dialog.setCancelable(true)
-        dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        val lp: WindowManager.LayoutParams = WindowManager.LayoutParams()
-        lp.copyFrom(dialog.window!!.attributes)
-        lp.width = WindowManager.LayoutParams.WRAP_CONTENT
-        lp.height = WindowManager.LayoutParams.WRAP_CONTENT
-        dialog.findViewById<View>(R.id.yes).setOnClickListener {
-            FirebaseAuth.getInstance().signOut()
-            IntentClear(context, CLASS.AUTH)
+
+        dialog.window?.let { window ->
+            window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            val lp = WindowManager.LayoutParams().apply {
+                copyFrom(window.attributes)
+                width = WindowManager.LayoutParams.WRAP_CONTENT
+                height = WindowManager.LayoutParams.WRAP_CONTENT
+            }
+            window.attributes = lp
         }
-        dialog.findViewById<View>(R.id.no).setOnClickListener { dialog.cancel() }
+
+        binding.yes.setOnClickListener {
+            FirebaseAuth.getInstance().signOut()
+
+            val intent = Intent(activity, CLASS.AUTH).apply {
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+            activity.startActivity(intent)
+
+            dialog.dismiss()
+        }
+
+        binding.no.setOnClickListener {
+            dialog.cancel()
+        }
+
         dialog.show()
-        dialog.window!!.attributes = lp
     }
 
     fun shareApp(context: Context?) {
-        val shareIntent = Intent(Intent.ACTION_SEND)
-        shareIntent.type = "text/plain"
-        shareIntent.putExtra(Intent.EXTRA_SUBJECT, "share app")
-        shareIntent.putExtra(
-            Intent.EXTRA_TEXT,
-            " Download the app now from Google Play " + " https://play.google.com/store/apps/details?id=" + context!!.packageName
-        )
-        context.startActivity(Intent.createChooser(shareIntent, "Choose how to share"))
-    }
-
-    fun rateApp(context: Context?) {
-        val uri = Uri.parse("market://details?id=" + context!!.packageName)
-        val goToMarket = Intent(Intent.ACTION_VIEW, uri)
-        try {
-            context.startActivity(goToMarket)
-        } catch (e: ActivityNotFoundException) {
-            context.startActivity(
-                Intent(
-                    Intent.ACTION_VIEW,
-                    Uri.parse("http://play.google.com/store/apps/details?id=" + context.packageName)
+        context?.let { ctx ->
+            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_SUBJECT, "share app")
+                putExtra(
+                    Intent.EXTRA_TEXT,
+                    "Download the app now from Google Play: https://google.com{ctx.packageName}"
                 )
-            )
+            }
+            ctx.startActivity(Intent.createChooser(shareIntent, "Choose how to share"))
         }
     }
 
-    fun dialogAboutApp(context: Context?) {
-        val dialog = Dialog(context!!)
+    fun rateApp(context: Context?) {
+        context?.let { ctx ->
+            val packageName = ctx.packageName
+            val marketUri = Uri.parse("market://details?id=$packageName")
+            val webUri = Uri.parse("https://google.com")
+
+            try {
+                ctx.startActivity(Intent(Intent.ACTION_VIEW, marketUri))
+            } catch (_: ActivityNotFoundException) {
+                ctx.startActivity(Intent(Intent.ACTION_VIEW, webUri))
+            }
+        }
+    }
+
+    fun dialogAboutApp(activity: Activity?) {
+        if (activity == null || activity.isFinishing || activity.isDestroyed) return
+
+        val binding = DialogAboutAppBinding.inflate(LayoutInflater.from(activity))
+        val dialog = Dialog(activity)
+
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-        dialog.setContentView(R.layout.dialog_about_app)
+        dialog.setContentView(binding.root)
         dialog.setCancelable(true)
-        dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        val lp: WindowManager.LayoutParams = WindowManager.LayoutParams()
-        lp.copyFrom(dialog.window!!.attributes)
-        lp.width = WindowManager.LayoutParams.WRAP_CONTENT
-        lp.height = WindowManager.LayoutParams.WRAP_CONTENT
-        dialog.findViewById<View>(R.id.website).setOnClickListener(object : View.OnClickListener {
-            override fun onClick(v: View) {
-                context.startActivity(websiteIntent)
-            }
 
-            val websiteIntent: Intent
-                get() = Intent(Intent.ACTION_VIEW, Uri.parse(DATA.WEBSITE))
-        })
-        dialog.findViewById<View>(R.id.facebook).setOnClickListener(object : View.OnClickListener {
-            override fun onClick(v: View) {
-                context.startActivity(openFacebookIntent)
+        dialog.window?.let { window ->
+            window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            val lp = WindowManager.LayoutParams().apply {
+                copyFrom(window.attributes)
+                width = WindowManager.LayoutParams.WRAP_CONTENT
+                height = WindowManager.LayoutParams.WRAP_CONTENT
             }
+            window.attributes = lp
+        }
 
-            val openFacebookIntent: Intent
-                get() = try {
-                    context.packageManager.getPackageInfo("com.facebook.katana", 0)
-                    Intent(Intent.ACTION_VIEW, Uri.parse("fb://profile/" + DATA.FB_ID))
-                } catch (e: Exception) {
-                    Intent(
-                        Intent.ACTION_VIEW,
-                        Uri.parse("https://www.facebook.com/" + DATA.FB_ID)
+        binding.website.setOnClickListener {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(DATA.WEBSITE))
+            activity.startActivity(intent)
+        }
+
+        binding.facebook.setOnClickListener {
+            val facebookUri = try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    activity.packageManager.getPackageInfo(
+                        "com.facebook.katana",
+                        android.content.pm.PackageManager.PackageInfoFlags.of(0)
                     )
+                } else {
+                    @Suppress("DEPRECATION")
+                    activity.packageManager.getPackageInfo("com.facebook.katana", 0)
                 }
-        })
+                "fb://profile/${DATA.FB_ID}"
+            } catch (_: Exception) {
+                "https://facebook.com{DATA.FB_ID}"
+            }
+
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(facebookUri))
+            activity.startActivity(intent)
+        }
+
         dialog.show()
-        dialog.window!!.attributes = lp
     }
 
     fun isFavorite(add: ImageView, TaskId: String?, UserId: String?) {
@@ -286,7 +349,7 @@ object VOID {
         //alert dialog
         val builder = AlertDialog.Builder(context!!)
         builder.setTitle("Choose Options")
-            .setItems(options) { dialog: DialogInterface?, which: Int ->
+            .setItems(options) { _: DialogInterface?, which: Int ->
                 //handle dialog option click
                 if (which == 0) {
                     //Edit clicked ,Open new activity to edit the book info
@@ -299,69 +362,76 @@ object VOID {
     }
 
     fun moreTask(context: Context?, item: Task?) {
-        val id = item!!.id
+        if (context == null || item == null) return
+
+        val id = item.id
         val name = item.name
         val category = item.category
         val start = item.start
         val end = item.end
-        val one = arrayOf<String?>("Edit", "Delete")
-        val two = arrayOf<String?>("Edit", "Delete", "Start Again")
-        val three = arrayOf<String?>("Edit", "Delete", "Start Again", "Not End")
-        var options = arrayOfNulls<String>(0)
-        //options to show in dialog
-        if (start == 0L && end == 0L) {
-            options = one
-        } else if (start != 0L && end == 0L) {
-            options = two
-        } else if (start != 0L) {
-            options = three
+
+        val options = when {
+            start == 0L && end == 0L -> arrayOf("Edit", "Delete")
+            start != 0L && end == 0L -> arrayOf("Edit", "Delete", "Start Again")
+            start != 0L -> arrayOf("Edit", "Delete", "Start Again", "Not End")
+            else -> arrayOf()
         }
 
-        //alert dialog
-        val builder = AlertDialog.Builder(context!!)
-        builder.setTitle("Choose Options")
-            .setItems(options) { dialog: DialogInterface?, which: Int ->
-                //handle dialog option click
-                if (which == 0) {
-                    //Edit clicked ,Open new activity to edit the book info
-                    IntentExtra2(
-                        context, CLASS.TASK_EDIT, DATA.TASK_ID, id, DATA.CATEGORY_ID, category
-                    )
-                } else if (which == 1) {
-                    //Delete Clicked
-                    dialogOptionDelete(
-                        context, DATA.TASKS, DATA.EMPTY + id, DATA.EMPTY + name
-                    )
-                } else if (which == 2) {
-                    //Delete Clicked
-                    EditTaskStatus(context, id, true, false)
-                } else if (which == 3) {
-                    //Delete Clicked
-                    EditTaskStatus(context, id, false, true)
+        MaterialAlertDialogBuilder(context)
+            .setTitle("Choose Options")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> {
+                        val intent = Intent(context, CLASS.TASK_EDIT).apply {
+                            putExtra(DATA.TASK_ID, id)
+                            putExtra(DATA.CATEGORY_ID, category)
+                        }
+                        context.startActivity(intent)
+                    }
+
+                    1 -> {
+                        dialogOptionDelete(
+                            context,
+                            DATA.TASKS,
+                            "${DATA.EMPTY}$id",
+                            "${DATA.EMPTY}$name"
+                        )
+                    }
+
+                    2 -> EditTaskStatus(context, id, startStatus = true, endStatus = false)
+                    3 -> EditTaskStatus(context, id, startStatus = false, endStatus = true)
                 }
             }.show()
     }
 
     private fun EditTaskStatus(
-        context: Context?, taskId: String?, startStatus: Boolean, endStatus: Boolean
+        context: Context?,
+        taskId: String?,
+        startStatus: Boolean,
+        endStatus: Boolean
     ) {
-        val hashMap = HashMap<String?, Any>()
+        if (context == null || taskId == null) return
+
+        val hashMap = HashMap<String, Any>()
         if (startStatus) hashMap[DATA.START] = DATA.ZERO
         if (endStatus) hashMap[DATA.END] = DATA.ZERO
-        val ref: DatabaseReference = FirebaseDatabase.getInstance().getReference(DATA.TASKS)
-        ref.child(taskId!!).updateChildren(hashMap).addOnSuccessListener {
-            if (startStatus) Toast.makeText(
-                context, "Task started again...", Toast.LENGTH_SHORT
-            ).show()
-            if (endStatus) Toast.makeText(context, "Task did not End...", Toast.LENGTH_SHORT)
-                .show()
-        }.addOnFailureListener { e: Exception ->
-            Toast.makeText(
-                context,
-                DATA.EMPTY + e.message,
-                Toast.LENGTH_SHORT
-            ).show()
-        }
+
+        if (hashMap.isEmpty()) return
+
+        FirebaseDatabase.getInstance().getReference(DATA.TASKS)
+            .child(taskId)
+            .updateChildren(hashMap)
+            .addOnSuccessListener {
+                if (startStatus) {
+                    Toast.makeText(context, "Task started again...", Toast.LENGTH_SHORT).show()
+                }
+                if (endStatus) {
+                    Toast.makeText(context, "Task did not End...", Toast.LENGTH_SHORT).show()
+                }
+            }.addOnFailureListener { e ->
+                Toast.makeText(context, "${DATA.EMPTY}${e.localizedMessage}", Toast.LENGTH_SHORT)
+                    .show()
+            }
     }
 
     fun moreCategory(context: Context?, item: Category?) {
@@ -369,13 +439,10 @@ object VOID {
         val name = item.name
         val plan = item.plan
 
-        //options to show in dialog
         val options = arrayOf("Add Task", "Edit", "Delete")
-        //alert dialog
         val builder = AlertDialog.Builder(context!!)
         builder.setTitle("Choose Options")
-            .setItems(options) { dialog: DialogInterface?, which: Int ->
-                //handle dialog option click
+            .setItems(options) { _: DialogInterface?, which: Int ->
                 when (which) {
                     0 -> {
                         IntentExtra2(
@@ -402,18 +469,13 @@ object VOID {
         val id: String = item!!.id!!
         val name: String = item.name!!
 
-        //options to show in dialog
         val options = arrayOf("Edit", "Delete")
-        //alert dialog
         val builder = AlertDialog.Builder(context!!)
         builder.setTitle("Choose Options")
-            .setItems(options) { dialog: DialogInterface?, which: Int ->
-                //handle dialog option click
+            .setItems(options) { _: DialogInterface?, which: Int ->
                 if (which == 0) {
-                    //Edit clicked ,Open new activity to edit the book info
                     IntentExtra(context, CLASS.PLAN_EDIT, DATA.ID, id)
                 } else if (which == 1) {
-                    //Delete Clicked
                     dialogOptionDelete(
                         context, DATA.PLANS, DATA.EMPTY + id, DATA.EMPTY + name
                     )
@@ -519,126 +581,41 @@ object VOID {
         })
     }
 
-    fun levelPoint(AVPoints: Int, point: Int): Int {
-        var point = point
-        val half = point / 2
-        var level: Int
-        val S1 = point * 5
-        val S2 = loop(S1, half, 3)
-        val S3 = loop(S2, half, 4)
-        val S4 = loop(S3, half, 5)
-        val S5 = loop(S4, half, 6)
-        val S6 = loop(S5, half, 7)
-        val S7 = loop(S6, half, 8)
-        val S8 = loop(S7, half, 9)
-        val S9 = loop(S8, half, 10)
-        val S10 = loop(S9, half, 11)
-        val S11 = loop(S10, half, 12)
-        val S12 = loop(S11, half, 13)
-        val S13 = loop(S12, half, 14)
-        val S14 = loop(S13, half, 15)
-        val S15 = loop(S14, half, 16)
-        val S16 = loop(S15, half, 17)
-        val S17 = loop(S16, half, 18)
-        val S18 = loop(S17, half, 19)
-        val S19 = loop(S18, half, 20)
-        val S20 = loop(S19, half, 21)
-        // 0 TO 5
-        if (AVPoints <= S1) {
-            level = AVPoints / point
-        } else if (AVPoints <= S20) {
-            val a: Int
-            // 5 TO 10
-            if (AVPoints <= S2) {
-                a = AVPoints - S1
-                level = 5
-                //10 = 10+5;
-                point = point + half
-            } else if (AVPoints <= S3) {
-                a = AVPoints - S2
-                level = 10
-                point = point + half * 2
-            } else if (AVPoints <= S4) {
-                a = AVPoints - S3
-                level = 15
-                point = point + half * 3
-            } else if (AVPoints <= S5) {
-                a = AVPoints - S4
-                level = 20
-                point = point + half * 4
-            } else if (AVPoints <= S6) {
-                a = AVPoints - S5
-                level = 25
-                point = point + half * 5
-            } else if (AVPoints <= S7) {
-                a = AVPoints - S6
-                level = 30
-                point = point + half * 6
-            } else if (AVPoints <= S8) {
-                a = AVPoints - S7
-                level = 35
-                point = point + half * 7
-            } else if (AVPoints <= S9) {
-                a = AVPoints - S8
-                level = 40
-                point = point + half * 8
-            } else if (AVPoints <= S10) {
-                a = AVPoints - S9
-                level = 45
-                point = point + half * 9
-            } else if (AVPoints <= S11) {
-                a = AVPoints - S10
-                level = 50
-                point = point + half * 10
-            } else if (AVPoints <= S12) {
-                a = AVPoints - S11
-                level = 55
-                point = point + half * 11
-            } else if (AVPoints <= S13) {
-                a = AVPoints - S12
-                level = 60
-                point = point + half * 12
-            } else if (AVPoints <= S14) {
-                a = AVPoints - S13
-                level = 65
-                point = point + half * 13
-            } else if (AVPoints <= S15) {
-                a = AVPoints - S14
-                level = 70
-                point = point + half * 14
-            } else if (AVPoints <= S16) {
-                a = AVPoints - S15
-                level = 75
-                point = point + half * 15
-            } else if (AVPoints <= S17) {
-                a = AVPoints - S16
-                level = 80
-                point = point + half * 16
-            } else if (AVPoints <= S18) {
-                a = AVPoints - S17
-                level = 85
-                point = point + half * 17
-            } else if (AVPoints <= S19) {
-                a = AVPoints - S18
-                level = 90
-                point = point + half * 18
-            } else {
-                a = AVPoints - S19
-                level = 95
-                point = point + half * 19
-            }
-            level = level + a / point
-        } else {
-            level = 100
+    fun levelPoint(AVPoints: Int, initialPoint: Int): Int {
+        var mutablePoint = initialPoint
+        val half = mutablePoint / 2
+
+        val thresholds = IntArray(21)
+        thresholds[1] = mutablePoint * 5
+        for (i in 2..20) {
+            thresholds[i] = loop(thresholds[i - 1], half, i + 1)
         }
-        return level
-        //MAX 5750 - 100
+
+        return when {
+            AVPoints <= thresholds[1] -> {
+                AVPoints / mutablePoint
+            }
+
+            AVPoints <= thresholds[20] -> {
+                var stepIndex = 1
+                while (stepIndex < 19 && AVPoints > thresholds[stepIndex + 1]) {
+                    stepIndex++
+                }
+
+                val baseLevel = 5 * stepIndex
+                val remainderPoints = AVPoints - thresholds[stepIndex]
+                mutablePoint += half * (stepIndex - 1)
+
+                baseLevel + (remainderPoints / mutablePoint)
+            }
+
+            else -> 100
+            //MAX 5750 - 100
+        }
     }
 
     private fun loop(S: Int, half: Int, number: Int): Int {
-        val SA: Int
-        SA = S + half * number * half
-        return SA
+        return S + half * number * half
     }
 
     fun getFileExtension(uri: Uri?, context: Context): String {

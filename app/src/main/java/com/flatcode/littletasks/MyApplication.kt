@@ -2,9 +2,11 @@ package com.flatcode.littletasks
 
 import android.app.Application
 import android.text.format.DateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Locale
 
 class MyApplication : Application() {
+
     override fun onCreate() {
         super.onCreate()
     }

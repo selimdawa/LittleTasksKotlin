@@ -1,5 +1,6 @@
 package com.flatcode.littletasks.Adapter
 
+import android.app.Activity
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
@@ -53,8 +54,8 @@ class SettingAdapter(private val context: Context?, private val list: ArrayList<
                 }
             } else {
                 when (id) {
-                    "10" -> VOID.dialogAboutApp(context)
-                    "11" -> VOID.dialogLogout(context)
+                    "10" -> VOID.dialogAboutApp(context as? Activity)
+                    "11" -> VOID.dialogLogout(context as? Activity)
                     "12" -> VOID.shareApp(context)
                     "13" -> VOID.rateApp(context)
                     else -> VOID.Intent1(context, to)

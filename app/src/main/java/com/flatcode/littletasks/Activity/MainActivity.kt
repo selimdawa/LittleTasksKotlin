@@ -128,7 +128,7 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
     }
 
     override fun onBackPressed() {
-        VOID.closeApp(context, activity)
+        VOID.closeApp(this)
     }
 
     // Color Mode ----------------------------- Start
