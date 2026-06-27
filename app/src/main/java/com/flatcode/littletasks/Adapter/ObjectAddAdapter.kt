@@ -9,13 +9,13 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
-import com.flatcode.littletasks.Model.OBJECT
+import com.flatcode.littletasks.Model.TaskItem
 import com.flatcode.littletasks.Unit.DATA
 import com.flatcode.littletasks.databinding.ItemNewPlanBinding
 import com.google.firebase.database.FirebaseDatabase
 import java.text.MessageFormat
 
-class ObjectAddAdapter(private val context: Context, var list: List<OBJECT>) :
+class ObjectAddAdapter(private val context: Context, var list: List<TaskItem>) :
     RecyclerView.Adapter<ObjectAddAdapter.ViewHolder>() {
 
     private var binding: ItemNewPlanBinding? = null

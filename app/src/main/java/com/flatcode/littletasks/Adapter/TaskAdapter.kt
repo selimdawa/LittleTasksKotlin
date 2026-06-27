@@ -57,14 +57,14 @@ class TaskAdapter(private val context: Context, var list: ArrayList<Task?>) :
         holder.points.text = points
         holder.AVPoints.text = AVPoints
         val addTime = timestamp.toLong()
-        val Add = GetTimeAgo.getMessageAgo(addTime, context)
+        val Add = GetTimeAgo.getMessageAgo(addTime)
         holder.add.text = Add
 
         if (start == "0") {
             holder.start.text = "-"
         } else {
             val startTime = start.toLong()
-            val Start = GetTimeAgo.getMessageAgo(startTime, context)
+            val Start = GetTimeAgo.getMessageAgo(startTime)
             holder.start.text = Start
         }
 
@@ -72,7 +72,7 @@ class TaskAdapter(private val context: Context, var list: ArrayList<Task?>) :
             holder.end.text = "-"
         } else {
             val endTime = end.toLong()
-            val End = GetTimeAgo.getMessageAgo(endTime, context)
+            val End = GetTimeAgo.getMessageAgo(endTime)
             holder.end.text = End
         }
 

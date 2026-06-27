@@ -7,7 +7,7 @@ import android.text.TextUtils
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.flatcode.littletasks.Model.OBJECT
+import com.flatcode.littletasks.Model.TaskItem
 import com.flatcode.littletasks.R
 import com.flatcode.littletasks.Unit.DATA
 import com.flatcode.littletasks.Unit.THEME
@@ -81,7 +81,7 @@ class ObjectEditActivity : AppCompatActivity() {
         val reference = FirebaseDatabase.getInstance().getReference(DATA.OBJECTS)
         reference.child(id!!).addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val item = snapshot.getValue(OBJECT::class.java)!!
+                val item = snapshot.getValue(TaskItem::class.java)!!
                 val name = item.name
                 val points = item.points
 

@@ -10,7 +10,7 @@ import android.os.Bundle
 import android.text.TextUtils
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.flatcode.littletasks.Model.OBJECT
+import com.flatcode.littletasks.Model.TaskItem
 import com.flatcode.littletasks.Model.Plan
 import com.flatcode.littletasks.R
 import com.flatcode.littletasks.Unit.DATA
@@ -134,7 +134,7 @@ class CategoryAddActivity : AppCompatActivity() {
         ref.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 for (data in dataSnapshot.children) {
-                    val `object` = data.getValue(OBJECT::class.java)!!
+                    val `object` = data.getValue(TaskItem::class.java)!!
                     if (`object`.publisher == DATA.FirebaseUserUid) checkObject(
                         `object`.id, categoryId, `object`.name, `object`.points
                     )

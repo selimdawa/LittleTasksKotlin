@@ -7,7 +7,7 @@ import android.text.TextWatcher
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.Adapter.ObjectAdapter
-import com.flatcode.littletasks.Model.OBJECT
+import com.flatcode.littletasks.Model.TaskItem
 import com.flatcode.littletasks.R
 import com.flatcode.littletasks.Unit.CLASS
 import com.flatcode.littletasks.Unit.DATA
@@ -25,7 +25,7 @@ class ObjectsPlanActivity : AppCompatActivity() {
     private var binding: ActivityObjectsBinding? = null
     private val context: Context = this@ObjectsPlanActivity
     var item: MutableList<String?>? = null
-    var list: ArrayList<OBJECT?>? = null
+    var list: ArrayList<TaskItem?>? = null
     var adapter: ObjectAdapter? = null
     var id: String? = null
     var name: String? = null
@@ -95,7 +95,7 @@ class ObjectsPlanActivity : AppCompatActivity() {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     list!!.clear()
                     for (snapshot in dataSnapshot.children) {
-                        val `object` = snapshot.getValue(OBJECT::class.java)
+                        val `object` = snapshot.getValue(TaskItem::class.java)
                         for (id in item!!) {
                             assert(`object` != null)
                             if (`object`!!.id == id) if (`object`.publisher == DATA.FirebaseUserUid) list!!.add(

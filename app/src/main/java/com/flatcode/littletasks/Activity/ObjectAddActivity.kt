@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.Adapter.ObjectAddAdapter
-import com.flatcode.littletasks.Model.OBJECT
+import com.flatcode.littletasks.Model.TaskItem
 import com.flatcode.littletasks.R
 import com.flatcode.littletasks.Unit.THEME
 import com.flatcode.littletasks.databinding.ActivityObjectAddBinding
@@ -14,9 +14,9 @@ class ObjectAddActivity : AppCompatActivity() {
 
     private var binding: ActivityObjectAddBinding? = null
     var context: Context = this@ObjectAddActivity
-    var list: ArrayList<OBJECT>? = null
+    var list: ArrayList<TaskItem>? = null
     var adapter: ObjectAddAdapter? = null
-    var editorsChoice = OBJECT()
+    var editorsChoice = TaskItem()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         THEME.setThemeOfApp(context)

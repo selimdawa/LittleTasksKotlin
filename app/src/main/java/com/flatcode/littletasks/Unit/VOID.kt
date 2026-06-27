@@ -23,7 +23,7 @@ import androidx.appcompat.app.AlertDialog
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.flatcode.littletasks.Model.Category
-import com.flatcode.littletasks.Model.OBJECT
+import com.flatcode.littletasks.Model.TaskItem
 import com.flatcode.littletasks.Model.Plan
 import com.flatcode.littletasks.Model.Task
 import com.flatcode.littletasks.R
@@ -340,7 +340,7 @@ object VOID {
         }
     }
 
-    fun moreObject(context: Context?, item: OBJECT?) {
+    fun moreObject(context: Context?, item: TaskItem?) {
         val id: String = item!!.id!!
         val name: String = item.name!!
 

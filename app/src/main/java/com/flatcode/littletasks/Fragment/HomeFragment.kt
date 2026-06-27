@@ -12,10 +12,14 @@ import com.flatcode.littletasks.databinding.FragmentHomeBinding
 
 class HomeFragment : Fragment() {
 
+    private var _binding: FragmentHomeBinding? = null
+    private val binding get() = _binding!!
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
     ): View {
-        val binding = FragmentHomeBinding.inflate(LayoutInflater.from(context), container, false)
+        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+
         binding.one.setOnClickListener {
             VOID.IntentExtra(context, CLASS.FAVORITES, DATA.TASK_TYPE, DATA.TASKS_ALL)
         }
@@ -29,5 +33,10 @@ class HomeFragment : Fragment() {
             VOID.IntentExtra(context, CLASS.FAVORITES, DATA.TASK_TYPE, DATA.TASKS_COMPLETED)
         }
         return binding.root
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

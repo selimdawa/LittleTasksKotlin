@@ -9,58 +9,119 @@ import com.flatcode.littletasks.Adapter.CategoryMainAdapter
 import com.flatcode.littletasks.Model.Category
 import com.flatcode.littletasks.Unit.DATA
 import com.flatcode.littletasks.databinding.FragmentCategoriesBinding
+import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.Query
-import com.google.firebase.database.ValueEventListener
 
 class CategoriesFragment : Fragment() {
 
-    private var binding: FragmentCategoriesBinding? = null
-    var list: ArrayList<Category?>? = null
-    var adapter: CategoryMainAdapter? = null
+    private var _binding: FragmentCategoriesBinding? = null
+    private val binding get() = _binding!!
+
+    private val list = ArrayList<Category?>()
+    private var adapter: CategoryMainAdapter? = null
+    private var childEventListener: ChildEventListener? = null
+    private val databaseRef = FirebaseDatabase.getInstance().getReference(DATA.CATEGORIES)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
-    ): View? {
-        // Inflate the layout for this fragment
-        binding = FragmentCategoriesBinding.inflate(LayoutInflater.from(context), container, false)
+    ): View {
+        _binding = FragmentCategoriesBinding.inflate(inflater, container, false)
 
-        //binding.recyclerCategory.setHasFixedSize(true);
-        list = ArrayList()
-        adapter = CategoryMainAdapter(context, list!!)
-        binding!!.recyclerView.adapter = adapter
+        adapter = CategoryMainAdapter(context, list)
+        binding.recyclerView.adapter = adapter
 
-        return binding!!.root
+        return binding.root
     }
 
-    private fun loadItems() {
-        val ref: Query = FirebaseDatabase.getInstance().getReference(DATA.CATEGORIES)
-        ref.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                list!!.clear()
-                for (snapshot in dataSnapshot.children) {
-                    val item = snapshot.getValue(Category::class.java)!!
-                    if (item.publisher == DATA.FirebaseUserUid) list!!.add(item)
+    private fun observeItems() {
+        val uid = DATA.FirebaseUserUid
+        if (childEventListener != null) return
+
+        val previousSize = list.size
+        if (previousSize > 0) {
+            list.clear()
+            adapter?.notifyItemRangeRemoved(0, previousSize)
+        }
+
+        childEventListener = object : ChildEventListener {
+            override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+                val item = snapshot.getValue(Category::class.java) ?: return
+                if (item.publisher == uid) {
+                    list.add(item)
+                    val insertedIndex = list.size - 1
+                    adapter?.notifyItemInserted(insertedIndex)
+                    updateViewsVisibility()
                 }
-                binding!!.bar.visibility = View.GONE
-                if (list!!.isNotEmpty()) {
-                    binding!!.recyclerView.visibility = View.VISIBLE
-                    binding!!.emptyText.visibility = View.GONE
-                } else {
-                    binding!!.recyclerView.visibility = View.GONE
-                    binding!!.emptyText.visibility = View.VISIBLE
-                }
-                adapter!!.notifyDataSetChanged()
             }
 
-            override fun onCancelled(databaseError: DatabaseError) {}
-        })
+            override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
+                val item = snapshot.getValue(Category::class.java) ?: return
+                val index = list.indexOfFirst { it?.id == item.id }
+
+                if (item.publisher == uid) {
+                    if (index != -1) {
+                        list[index] = item
+                        adapter?.notifyItemChanged(index)
+                    } else {
+                        list.add(item)
+                        adapter?.notifyItemInserted(list.size - 1)
+                        updateViewsVisibility()
+                    }
+                } else if (index != -1) {
+                    list.removeAt(index)
+                    adapter?.notifyItemRemoved(index)
+                    updateViewsVisibility()
+                }
+            }
+
+            override fun onChildRemoved(snapshot: DataSnapshot) {
+                val item = snapshot.getValue(Category::class.java) ?: return
+                val index = list.indexOfFirst { it?.id == item.id }
+                if (index != -1) {
+                    list.removeAt(index)
+                    adapter?.notifyItemRemoved(index)
+                    updateViewsVisibility()
+                }
+            }
+
+            override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {}
+
+            override fun onCancelled(error: DatabaseError) {}
+        }
+
+        binding.bar.visibility = View.GONE
+        databaseRef.addChildEventListener(childEventListener!!)
+    }
+
+    private fun updateViewsVisibility() {
+        _binding?.let { b ->
+            if (list.isNotEmpty()) {
+                b.recyclerView.visibility = View.VISIBLE
+                b.emptyText.visibility = View.GONE
+            } else {
+                b.recyclerView.visibility = View.GONE
+                b.emptyText.visibility = View.VISIBLE
+            }
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        loadItems()
+        observeItems()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        childEventListener?.let {
+            databaseRef.removeEventListener(it)
+            childEventListener = null
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

@@ -11,17 +11,17 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.flatcode.littletasks.Filter.ObjectsFilter
-import com.flatcode.littletasks.Model.OBJECT
+import com.flatcode.littletasks.Model.TaskItem
 import com.flatcode.littletasks.Unit.DATA
 import com.flatcode.littletasks.Unit.VOID
 import com.flatcode.littletasks.databinding.ItemObjectBinding
 import java.text.MessageFormat
 
-class ObjectAdapter(private val context: Context, var list: ArrayList<OBJECT?>) :
+class ObjectAdapter(private val context: Context, var list: ArrayList<TaskItem?>) :
     RecyclerView.Adapter<ObjectAdapter.ViewHolder>(), Filterable {
 
     private var binding: ItemObjectBinding? = null
-    var filterList: ArrayList<OBJECT?>
+    var filterList: ArrayList<TaskItem?>
     private var filter: ObjectsFilter? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

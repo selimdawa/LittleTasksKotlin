@@ -11,7 +11,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.flatcode.littletasks.Filter.ObjectOptionFilter
-import com.flatcode.littletasks.Model.OBJECT
+import com.flatcode.littletasks.Model.TaskItem
 import com.flatcode.littletasks.R
 import com.flatcode.littletasks.Unit.DATA
 import com.flatcode.littletasks.Unit.VOID
@@ -23,11 +23,11 @@ import com.google.firebase.database.ValueEventListener
 import java.text.MessageFormat
 
 class ObjectOptionAdapter(
-    private val context: Context, var list: ArrayList<OBJECT?>, planId: String?
+    private val context: Context, var list: ArrayList<TaskItem?>, planId: String?
 ) : RecyclerView.Adapter<ObjectOptionAdapter.ViewHolder>(), Filterable {
 
     private var binding: ItemObjectBinding? = null
-    var filterList: ArrayList<OBJECT?>
+    var filterList: ArrayList<TaskItem?>
     private var filter: ObjectOptionFilter? = null
     var planId: String?
 

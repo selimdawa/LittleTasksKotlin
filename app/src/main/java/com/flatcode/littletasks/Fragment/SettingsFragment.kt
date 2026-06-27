@@ -7,10 +7,10 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.flatcode.littletasks.Adapter.SettingAdapter
 import com.flatcode.littletasks.Model.Category
-import com.flatcode.littletasks.Model.OBJECT
 import com.flatcode.littletasks.Model.Plan
 import com.flatcode.littletasks.Model.Setting
 import com.flatcode.littletasks.Model.Task
+import com.flatcode.littletasks.Model.TaskItem
 import com.flatcode.littletasks.Model.User
 import com.flatcode.littletasks.R
 import com.flatcode.littletasks.Unit.CLASS
@@ -22,169 +22,136 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import java.text.MessageFormat
-import java.util.Objects
 
 class SettingsFragment : Fragment() {
 
-    private var binding: FragmentSettingsBinding? = null
-    private var list: ArrayList<Setting>? = null
+    private var _binding: FragmentSettingsBinding? = null
+    private val binding get() = _binding!!
+
+    private val list = ArrayList<Setting>()
     private var adapter: SettingAdapter? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
     ): View {
-        // Inflate the layout for this fragment
-        binding = FragmentSettingsBinding.inflate(LayoutInflater.from(context), container, false)
+        _binding = FragmentSettingsBinding.inflate(inflater, container, false)
 
-        //binding!!.recyclerView.setHasFixedSize(true)
-        list = ArrayList()
-        adapter = SettingAdapter(context, list!!)
-        binding!!.recyclerView.adapter = adapter
+        initStaticSettings()
+        adapter = SettingAdapter(context, list)
+        binding.recyclerView.adapter = adapter
 
-        binding!!.toolbar.item.setOnClickListener {
+        binding.toolbar.item.setOnClickListener {
             VOID.IntentExtra(context, CLASS.PROFILE, DATA.PROFILE_ID, DATA.FirebaseUserUid)
         }
-        return binding!!.root
+        return binding.root
     }
 
-    var C = 0
-    var P = 0
-    var O = 0
-    var F = 0
+    private fun initStaticSettings() {
+        list.clear()
+        list.add(Setting(id = "1", name = "Edit Profile", image = R.drawable.ic_edit_white, number = 0, c = CLASS.PROFILE_EDIT))
+        list.add(Setting(id = "2", name = "Categories", image = R.drawable.ic_category, number = 0, c = CLASS.CATEGORIES))
+        list.add(Setting(id = "4", name = "Plans", image = R.drawable.ic_list, number = 0, type = DATA.PLANS))
+        list.add(Setting(id = "7", name = "Objects", image = R.drawable.ic_object, number = 0, c = CLASS.OBJECTS))
+        list.add(Setting(id = "9", name = "Favorites", image = R.drawable.ic_star_selected, number = 0, c = CLASS.FAVORITES))
+        list.add(Setting(id = "10", name = "About App", image = R.drawable.ic_info, number = 0))
+        list.add(Setting(id = "11", name = "Logout", image = R.drawable.ic_logout_white, number = 0))
+        list.add(Setting(id = "12", name = "Share App", image = R.drawable.ic_share, number = 0))
+        list.add(Setting(id = "13", name = "Rate APP", image = R.drawable.ic_heart_selected, number = 0))
+        list.add(Setting(id = "14", name = "Privacy Policy", image = R.drawable.ic_privacy_policy, number = 0, c = CLASS.PRIVACY_POLICY))
+    }
+
+    private fun updateSettingNumber(index: Int, count: Int) {
+        if (index in list.indices && list[index].number != count) {
+            list[index].number = count
+            adapter?.notifyItemChanged(index)
+        }
+    }
+
     private fun nrItems() {
-        val reference = FirebaseDatabase.getInstance().getReference(DATA.CATEGORIES)
-        reference.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                C = 0
-                for (data in dataSnapshot.children) {
-                    val item = data.getValue(Category::class.java)!!
-                    if (item.id != null) if (item.publisher == DATA.FirebaseUserUid) C++
-                }
-                nrPlans()
-            }
+        val uid = DATA.FirebaseUserUid
+        val database = FirebaseDatabase.getInstance()
 
-            private fun nrPlans() {
-                val reference = FirebaseDatabase.getInstance().getReference(DATA.PLANS)
-                reference.addListenerForSingleValueEvent(object : ValueEventListener {
-                    override fun onDataChange(dataSnapshot: DataSnapshot) {
-                        P = 0
-                        for (data in dataSnapshot.children) {
-                            val item = data.getValue(Plan::class.java)!!
-                            if (item.id != null) if (item.publisher == DATA.FirebaseUserUid) P++
-                        }
-                        nrObjects()
+        database.getReference(DATA.CATEGORIES).addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val c = snapshot.children.mapNotNull { it.getValue(Category::class.java) }
+                    .count { it.id != null && it.publisher == uid }
+                updateSettingNumber(1, c)
+
+                database.getReference(DATA.PLANS).addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val p = snapshot.children.mapNotNull { it.getValue(Plan::class.java) }
+                            .count { it.id != null && it.publisher == uid }
+                        updateSettingNumber(2, p)
+
+                        database.getReference(DATA.OBJECTS).addListenerForSingleValueEvent(object : ValueEventListener {
+                            override fun onDataChange(snapshot: DataSnapshot) {
+                                val o = snapshot.children.mapNotNull { it.getValue(TaskItem::class.java) }
+                                    .count { it.id != null && it.publisher == uid }
+                                updateSettingNumber(3, o)
+
+                                database.getReference(DATA.FAVORITES).child(uid).addListenerForSingleValueEvent(object : ValueEventListener {
+                                    override fun onDataChange(snapshot: DataSnapshot) {
+                                        val f = snapshot.childrenCount.toInt()
+                                        updateSettingNumber(4, f)
+                                    }
+                                    override fun onCancelled(error: DatabaseError) {}
+                                })
+                            }
+                            override fun onCancelled(error: DatabaseError) {}
+                        })
                     }
-
-                    override fun onCancelled(databaseError: DatabaseError) {}
+                    override fun onCancelled(error: DatabaseError) {}
                 })
             }
-
-            private fun nrObjects() {
-                val reference = FirebaseDatabase.getInstance().getReference(DATA.OBJECTS)
-                reference.addListenerForSingleValueEvent(object : ValueEventListener {
-                    override fun onDataChange(dataSnapshot: DataSnapshot) {
-                        O = 0
-                        for (data in dataSnapshot.children) {
-                            val item = data.getValue(OBJECT::class.java)!!
-                            if (item.id != null) if (item.publisher == DATA.FirebaseUserUid) O++
-                        }
-                        nrFavorites()
-                    }
-
-                    override fun onCancelled(databaseError: DatabaseError) {}
-                })
-            }
-
-            private fun nrFavorites() {
-                val reference = FirebaseDatabase.getInstance().getReference(DATA.FAVORITES)
-                    .child(DATA.FirebaseUserUid)
-                reference.addListenerForSingleValueEvent(object : ValueEventListener {
-                    override fun onDataChange(dataSnapshot: DataSnapshot) {
-                        F = O
-                        F = dataSnapshot.childrenCount.toInt()
-                        loadSettings(C, P, O, F)
-                    }
-
-                    override fun onCancelled(databaseError: DatabaseError) {}
-                })
-            }
-
-            override fun onCancelled(databaseError: DatabaseError) {}
+            override fun onCancelled(error: DatabaseError) {}
         })
     }
 
     private fun loadUserInfo() {
-        val reference = FirebaseDatabase.getInstance().getReference(DATA.USERS)
-        reference.child(Objects.requireNonNull(DATA.FirebaseUserUid))
+        val uid = DATA.FirebaseUserUid
+        FirebaseDatabase.getInstance().getReference(DATA.USERS).child(uid)
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    val item = snapshot.getValue(User::class.java)!!
-                    val ProfileImage = item.profileImage
-                    val Username = item.username
-
-                    VOID.GlideImage(true, context, ProfileImage, binding!!.toolbar.imageProfile)
-                    binding!!.toolbar.username.text = Username
+                    val item = snapshot.getValue(User::class.java) ?: return
+                    VOID.GlideImage(true, context, item.profileImage, binding.toolbar.imageProfile)
+                    binding.toolbar.username.text = item.username
                 }
-
                 override fun onCancelled(error: DatabaseError) {}
             })
     }
 
-    private fun loadSettings(categories: Int, plans: Int, objects: Int, favorites: Int) {
-        list!!.clear()
-        val item = Setting("1", "Edit Profile", R.drawable.ic_edit_white, 0, CLASS.PROFILE_EDIT)
-        val item2 =
-            Setting("2", "Categories", R.drawable.ic_category, categories, CLASS.CATEGORIES)
-        val item3 = Setting("4", "Plans", R.drawable.ic_list, plans, DATA.PLANS)
-        val item4 = Setting("7", "Objects", R.drawable.ic_object, objects, CLASS.OBJECTS)
-        val item5 =
-            Setting("9", "Favorites", R.drawable.ic_star_selected, favorites, CLASS.FAVORITES)
-        val item6 = Setting("10", "About App", R.drawable.ic_info, 0)
-        val item7 = Setting("11", "Logout", R.drawable.ic_logout_white, 0)
-        val item8 = Setting("12", "Share App", R.drawable.ic_share, 0)
-        val item9 = Setting("13", "Rate APP", R.drawable.ic_heart_selected, 0)
-        val item10 =
-            Setting("14", "Privacy Policy", R.drawable.ic_privacy_policy, 0, CLASS.PRIVACY_POLICY)
-        list!!.add(item)
-        list!!.add(item2)
-        list!!.add(item3)
-        list!!.add(item4)
-        list!!.add(item5)
-        list!!.add(item6)
-        list!!.add(item7)
-        list!!.add(item8)
-        list!!.add(item9)
-        list!!.add(item10)
-        adapter!!.notifyDataSetChanged()
-    }
-
-    private val points: Unit
-        private get() {
-            val ref = FirebaseDatabase.getInstance().getReference(DATA.TASKS)
-            ref.addValueEventListener(object : ValueEventListener {
+    private fun loadPoints() {
+        FirebaseDatabase.getInstance().getReference(DATA.TASKS)
+            .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    var i = 0
-                    var a = 0
-                    for (snapshot in dataSnapshot.children) {
-                        val item = snapshot.getValue(Task::class.java)!!
-                        i = i + item.points
-                        a = a + item.aVPoints
-                    }
-                    binding!!.toolbar.all.text = MessageFormat.format("{0}{1}", DATA.EMPTY, i)
-                    binding!!.toolbar.availablePoints.text =
-                        MessageFormat.format("{0}{1}", DATA.EMPTY, a)
-                    binding!!.toolbar.level.text =
-                        MessageFormat.format("{0}{1}", DATA.EMPTY, VOID.levelPoint(a, 10))
-                }
+                    var totalPoints = 0
+                    var availablePoints = 0
 
+                    for (snapshot in dataSnapshot.children) {
+                        val item = snapshot.getValue(Task::class.java) ?: continue
+                        totalPoints += item.points
+                        availablePoints += item.aVPoints
+                    }
+
+                    _binding?.let { b ->
+                        b.toolbar.all.text = MessageFormat.format("{0}{1}", DATA.EMPTY, totalPoints)
+                        b.toolbar.availablePoints.text = MessageFormat.format("{0}{1}", DATA.EMPTY, availablePoints)
+                        b.toolbar.level.text = MessageFormat.format("{0}{1}", DATA.EMPTY, VOID.levelPoint(availablePoints, 10))
+                    }
+                }
                 override fun onCancelled(databaseError: DatabaseError) {}
             })
-        }
+    }
 
     override fun onResume() {
-        loadUserInfo()
-        points
-        nrItems()
         super.onResume()
+        loadUserInfo()
+        loadPoints()
+        nrItems()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

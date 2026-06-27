@@ -7,7 +7,7 @@ import android.text.TextWatcher
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.Adapter.ObjectOptionAdapter
-import com.flatcode.littletasks.Model.OBJECT
+import com.flatcode.littletasks.Model.TaskItem
 import com.flatcode.littletasks.R
 import com.flatcode.littletasks.Unit.DATA
 import com.flatcode.littletasks.Unit.THEME
@@ -21,7 +21,7 @@ class ObjectsToPlanActivity : AppCompatActivity() {
 
     private var binding: ActivityObjectsBinding? = null
     private val context: Context = this@ObjectsToPlanActivity
-    var list: ArrayList<OBJECT?>? = null
+    var list: ArrayList<TaskItem?>? = null
     var adapter: ObjectOptionAdapter? = null
     var id: String? = null
 
@@ -70,7 +70,7 @@ class ObjectsToPlanActivity : AppCompatActivity() {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     list!!.clear()
                     for (data in dataSnapshot.children) {
-                        val `object` = data.getValue(OBJECT::class.java)!!
+                        val `object` = data.getValue(TaskItem::class.java)!!
                         if (`object`.publisher == DATA.FirebaseUserUid) list!!.add(`object`)
                     }
                     binding!!.bar.visibility = View.GONE
