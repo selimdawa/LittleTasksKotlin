@@ -5,9 +5,6 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.flatcode.littletasks.Model.Setting
 import com.flatcode.littletasks.Unit.CLASS
@@ -19,11 +16,9 @@ import java.text.MessageFormat
 class SettingAdapter(private val context: Context?, private val list: ArrayList<Setting>) :
     RecyclerView.Adapter<SettingAdapter.ViewHolder>() {
 
-    private var binding: ItemSettingBinding? = null
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        binding = ItemSettingBinding.inflate(LayoutInflater.from(context), parent, false)
-        return ViewHolder(binding!!.root)
+        val binding = ItemSettingBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -35,17 +30,17 @@ class SettingAdapter(private val context: Context?, private val list: ArrayList<
         val to = item.c
         val type = item.type
 
-        holder.name.text = name
-        holder.image.setImageResource(image)
+        holder.binding.name.text = name
+        holder.binding.image.setImageResource(image)
 
         if (number != 0) {
-            holder.number.visibility = View.VISIBLE
-            holder.number.text = MessageFormat.format("{0}{1}", DATA.EMPTY, number)
+            holder.binding.number.visibility = View.VISIBLE
+            holder.binding.number.text = MessageFormat.format("{0}{1}", DATA.EMPTY, number)
         } else {
-            holder.number.visibility = View.GONE
+            holder.binding.number.visibility = View.GONE
         }
 
-        holder.item.setOnClickListener {
+        holder.binding.item.setOnClickListener {
             if (type != null) {
                 if (type == DATA.PLANS) {
                     VOID.IntentExtra(context, CLASS.PLANS, DATA.NEW_PLAN, DATA.EMPTY + false)
@@ -64,21 +59,7 @@ class SettingAdapter(private val context: Context?, private val list: ArrayList<
         }
     }
 
-    override fun getItemCount(): Int {
-        return list.size
-    }
+    override fun getItemCount(): Int = list.size
 
-    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        var name: TextView
-        var number: TextView
-        var image: ImageView
-        var item: LinearLayout
-
-        init {
-            image = binding!!.image
-            name = binding!!.name
-            number = binding!!.number
-            item = binding!!.item
-        }
-    }
+    class ViewHolder(val binding: ItemSettingBinding) : RecyclerView.ViewHolder(binding.root)
 }

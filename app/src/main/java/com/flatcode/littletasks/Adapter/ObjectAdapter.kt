@@ -6,9 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Filter
 import android.widget.Filterable
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.flatcode.littletasks.Filter.ObjectsFilter
 import com.flatcode.littletasks.Model.TaskItem
@@ -20,40 +17,36 @@ import java.text.MessageFormat
 class ObjectAdapter(private val context: Context, var list: ArrayList<TaskItem?>) :
     RecyclerView.Adapter<ObjectAdapter.ViewHolder>(), Filterable {
 
-    private var binding: ItemObjectBinding? = null
-    var filterList: ArrayList<TaskItem?>
+    var filterList: ArrayList<TaskItem?> = list
     private var filter: ObjectsFilter? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        binding = ItemObjectBinding.inflate(LayoutInflater.from(context), parent, false)
-        return ViewHolder(binding!!.root)
+        val binding = ItemObjectBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = list[position]
-        val id = DATA.EMPTY + item!!.id
+        val item = list[position] ?: return
         val name = DATA.EMPTY + item.name
         val points = DATA.EMPTY + item.points
 
         if (name == DATA.EMPTY) {
-            holder.name.visibility = View.GONE
+            holder.binding.name.visibility = View.GONE
         } else {
-            holder.name.visibility = View.VISIBLE
-            holder.name.text = name
+            holder.binding.name.visibility = View.VISIBLE
+            holder.binding.name.text = name
         }
 
         if (points == DATA.EMPTY) {
-            holder.points.text = MessageFormat.format("{0}{1}", DATA.EMPTY, DATA.ZERO)
+            holder.binding.points.text = MessageFormat.format("{0}{1}", DATA.EMPTY, DATA.ZERO)
         } else {
-            holder.points.text = points
+            holder.binding.points.text = points
         }
 
-        holder.more.setOnClickListener { VOID.moreObject(context, item) }
+        holder.binding.more.setOnClickListener { VOID.moreObject(context, item) }
     }
 
-    override fun getItemCount(): Int {
-        return list.size
-    }
+    override fun getItemCount(): Int = list.size
 
     override fun getFilter(): Filter {
         if (filter == null) {
@@ -62,21 +55,5 @@ class ObjectAdapter(private val context: Context, var list: ArrayList<TaskItem?>
         return filter!!
     }
 
-    inner class ViewHolder(view: View?) : RecyclerView.ViewHolder(view!!) {
-        var name: TextView
-        var points: TextView
-        var more: ImageView
-        var item: LinearLayout
-
-        init {
-            points = binding!!.points
-            name = binding!!.name
-            more = binding!!.more
-            item = binding!!.item
-        }
-    }
-
-    init {
-        filterList = list
-    }
+    class ViewHolder(val binding: ItemObjectBinding) : RecyclerView.ViewHolder(binding.root)
 }

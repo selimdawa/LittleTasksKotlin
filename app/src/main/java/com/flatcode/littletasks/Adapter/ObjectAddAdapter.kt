@@ -5,7 +5,6 @@ import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
@@ -18,11 +17,9 @@ import java.text.MessageFormat
 class ObjectAddAdapter(private val context: Context, var list: List<TaskItem>) :
     RecyclerView.Adapter<ObjectAddAdapter.ViewHolder>() {
 
-    private var binding: ItemNewPlanBinding? = null
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        binding = ItemNewPlanBinding.inflate(LayoutInflater.from(context), parent, false)
-        return ViewHolder(binding!!.root)
+        val binding = ItemNewPlanBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -30,75 +27,57 @@ class ObjectAddAdapter(private val context: Context, var list: List<TaskItem>) :
         val last = list.size - 1
 
         if (position == last) {
-            holder.line.visibility = View.GONE
+            holder.binding.view.visibility = View.GONE
         } else {
-            holder.line.visibility = View.VISIBLE
+            holder.binding.view.visibility = View.VISIBLE
         }
 
-        holder.number.text = MessageFormat.format("{0}{1}", DATA.EMPTY, id)
-        holder.add.setOnClickListener {
-            validateData(holder.name, holder.points, holder.add, holder.done)
+        holder.binding.number.text = MessageFormat.format("{0}{1}", DATA.EMPTY, id)
+        holder.binding.add.setOnClickListener {
+            validateData(holder.binding.nameEt, holder.binding.PointsEt, holder.binding.add, holder.binding.done)
         }
-        holder.done.setOnClickListener {
+        holder.binding.done.setOnClickListener {
             Toast.makeText(context, "Already done", Toast.LENGTH_SHORT).show()
         }
     }
 
-    override fun getItemCount(): Int {
-        return list.size
-    }
+    override fun getItemCount(): Int = list.size
 
-    inner class ViewHolder(view: View?) : RecyclerView.ViewHolder(view!!) {
-        var add: TextView
-        var number: TextView
-        var done: TextView
-        var name: EditText
-        var points: EditText
-        var line: View
-
-        init {
-            name = binding!!.nameEt
-            add = binding!!.add
-            done = binding!!.done
-            number = binding!!.number
-            points = binding!!.PointsEt
-            line = binding!!.view
-        }
-    }
+    class ViewHolder(val binding: ItemNewPlanBinding) : RecyclerView.ViewHolder(binding.root)
 
     private fun validateData(name: TextView, points: TextView, add: TextView, ok: TextView) {
-        val Name = name.text.toString().trim { it <= ' ' }
-        val Points = points.text.toString().trim { it <= ' ' }
+        val inputName = name.text.toString().trim()
+        val inputPoints = points.text.toString().trim()
 
-        //validate data
-        if (TextUtils.isEmpty(Name)) {
+        if (TextUtils.isEmpty(inputName)) {
             Toast.makeText(context, "Enter Name...", Toast.LENGTH_SHORT).show()
-        } else if (TextUtils.isEmpty(Points)) {
+        } else if (TextUtils.isEmpty(inputPoints)) {
             Toast.makeText(context, "Enter Points...", Toast.LENGTH_SHORT).show()
         } else {
-            uploadToDB(Name, Points, add, ok)
+            uploadToDB(inputName, inputPoints, add, ok)
         }
     }
 
     private fun uploadToDB(name: String, points: String, add: TextView, ok: TextView) {
         val ref = FirebaseDatabase.getInstance().getReference(DATA.OBJECTS)
-        val id = ref.push().key
-        val point = points.toInt()
-        //setup data to upload
-        val hashMap = HashMap<String?, Any?>()
-        hashMap[DATA.PUBLISHER] = DATA.EMPTY + DATA.FirebaseUserUid
-        hashMap[DATA.ID] = id
-        hashMap[DATA.NAME] = DATA.EMPTY + name
-        hashMap[DATA.POINTS] = point
-        hashMap[DATA.TIMESTAMP] = System.currentTimeMillis()
-        assert(id != null)
-        ref.child(id!!).setValue(hashMap).addOnSuccessListener {
+        val id = ref.push().key ?: return
+        val point = points.toIntOrNull() ?: 0
+
+        val hashMap = HashMap<String?, Any?>().apply {
+            put(DATA.PUBLISHER, DATA.EMPTY + DATA.FirebaseUserUid)
+            put(DATA.ID, id)
+            put(DATA.NAME, DATA.EMPTY + name)
+            put(DATA.POINTS, point)
+            put(DATA.TIMESTAMP, System.currentTimeMillis())
+        }
+
+        ref.child(id).setValue(hashMap).addOnSuccessListener {
             Toast.makeText(context, "Successfully uploaded...", Toast.LENGTH_SHORT).show()
             add.visibility = View.GONE
             ok.visibility = View.VISIBLE
-        }.addOnFailureListener { e: Exception ->
+        }.addOnFailureListener { e ->
             Toast.makeText(
-                context, "Failure to upload to db due to :" + e.message, Toast.LENGTH_SHORT
+                context, "Failure to upload to db due to :${e.message}", Toast.LENGTH_SHORT
             ).show()
         }
     }

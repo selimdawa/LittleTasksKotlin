@@ -7,8 +7,6 @@ import android.view.ViewGroup
 import android.widget.Filter
 import android.widget.Filterable
 import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.flatcode.littletasks.Filter.ObjectOptionFilter
 import com.flatcode.littletasks.Model.TaskItem
@@ -23,48 +21,44 @@ import com.google.firebase.database.ValueEventListener
 import java.text.MessageFormat
 
 class ObjectOptionAdapter(
-    private val context: Context, var list: ArrayList<TaskItem?>, planId: String?
+    private val context: Context, var list: ArrayList<TaskItem?>, var planId: String?
 ) : RecyclerView.Adapter<ObjectOptionAdapter.ViewHolder>(), Filterable {
 
-    private var binding: ItemObjectBinding? = null
-    var filterList: ArrayList<TaskItem?>
+    var filterList: ArrayList<TaskItem?> = list
     private var filter: ObjectOptionFilter? = null
-    var planId: String?
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        binding = ItemObjectBinding.inflate(LayoutInflater.from(context), parent, false)
-        return ViewHolder(binding!!.root)
+        val binding = ItemObjectBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = list[position]
-        val id = DATA.EMPTY + item!!.id
+        val item = list[position] ?: return
+        val id = DATA.EMPTY + item.id
         val name = DATA.EMPTY + item.name
         val points = DATA.EMPTY + item.points
 
-        holder.option.visibility = View.VISIBLE
-        holder.more.visibility = View.GONE
+        holder.binding.option.visibility = View.VISIBLE
+        holder.binding.more.visibility = View.GONE
 
         if (name == DATA.EMPTY) {
-            holder.name.visibility = View.GONE
+            holder.binding.name.visibility = View.GONE
         } else {
-            holder.name.visibility = View.VISIBLE
-            holder.name.text = name
+            holder.binding.name.visibility = View.VISIBLE
+            holder.binding.name.text = name
         }
 
         if (points == DATA.EMPTY) {
-            holder.points.text = MessageFormat.format("{0}{1}", DATA.EMPTY, DATA.ZERO)
+            holder.binding.points.text = MessageFormat.format("{0}{1}", DATA.EMPTY, DATA.ZERO)
         } else {
-            holder.points.text = points
+            holder.binding.points.text = points
         }
 
-        VOID.isPlan(holder.option, id, planId)
-        holder.option.setOnClickListener { VOID.checkPlan(holder.option, id, planId) }
+        VOID.isPlan(holder.binding.option, id, planId)
+        holder.binding.option.setOnClickListener { VOID.checkPlan(holder.binding.option, id, planId) }
     }
 
-    override fun getItemCount(): Int {
-        return list.size
-    }
+    override fun getItemCount(): Int = list.size
 
     override fun getFilter(): Filter {
         if (filter == null) {
@@ -73,29 +67,16 @@ class ObjectOptionAdapter(
         return filter!!
     }
 
-    inner class ViewHolder(view: View?) : RecyclerView.ViewHolder(view!!) {
-        var name: TextView
-        var points: TextView
-        var more: ImageView
-        var option: ImageView
-        var item: LinearLayout
-
-        init {
-            points = binding!!.points
-            name = binding!!.name
-            more = binding!!.more
-            option = binding!!.option
-            item = binding!!.item
-        }
-    }
+    class ViewHolder(val binding: ItemObjectBinding) : RecyclerView.ViewHolder(binding.root)
 
     companion object {
         fun isLoves(image: ImageView, planId: String?, objectId: String?) {
-            val reference = FirebaseDatabase.getInstance().getReference(DATA.PLANS).child(planId!!)
+            if (planId == null || objectId == null) return
+            val reference = FirebaseDatabase.getInstance().getReference(DATA.PLANS).child(planId)
                 .child(DATA.OBJECTS)
             reference.addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    if (dataSnapshot.child(objectId!!).exists()) {
+                    if (dataSnapshot.child(objectId).exists()) {
                         image.setImageResource(R.drawable.ic_remove)
                         image.tag = "added"
                     } else {
@@ -109,18 +90,14 @@ class ObjectOptionAdapter(
         }
 
         fun addToPlan(image: ImageView, planId: String?, objectId: String?) {
+            if (planId == null || objectId == null) return
+            val reference = FirebaseDatabase.getInstance().getReference(DATA.PLANS).child(planId)
+                .child(DATA.OBJECTS).child(objectId)
             if (image.tag == "add") {
-                FirebaseDatabase.getInstance().getReference(DATA.PLANS).child(planId!!)
-                    .child(DATA.OBJECTS).child(objectId!!).setValue(true)
+                reference.setValue(true)
             } else {
-                FirebaseDatabase.getInstance().getReference(DATA.PLANS).child(planId!!)
-                    .child(DATA.OBJECTS).child(objectId!!).removeValue()
+                reference.removeValue()
             }
         }
-    }
-
-    init {
-        filterList = list
-        this.planId = planId
     }
 }

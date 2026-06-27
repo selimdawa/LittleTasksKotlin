@@ -6,19 +6,19 @@ import com.flatcode.littletasks.Model.Plan
 import java.util.*
 
 class PlansFilter(var list: ArrayList<Plan?>, var adapter: PlanAdapter) : Filter() {
-    override fun performFiltering(constraint: CharSequence): FilterResults {
-        var constraint: CharSequence? = constraint
+
+    override fun performFiltering(constraint: CharSequence?): FilterResults {
         val results = FilterResults()
-        if (constraint != null && constraint.length > 0) {
-            constraint = constraint.toString().uppercase(Locale.getDefault())
-            val filter = ArrayList<Plan?>()
-            for (i in list.indices) {
-                if (list[i]!!.name!!.uppercase(Locale.getDefault()).contains(constraint)) {
-                    filter.add(list[i])
+        if (!constraint.isNullOrEmpty()) {
+            val query = constraint.toString().uppercase(Locale.getDefault())
+            val filteredList = ArrayList<Plan?>()
+            for (item in list) {
+                if (item?.name?.uppercase(Locale.getDefault())?.contains(query) == true) {
+                    filteredList.add(item)
                 }
             }
-            results.count = filter.size
-            results.values = filter
+            results.count = filteredList.size
+            results.values = filteredList
         } else {
             results.count = list.size
             results.values = list
@@ -26,8 +26,31 @@ class PlansFilter(var list: ArrayList<Plan?>, var adapter: PlanAdapter) : Filter
         return results
     }
 
-    override fun publishResults(constraint: CharSequence, results: FilterResults) {
-        adapter.list = (results.values as ArrayList<Plan?>)
-        adapter.notifyDataSetChanged()
+    @Suppress("UNCHECKED_CAST")
+    override fun publishResults(constraint: CharSequence?, results: FilterResults) {
+        val oldList = adapter.list
+        val newList = results.values as ArrayList<Plan?>
+
+        adapter.list = newList
+
+        val oldSize = oldList.size
+        val newSize = newList.size
+
+        when {
+            oldSize == 0 && newSize > 0 -> adapter.notifyItemRangeInserted(0, newSize)
+            oldSize > 0 && newSize == 0 -> adapter.notifyItemRangeRemoved(0, oldSize)
+            else -> {
+                for (i in 0 until minOf(oldSize, newSize)) {
+                    if (oldList[i] != newList[i]) {
+                        adapter.notifyItemChanged(i)
+                    }
+                }
+                if (newSize > oldSize) {
+                    adapter.notifyItemRangeInserted(oldSize, newSize - oldSize)
+                } else if (oldSize > newSize) {
+                    adapter.notifyItemRangeRemoved(newSize, oldSize - newSize)
+                }
+            }
+        }
     }
 }

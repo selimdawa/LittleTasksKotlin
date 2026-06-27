@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import android.widget.Filter
 import android.widget.Filterable
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.flatcode.littletasks.Filter.TaskCategoryFilter
@@ -20,24 +19,22 @@ import com.flatcode.littletasks.databinding.ItemTaskBinding
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.Query
 import com.google.firebase.database.ValueEventListener
 
 class TaskAdapter(private val context: Context, var list: ArrayList<Task?>) :
     RecyclerView.Adapter<TaskAdapter.ViewHolder>(), Filterable {
 
-    private var binding: ItemTaskBinding? = null
-    var filterList: ArrayList<Task?>
+    var filterList: ArrayList<Task?> = list
     private var filter: TaskCategoryFilter? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        binding = ItemTaskBinding.inflate(LayoutInflater.from(context), parent, false)
-        return ViewHolder(binding!!.root)
+        val binding = ItemTaskBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = list[position]
-        val id = DATA.EMPTY + item!!.id
+        val item = list[position] ?: return
+        val id = DATA.EMPTY + item.id
         val name = DATA.EMPTY + item.name
         val publisher = DATA.EMPTY + item.publisher
         val category = DATA.EMPTY + item.category
@@ -45,48 +42,44 @@ class TaskAdapter(private val context: Context, var list: ArrayList<Task?>) :
         val start = DATA.EMPTY + item.start
         val end = DATA.EMPTY + item.end
         val points = DATA.EMPTY + item.points
-        val AVPoints = DATA.EMPTY + item.aVPoints
+        val avPoints = DATA.EMPTY + item.aVPoints
 
         if (name == DATA.EMPTY) {
-            holder.name.visibility = View.GONE
+            holder.binding.name.visibility = View.GONE
         } else {
-            holder.name.visibility = View.VISIBLE
-            holder.name.text = name
+            holder.binding.name.visibility = View.VISIBLE
+            holder.binding.name.text = name
         }
 
-        holder.points.text = points
-        holder.AVPoints.text = AVPoints
-        val addTime = timestamp.toLong()
-        val Add = GetTimeAgo.getMessageAgo(addTime)
-        holder.add.text = Add
+        holder.binding.points.text = points
+        holder.binding.AVPoints.text = avPoints
+
+        val addTime = timestamp.toLongOrNull() ?: 0L
+        holder.binding.add.text = GetTimeAgo.getMessageAgo(addTime)
 
         if (start == "0") {
-            holder.start.text = "-"
+            holder.binding.start.text = "-"
         } else {
-            val startTime = start.toLong()
-            val Start = GetTimeAgo.getMessageAgo(startTime)
-            holder.start.text = Start
+            val startTime = start.toLongOrNull() ?: 0L
+            holder.binding.start.text = GetTimeAgo.getMessageAgo(startTime)
         }
 
         if (end == "0") {
-            holder.end.text = "-"
+            holder.binding.end.text = "-"
         } else {
-            val endTime = end.toLong()
-            val End = GetTimeAgo.getMessageAgo(endTime)
-            holder.end.text = End
+            val endTime = end.toLongOrNull() ?: 0L
+            holder.binding.end.text = GetTimeAgo.getMessageAgo(endTime)
         }
 
-        getData(category, holder.category, holder.image)
-        VOID.isFavorite(holder.favorites, id, publisher)
-        holder.favorites.setOnClickListener { VOID.checkFavorite(holder.favorites, id) }
-        VOID.isTask(context, holder.task, id)
+        getData(category, holder.binding.category, holder.binding.image)
+        VOID.isFavorite(holder.binding.favorites, id, publisher)
+        holder.binding.favorites.setOnClickListener { VOID.checkFavorite(holder.binding.favorites, id) }
+        VOID.isTask(context, holder.binding.task, id)
 
-        holder.more.setOnClickListener { VOID.moreTask(context, item) }
+        holder.binding.more.setOnClickListener { VOID.moreTask(context, item) }
     }
 
-    override fun getItemCount(): Int {
-        return list.size
-    }
+    override fun getItemCount(): Int = list.size
 
     override fun getFilter(): Filter {
         if (filter == null) {
@@ -95,51 +88,18 @@ class TaskAdapter(private val context: Context, var list: ArrayList<Task?>) :
         return filter!!
     }
 
-    inner class ViewHolder(view: View?) : RecyclerView.ViewHolder(view!!) {
-        var image: ImageView
-        var favorites: ImageView
-        var task: ImageView
-        var more: ImageView
-        var name: TextView
-        var category: TextView
-        var points: TextView
-        var AVPoints: TextView
-        var add: TextView
-        var start: TextView
-        var end: TextView
-        var item: LinearLayout
-
-        init {
-            image = binding!!.image
-            favorites = binding!!.favorites
-            task = binding!!.task
-            name = binding!!.name
-            category = binding!!.category
-            points = binding!!.points
-            AVPoints = binding!!.AVPoints
-            add = binding!!.add
-            start = binding!!.start
-            end = binding!!.end
-            more = binding!!.more
-            item = binding!!.item
-        }
-    }
+    class ViewHolder(val binding: ItemTaskBinding) : RecyclerView.ViewHolder(binding.root)
 
     private fun getData(categoryId: String, name: TextView, image: ImageView) {
-        val reference: Query =
-            FirebaseDatabase.getInstance().getReference(DATA.CATEGORIES).child(categoryId)
-        reference.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                val item = dataSnapshot.getValue(Category::class.java)!!
-                name.text = item.name
-                VOID.GlideImage(false, context, item.image, image)
-            }
+        FirebaseDatabase.getInstance().getReference(DATA.CATEGORIES).child(categoryId)
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    val item = dataSnapshot.getValue(Category::class.java) ?: return
+                    name.text = item.name
+                    VOID.GlideImage(false, context, item.image, image)
+                }
 
-            override fun onCancelled(databaseError: DatabaseError) {}
-        })
-    }
-
-    init {
-        filterList = list
+                override fun onCancelled(databaseError: DatabaseError) {}
+            })
     }
 }

@@ -6,9 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Filter
 import android.widget.Filterable
-import android.widget.ImageView
 import android.widget.TextView
-import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.flatcode.littletasks.Filter.CategoriesFilter
 import com.flatcode.littletasks.Model.Category
@@ -26,41 +24,38 @@ import java.text.MessageFormat
 class CategoriesAdapter(private val context: Context, var list: ArrayList<Category?>) :
     RecyclerView.Adapter<CategoriesAdapter.ViewHolder>(), Filterable {
 
-    private var binding: ItemCategoriesBinding? = null
-    var filterList: ArrayList<Category?>
+    var filterList: ArrayList<Category?> = list
     private var filter: CategoriesFilter? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        binding = ItemCategoriesBinding.inflate(LayoutInflater.from(context), parent, false)
-        return ViewHolder(binding!!.root)
+        val binding = ItemCategoriesBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = list[position]
-        val id = DATA.EMPTY + item!!.id
+        val item = list[position] ?: return
+        val id = DATA.EMPTY + item.id
         val name = DATA.EMPTY + item.name
         val image = DATA.EMPTY + item.image
 
-        VOID.GlideImage(false, context, image, holder.image)
+        VOID.GlideImage(false, context, image, holder.binding.image)
 
         if (name == DATA.EMPTY) {
-            holder.name.visibility = View.GONE
+            holder.binding.name.visibility = View.GONE
         } else {
-            holder.name.visibility = View.VISIBLE
-            holder.name.text = name
+            holder.binding.name.visibility = View.VISIBLE
+            holder.binding.name.text = name
         }
 
-        nrBooks(holder.numer, id)
-        holder.more.setOnClickListener { VOID.moreCategory(context, item) }
+        nrBooks(holder.binding.number, id)
+        holder.binding.more.setOnClickListener { VOID.moreCategory(context, item) }
 
-        holder.card.setOnClickListener {
+        holder.binding.card.setOnClickListener {
             VOID.IntentExtra2(context, CLASS.CATEGORY_TASKS, DATA.ID, id, DATA.NAME, name)
         }
     }
 
-    override fun getItemCount(): Int {
-        return list.size
-    }
+    override fun getItemCount(): Int = list.size
 
     override fun getFilter(): Filter {
         if (filter == null) {
@@ -69,21 +64,7 @@ class CategoriesAdapter(private val context: Context, var list: ArrayList<Catego
         return filter!!
     }
 
-    inner class ViewHolder(view: View?) : RecyclerView.ViewHolder(view!!) {
-        var image: ImageView
-        var more: ImageView
-        var name: TextView
-        var numer: TextView
-        var card: CardView
-
-        init {
-            image = binding!!.image
-            name = binding!!.name
-            more = binding!!.more
-            numer = binding!!.number
-            card = binding!!.card
-        }
-    }
+    class ViewHolder(val binding: ItemCategoriesBinding) : RecyclerView.ViewHolder(binding.root)
 
     companion object {
         fun nrBooks(number: TextView, categoryId: String) {
@@ -92,7 +73,7 @@ class CategoriesAdapter(private val context: Context, var list: ArrayList<Catego
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     var i = 0
                     for (snapshot in dataSnapshot.children) {
-                        val item = snapshot.getValue(Task::class.java)!!
+                        val item = snapshot.getValue(Task::class.java) ?: continue
                         if (item.category == categoryId) i++
                     }
                     number.text = MessageFormat.format("{0}{1}", DATA.EMPTY, i)
@@ -101,9 +82,5 @@ class CategoriesAdapter(private val context: Context, var list: ArrayList<Catego
                 override fun onCancelled(databaseError: DatabaseError) {}
             })
         }
-    }
-
-    init {
-        filterList = list
     }
 }
