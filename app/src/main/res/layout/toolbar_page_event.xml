@@ -87,6 +87,7 @@
             android:background="@android:color/transparent"
             android:gravity="center"
             android:hint="@string/search"
+            android:singleLine="true"
             android:maxLines="1"
             android:textColor="@color/white"
             android:textColorHint="@color/white"
