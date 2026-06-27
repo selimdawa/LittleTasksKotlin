@@ -3,6 +3,7 @@ package com.flatcode.littletasks.Activity
 import android.content.Context
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.Unit.CLASS
 import com.flatcode.littletasks.Unit.THEME
@@ -12,26 +13,27 @@ import com.google.firebase.auth.FirebaseAuth
 
 class SplashActivity : AppCompatActivity() {
 
-    private var binding: ActivitySplashBinding? = null
-    var context: Context = this@SplashActivity
-    var auth: FirebaseAuth? = null
-    var time_per_second = 2
-    var time_final = time_per_millis * time_per_second
+    private var _binding: ActivitySplashBinding? = null
+    private val binding get() = _binding!!
+
+    private val context: Context = this@SplashActivity
+    private var auth: FirebaseAuth? = null
+
+    private val timePerSecond = 2
+    private val timeFinal = TIME_PER_MILLIS * timePerSecond
 
     override fun onCreate(savedInstanceState: Bundle?) {
         THEME.setThemeOfApp(context)
         super.onCreate(savedInstanceState)
-        binding = ActivitySplashBinding.inflate(layoutInflater)
-        val view = binding!!.root
-        setContentView(view)
+        _binding = ActivitySplashBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         auth = FirebaseAuth.getInstance()
-        Handler().postDelayed({ checkUser() }, time_final.toLong())
+        Handler(Looper.getMainLooper()).postDelayed({ checkUser() }, timeFinal.toLong())
     }
 
     private fun checkUser() {
-        //get current user, if logged in
-        val firebaseUser = auth!!.currentUser
+        val firebaseUser = auth?.currentUser
         if (firebaseUser == null) {
             VOID.Intent1(context, CLASS.AUTH)
         } else {
@@ -40,7 +42,12 @@ class SplashActivity : AppCompatActivity() {
         finish()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
+    }
+
     companion object {
-        const val time_per_millis = 1000
+        const val TIME_PER_MILLIS = 1000
     }
 }

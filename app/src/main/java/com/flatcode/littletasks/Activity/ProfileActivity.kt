@@ -19,71 +19,74 @@ import java.text.MessageFormat
 
 class ProfileActivity : AppCompatActivity() {
 
-    private var binding: ActivityProfileBinding? = null
-    var context: Context = this@ProfileActivity
-    var profileId: String? = null
+    private var _binding: ActivityProfileBinding? = null
+    private val binding get() = _binding!!
+
+    private val context: Context = this@ProfileActivity
+    private var profileId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         THEME.setThemeOfApp(context)
         super.onCreate(savedInstanceState)
-        binding = ActivityProfileBinding.inflate(layoutInflater)
-        val view = binding!!.root
-        setContentView(view)
+        _binding = ActivityProfileBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        val intent = intent
         profileId = intent.getStringExtra(DATA.PROFILE_ID)
 
-        binding!!.edit.setOnClickListener { VOID.Intent1(context, CLASS.PROFILE_EDIT) }
-        binding!!.back.setOnClickListener { onBackPressed() }
+        binding.edit.setOnClickListener { VOID.Intent1(context, CLASS.PROFILE_EDIT) }
+        binding.back.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
     }
 
     private fun init() {
-        loadUserInfo()
-        getNrItems(DATA.TASKS, binding!!.numberTasks)
-        getNrItems(DATA.PLANS, binding!!.numberPlans)
-        getNrItems(DATA.OBJECTS, binding!!.numberObjects)
-        getNrItems(DATA.CATEGORIES, binding!!.numberCategories)
+        val id = profileId ?: return
+        loadUserInfo(id)
+        getNrItems(DATA.TASKS, id, binding.numberTasks)
+        getNrItems(DATA.PLANS, id, binding.numberPlans)
+        getNrItems(DATA.OBJECTS, id, binding.numberObjects)
+        getNrItems(DATA.CATEGORIES, id, binding.numberCategories)
     }
 
-    private fun loadUserInfo() {
-        val reference = FirebaseDatabase.getInstance().getReference(DATA.USERS)
-        reference.child(profileId!!).addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val item = snapshot.getValue(User::class.java)!!
-                val username = DATA.EMPTY + item.username
-                val profileImage = DATA.EMPTY + item.profileImage
+    private fun loadUserInfo(id: String) {
+        FirebaseDatabase.getInstance().getReference(DATA.USERS).child(id)
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val item = snapshot.getValue(User::class.java) ?: return
+                    val username = DATA.EMPTY + item.username
+                    val profileImage = DATA.EMPTY + item.profileImage
 
-                binding!!.username.text = username
-                VOID.GlideImage(true, context, profileImage, binding!!.profile)
-            }
-
-            override fun onCancelled(error: DatabaseError) {}
-        })
-    }
-
-    private fun getNrItems(database: String?, text: TextView) {
-        val reference = FirebaseDatabase.getInstance().getReference(database!!)
-        reference.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                var i = 0
-                for (data in dataSnapshot.children) {
-                    val item = data.getValue(Task::class.java)!!
-                    if (item.publisher == profileId) i++
+                    _binding?.let { b ->
+                        b.username.text = username
+                        VOID.GlideImage(true, context, profileImage, b.profile)
+                    }
                 }
-                text.text = MessageFormat.format("{0}{1}", DATA.EMPTY, i)
-            }
 
-            override fun onCancelled(databaseError: DatabaseError) {}
-        })
+                override fun onCancelled(error: DatabaseError) {}
+            })
     }
 
-    override fun onRestart() {
-        super.onRestart()
-        init()
+    private fun getNrItems(database: String, id: String, text: TextView) {
+        FirebaseDatabase.getInstance().getReference(database)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    var i = 0
+                    for (data in dataSnapshot.children) {
+                        val item = data.getValue(Task::class.java) ?: continue
+                        if (item.publisher == id) i++
+                    }
+                    text.text = MessageFormat.format("{0}{1}", DATA.EMPTY, i)
+                }
+
+                override fun onCancelled(databaseError: DatabaseError) {}
+            })
     }
 
     override fun onResume() {
         super.onResume()
         init()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
     }
 }

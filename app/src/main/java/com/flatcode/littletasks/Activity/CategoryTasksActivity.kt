@@ -19,169 +19,169 @@ import com.flatcode.littletasks.databinding.ActivityPageSwitchBinding
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.Query
 import com.google.firebase.database.ValueEventListener
 import java.text.MessageFormat
 
 class CategoryTasksActivity : AppCompatActivity() {
 
-    private var binding: ActivityPageSwitchBinding? = null
+    private var _binding: ActivityPageSwitchBinding? = null
+    private val binding get() = _binding!!
+
     private val context: Context = this@CategoryTasksActivity
-    var list: ArrayList<Task?>? = null
-    var adapter: TaskAdapter? = null
-    var id: String? = null
-    var name: String? = null
-    var type: String? = null
+    private val list = ArrayList<Task?>()
+    private var adapter: TaskAdapter? = null
+    private var id: String? = null
+    private var name: String? = null
+    private var currentSortType = DATA.TIMESTAMP
 
     override fun onCreate(savedInstanceState: Bundle?) {
         THEME.setThemeOfApp(context)
         super.onCreate(savedInstanceState)
-        binding = ActivityPageSwitchBinding.inflate(layoutInflater)
-        val view = binding!!.root
-        setContentView(view)
+        _binding = ActivityPageSwitchBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        val intent = intent
         id = intent.getStringExtra(DATA.ID)
         name = intent.getStringExtra(DATA.NAME)
 
-        type = DATA.TIMESTAMP
-        binding!!.toolbar.nameSpace.text = name
-        binding!!.toolbar.back.setOnClickListener { onBackPressed() }
-        binding!!.toolbar.close.setOnClickListener { v: View? -> onBackPressed() }
-        binding!!.add.add.setText(R.string.add_task)
-        binding!!.add.item.setOnClickListener {
+        currentSortType = DATA.TIMESTAMP
+        binding.toolbar.nameSpace.text = name
+        binding.toolbar.back.setOnClickListener { handleBackPressed() }
+        binding.toolbar.close.setOnClickListener { handleBackPressed() }
+        binding.add.add.setText(R.string.add_task)
+        binding.add.item.setOnClickListener {
             VOID.IntentExtra(context, CLASS.TASK_ADD, DATA.CATEGORY_ID, id)
         }
 
-        binding!!.toolbar.search.setOnClickListener {
-            binding!!.toolbar.toolbar.visibility = View.GONE
-            binding!!.toolbar.toolbarSearch.visibility = View.VISIBLE
+        binding.toolbar.search.setOnClickListener {
+            binding.toolbar.toolbar.visibility = View.GONE
+            binding.toolbar.toolbarSearch.visibility = View.VISIBLE
             searchStatus = true
         }
-        binding!!.toolbar.textSearch.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-                try {
-                    adapter!!.filter.filter(s)
-                } catch (e: Exception) {
-                    //None
-                }
-            }
 
-            override fun afterTextChanged(s: Editable) {}
+        binding.toolbar.textSearch.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                adapter?.filter?.filter(s)
+            }
+            override fun afterTextChanged(s: Editable?) {}
         })
 
-        //binding.recyclerView.setHasFixedSize(true);
-        list = ArrayList()
-        adapter = TaskAdapter(context, list!!)
-        binding!!.recyclerView.adapter = adapter
-        binding!!.recyclerViewReverse.adapter = adapter
+        adapter = TaskAdapter(context, list)
+        binding.recyclerView.adapter = adapter
+        binding.recyclerViewReverse.adapter = adapter
 
-        binding!!.filter.all.setOnClickListener {
-            type = DATA.TIMESTAMP
-            getData(type, binding!!.recyclerView, binding!!.recyclerViewReverse)
+        binding.filter.all.setOnClickListener {
+            currentSortType = DATA.TIMESTAMP
+            fetchData(currentSortType, binding.recyclerView, binding.recyclerViewReverse)
         }
-        binding!!.filter.points.setOnClickListener { UpToDown(binding!!.filter.a1, DATA.POINTS) }
-        binding!!.filter.AVPoints.setOnClickListener {
-            UpToDown(binding!!.filter.a2, DATA.AVAILABLE_POINTS)
-        }
-        binding!!.filter.add.setOnClickListener { UpToDown(binding!!.filter.a3, DATA.TIMESTAMP) }
-        binding!!.filter.start.setOnClickListener { UpToDown(binding!!.filter.a4, DATA.START) }
-        binding!!.filter.end.setOnClickListener { UpToDown(binding!!.filter.a5, DATA.END) }
+        binding.filter.points.setOnClickListener { toggleSortDirection(binding.filter.a1, DATA.POINTS) }
+        binding.filter.AVPoints.setOnClickListener { toggleSortDirection(binding.filter.a2, DATA.AVAILABLE_POINTS) }
+        binding.filter.add.setOnClickListener { toggleSortDirection(binding.filter.a3, DATA.TIMESTAMP) }
+        binding.filter.start.setOnClickListener { toggleSortDirection(binding.filter.a4, DATA.START) }
+        binding.filter.end.setOnClickListener { toggleSortDirection(binding.filter.a5, DATA.END) }
     }
 
-    private fun UpToDown(item: ImageView, Type: String?) {
-        type = Type
-        if (item.tag != null) {
-            if (item.tag == "up") {
-                getData(type, binding!!.recyclerView, binding!!.recyclerViewReverse)
-                item.tag = "down"
-                item.setImageResource(R.drawable.ic_down)
-            } else if (item.tag == "down") {
-                getData(type, binding!!.recyclerViewReverse, binding!!.recyclerView)
-                item.tag = "up"
-                item.setImageResource(R.drawable.ic_up)
-            }
+    private fun toggleSortDirection(imageView: ImageView, targetSortType: String) {
+        currentSortType = targetSortType
+        if (imageView.tag == "up") {
+            fetchData(currentSortType, binding.recyclerView, binding.recyclerViewReverse)
+            imageView.tag = "down"
+            imageView.setImageResource(R.drawable.ic_down)
         } else {
-            getData(type, binding!!.recyclerView, binding!!.recyclerViewReverse)
-            item.tag = "down"
-            item.setImageResource(R.drawable.ic_down)
+            fetchData(currentSortType, binding.recyclerViewReverse, binding.recyclerView)
+            imageView.tag = "up"
+            imageView.setImageResource(R.drawable.ic_up)
         }
     }
 
-    private fun getData(orderBy: String?, recyclerView: RecyclerView, recyclerView2: RecyclerView) {
-        val reference: Query = FirebaseDatabase.getInstance().getReference(DATA.TASKS)
-        reference.orderByChild(orderBy!!).addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                list!!.clear()
-                var i = 0
-                for (snapshot in dataSnapshot.children) {
-                    val item = snapshot.getValue(Task::class.java)!!
-                    if (item.category == id) if (item.publisher == DATA.FirebaseUserUid) {
-                        list!!.add(item)
-                        i++
-                    }
-                }
-                binding!!.toolbar.number.text = MessageFormat.format("( {0} )", i)
-                recyclerView2.visibility = View.GONE
-                binding!!.bar.visibility = View.GONE
-                if (list!!.isNotEmpty()) {
-                    recyclerView.visibility = View.VISIBLE
-                    binding!!.emptyText.visibility = View.GONE
-                } else {
-                    recyclerView.visibility = View.GONE
-                    binding!!.emptyText.visibility = View.VISIBLE
-                }
-                adapter!!.notifyDataSetChanged()
-            }
-
-            override fun onCancelled(databaseError: DatabaseError) {}
-        })
-    }
-
-    private val points: Unit
-        get() {
-            val ref = FirebaseDatabase.getInstance().getReference(DATA.TASKS)
-            ref.addValueEventListener(object : ValueEventListener {
+    private fun fetchData(orderBy: String, activeRecyclerView: RecyclerView, inactiveRecyclerView: RecyclerView) {
+        val uid = DATA.FirebaseUserUid
+        FirebaseDatabase.getInstance().getReference(DATA.TASKS)
+            .orderByChild(orderBy)
+            .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    var i = 0
-                    var a = 0
+                    val newList = ArrayList<Task?>()
                     for (snapshot in dataSnapshot.children) {
-                        val item = snapshot.getValue(Task::class.java)!!
-                        if (item.category == id) {
-                            i = i + item.points
-                            a = a + item.aVPoints
+                        val item = snapshot.getValue(Task::class.java) ?: continue
+                        if (item.category == id && item.publisher == uid) {
+                            newList.add(item)
                         }
                     }
-                    binding!!.allPoints.text = MessageFormat.format("{0}{1}", DATA.EMPTY, i)
-                    binding!!.av.text = MessageFormat.format("{0}{1}", DATA.EMPTY, a)
-                    binding!!.level.text =
-                        MessageFormat.format("{0}{1}", DATA.EMPTY, VOID.levelPoint(a, 10))
+
+                    val oldSize = list.size
+                    val newSize = newList.size
+
+                    if (list != newList) {
+                        list.clear()
+                        list.addAll(newList)
+                        adapter?.let { adp ->
+                            adp.notifyItemRangeRemoved(0, oldSize)
+                            adp.notifyItemRangeInserted(0, newSize)
+                        }
+                    }
+
+                    _binding?.let { b ->
+                        b.toolbar.number.text = MessageFormat.format("( {0} )", list.size)
+                        inactiveRecyclerView.visibility = View.GONE
+                        b.bar.visibility = View.GONE
+                        if (list.isNotEmpty()) {
+                            activeRecyclerView.visibility = View.VISIBLE
+                            b.emptyText.visibility = View.GONE
+                        } else {
+                            activeRecyclerView.visibility = View.GONE
+                            b.emptyText.visibility = View.VISIBLE
+                        }
+                    }
                 }
 
                 override fun onCancelled(databaseError: DatabaseError) {}
             })
-        }
+    }
 
-    override fun onBackPressed() {
+    private fun loadPointsSummary() {
+        FirebaseDatabase.getInstance().getReference(DATA.TASKS)
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    var i = 0
+                    var a = 0
+                    for (snapshot in dataSnapshot.children) {
+                        val item = snapshot.getValue(Task::class.java) ?: continue
+                        if (item.category == id) {
+                            i += item.points
+                            a += item.aVPoints
+                        }
+                    }
+                    _binding?.let { b ->
+                        b.allPoints.text = MessageFormat.format("{0}{1}", DATA.EMPTY, i)
+                        b.av.text = MessageFormat.format("{0}{1}", DATA.EMPTY, a)
+                        b.level.text = MessageFormat.format("{0}{1}", DATA.EMPTY, VOID.levelPoint(a, 10))
+                    }
+                }
+
+                override fun onCancelled(databaseError: DatabaseError) {}
+            })
+    }
+
+    private fun handleBackPressed() {
         if (searchStatus) {
-            binding!!.toolbar.toolbar.visibility = View.VISIBLE
-            binding!!.toolbar.toolbarSearch.visibility = View.GONE
+            binding.toolbar.toolbar.visibility = View.VISIBLE
+            binding.toolbar.toolbarSearch.visibility = View.GONE
             searchStatus = false
-            binding!!.toolbar.textSearch.setText(DATA.EMPTY)
-        } else super.onBackPressed()
+            binding.toolbar.textSearch.setText(DATA.EMPTY)
+        } else {
+            onBackPressedDispatcher.onBackPressed()
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        getData(DATA.TIMESTAMP, binding!!.recyclerView, binding!!.recyclerViewReverse)
-        points
+        fetchData(DATA.TIMESTAMP, binding.recyclerView, binding.recyclerViewReverse)
+        loadPointsSummary()
     }
 
-    override fun onRestart() {
-        super.onRestart()
-        getData(DATA.TIMESTAMP, binding!!.recyclerView, binding!!.recyclerViewReverse)
-        points
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
     }
 
     companion object {

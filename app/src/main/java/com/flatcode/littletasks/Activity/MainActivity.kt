@@ -2,12 +2,12 @@ package com.flatcode.littletasks.Activity
 
 import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceFragmentCompat
@@ -26,132 +26,126 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.nafis.bottomnavigation.NafisBottomNavigation
-import java.util.Objects
 
 class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
 
-    private var binding: ActivityMainBinding? = null
-    var activity: Activity? = null
-    var context: Context = also { activity = it }
-    var bottomNavigation: NafisBottomNavigation? = null
+    private var _binding: ActivityMainBinding? = null
+    private val binding get() = _binding!!
+
+    private var activity: Activity? = null
+    private val context: Context = also { activity = it }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         PreferenceManager.getDefaultSharedPreferences(baseContext)
             .registerOnSharedPreferenceChangeListener(this)
         THEME.setThemeOfApp(context)
         super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        val view = binding!!.root
-        setContentView(view)
+        _binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        // Color Mode ----------------------------- Start
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                VOID.closeApp(this@MainActivity)
+            }
+        })
+
         supportFragmentManager
             .beginTransaction()
             .replace(R.id.settings, SettingFragment())
             .commit()
-        // Color Mode -------------------------------- End
 
-        bottomNavigation = binding!!.bottomNavigation
-        bottomNavigation!!.add(NafisBottomNavigation.Model(1, R.drawable.ic_settings))
-        bottomNavigation!!.add(NafisBottomNavigation.Model(2, R.drawable.ic_home))
-        bottomNavigation!!.add(NafisBottomNavigation.Model(3, R.drawable.ic_group))
-        bottomNavigation!!.setOnShowListener { item: NafisBottomNavigation.Model ->
-            var fragment: Fragment? = null
-            when (item.id) {
-                1 -> {
-                    binding!!.toolbar.card.visibility = View.GONE
-                    fragment = SettingsFragment()
+        binding.bottomNavigation.apply {
+            add(NafisBottomNavigation.Model(1, R.drawable.ic_settings))
+            add(NafisBottomNavigation.Model(2, R.drawable.ic_home))
+            add(NafisBottomNavigation.Model(3, R.drawable.ic_group))
+
+            setOnShowListener { item ->
+                val fragment = when (item.id) {
+                    1 -> {
+                        _binding?.toolbar?.card?.visibility = View.GONE
+                        SettingsFragment()
+                    }
+                    2 -> {
+                        _binding?.toolbar?.card?.visibility = View.VISIBLE
+                        HomeFragment()
+                    }
+                    3 -> {
+                        _binding?.toolbar?.card?.visibility = View.GONE
+                        CategoriesFragment()
+                    }
+                    else -> null
                 }
+                loadFragment(fragment)
+            }
 
-                2 -> {
-                    binding!!.toolbar.card.visibility = View.VISIBLE
-                    fragment = HomeFragment()
+            setOnClickMenuListener { item ->
+                val textRes = when (item.id) {
+                    1 -> R.string.settings
+                    2 -> R.string.home
+                    3 -> R.string.categories
+                    else -> return@setOnClickMenuListener
                 }
+                Toast.makeText(applicationContext, textRes, Toast.LENGTH_SHORT).show()
+            }
 
-                3 -> {
-                    binding!!.toolbar.card.visibility = View.GONE
-                    fragment = CategoriesFragment()
+            setOnReselectListener { item ->
+                val textRes = when (item.id) {
+                    1 -> R.string.settings
+                    2 -> R.string.home
+                    3 -> R.string.categories
+                    else -> return@setOnReselectListener
                 }
+                Toast.makeText(applicationContext, textRes, Toast.LENGTH_SHORT).show()
             }
-            loadFragment(fragment)
-        }
-        bottomNavigation!!.show(2, true)
-        bottomNavigation!!.setOnClickMenuListener { item: NafisBottomNavigation.Model ->
-            when (item.id) {
-                1 -> Toast.makeText(
-                    applicationContext, R.string.settings, Toast.LENGTH_SHORT
-                ).show()
 
-                2 -> Toast.makeText(applicationContext, R.string.home, Toast.LENGTH_SHORT).show()
-                3 -> Toast.makeText(applicationContext, R.string.categories, Toast.LENGTH_SHORT)
-                    .show()
-            }
+            show(2, true)
         }
-        bottomNavigation!!.setOnReselectListener { item: NafisBottomNavigation.Model ->
-            when (item.id) {
-                1 -> Toast.makeText(
-                    applicationContext, R.string.settings, Toast.LENGTH_SHORT
-                ).show()
 
-                2 -> Toast.makeText(applicationContext, R.string.home, Toast.LENGTH_SHORT).show()
-                3 -> Toast.makeText(applicationContext, R.string.categories, Toast.LENGTH_SHORT)
-                    .show()
-            }
+        binding.toolbar.image.setOnClickListener {
+            VOID.IntentExtra(context, CLASS.PROFILE, DATA.PROFILE_ID, DATA.FirebaseUserUid)
         }
-        binding!!.toolbar.image.setOnClickListener { v: View? ->
-            VOID.IntentExtra(
-                context,
-                CLASS.PROFILE,
-                DATA.PROFILE_ID,
-                DATA.FirebaseUserUid
-            )
-        }
+
         loadUserInfo()
     }
 
     private fun loadFragment(fragment: Fragment?) {
-        supportFragmentManager.beginTransaction().replace(R.id.fragmentContainer, fragment!!)
-            .commit()
+        fragment?.let {
+            supportFragmentManager.beginTransaction().replace(R.id.fragmentContainer, it).commit()
+        }
     }
 
     private fun loadUserInfo() {
-        val reference = FirebaseDatabase.getInstance().getReference(DATA.USERS)
-        reference.child(Objects.requireNonNull(DATA.FirebaseUserUid))
+        val uid = DATA.FirebaseUserUid
+        FirebaseDatabase.getInstance().getReference(DATA.USERS).child(uid)
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val profileImage = DATA.EMPTY + snapshot.child(DATA.PROFILE_IMAGE).value
-                    VOID.GlideImage(true, context, profileImage, binding!!.toolbar.image)
+                    _binding?.let { b ->
+                        VOID.GlideImage(true, context, profileImage, b.toolbar.image)
+                    }
                 }
 
                 override fun onCancelled(error: DatabaseError) {}
             })
     }
 
-    override fun onBackPressed() {
-        VOID.closeApp(this)
-    }
-
-    // Color Mode ----------------------------- Start
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if (key == DATA.COLOR_OPTION) {
             recreate()
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        PreferenceManager.getDefaultSharedPreferences(baseContext)
+            .unregisterOnSharedPreferenceChangeListener(this)
+        activity = null
+        _binding = null
+    }
+
     class SettingFragment : PreferenceFragmentCompat() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey)
         }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == SETTINGS_CODE) {
-            recreate()
-        }
-    } // Color Mode -------------------------------- End
-
-    companion object {
-        private const val SETTINGS_CODE = 234
     }
 }

@@ -1,11 +1,10 @@
 package com.flatcode.littletasks.Activity
 
-import android.app.ProgressDialog
 import android.content.Context
 import android.os.Bundle
 import android.text.TextUtils
-import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.Model.TaskItem
 import com.flatcode.littletasks.R
@@ -20,76 +19,101 @@ import java.text.MessageFormat
 
 class ObjectEditActivity : AppCompatActivity() {
 
-    private var binding: ActivityObjectEditBinding? = null
-    var context: Context = this@ObjectEditActivity
-    var id: String? = null
-    private var dialog: ProgressDialog? = null
+    private var _binding: ActivityObjectEditBinding? = null
+    private val binding get() = _binding!!
+
+    private val context: Context = this@ObjectEditActivity
+    private var id: String? = null
+    private var progressDialog: AlertDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         THEME.setThemeOfApp(context)
         super.onCreate(savedInstanceState)
-        binding = ActivityObjectEditBinding.inflate(layoutInflater)
-        val view = binding!!.root
-        setContentView(view)
+        _binding = ActivityObjectEditBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         id = intent.getStringExtra(DATA.ID)
 
-        dialog = ProgressDialog(context)
-        dialog!!.setTitle("Please wait")
-        dialog!!.setCanceledOnTouchOutside(false)
-
         loadInfo()
-        binding!!.toolbar.nameSpace.setText(R.string.edit_object)
-        binding!!.toolbar.back.setOnClickListener { onBackPressed() }
-        binding!!.name.setText(R.string.object_name)
-        binding!!.go.setOnClickListener { validateData() }
+        binding.toolbar.nameSpace.setText(R.string.edit_object)
+        binding.toolbar.back.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
+        binding.name.setText(R.string.object_name)
+        binding.go.setOnClickListener { validateData() }
     }
 
-    private var name = DATA.EMPTY
-    private var points = DATA.EMPTY
+    private fun showLoading() {
+        if (progressDialog == null) {
+            val builder = AlertDialog.Builder(context)
+            builder.setView(R.layout.layout_loading_dialog)
+            builder.setCancelable(false)
+            progressDialog = builder.create()
+        }
+        progressDialog?.show()
+    }
+
+    private fun dismissLoading() {
+        progressDialog?.dismiss()
+    }
+
     private fun validateData() {
-        name = binding!!.nameEt.text.toString().trim { it <= ' ' }
-        points = binding!!.PointsEt.text.toString().trim { it <= ' ' }
+        val name = binding.nameEt.text.toString().trim()
+        val points = binding.PointsEt.text.toString().trim()
+
         if (TextUtils.isEmpty(name)) {
             Toast.makeText(context, "Enter name...", Toast.LENGTH_SHORT).show()
         } else if (TextUtils.isEmpty(points)) {
             Toast.makeText(context, "Enter points...", Toast.LENGTH_SHORT).show()
         } else {
-            Update()
+            updateObject(name, points)
         }
     }
 
-    private fun Update() {
-        dialog!!.setMessage("Updating Object...")
-        dialog!!.show()
-        val point = points.toInt()
-        val hashMap = HashMap<String?, Any>()
-        hashMap[DATA.NAME] = DATA.EMPTY + name
-        hashMap[DATA.POINTS] = point
-        val reference = FirebaseDatabase.getInstance().getReference(DATA.OBJECTS)
-        reference.child(id!!).updateChildren(hashMap).addOnSuccessListener {
-            dialog!!.dismiss()
-            Toast.makeText(context, "Object updated...", Toast.LENGTH_SHORT).show()
-        }.addOnFailureListener { e: Exception ->
-            dialog!!.dismiss()
-            Toast.makeText(context, "Failed to update db duo to " + e.message, Toast.LENGTH_SHORT)
-                .show()
+    private fun updateObject(name: String, points: String) {
+        val objectId = id ?: return
+        showLoading()
+
+        val point = points.toIntOrNull() ?: 0
+        val hashMap = HashMap<String, Any>().apply {
+            put(DATA.NAME, name)
+            put(DATA.POINTS, point)
         }
+
+        FirebaseDatabase.getInstance().getReference(DATA.OBJECTS)
+            .child(objectId)
+            .updateChildren(hashMap)
+            .addOnSuccessListener {
+                dismissLoading()
+                Toast.makeText(context, "Object updated...", Toast.LENGTH_SHORT).show()
+            }.addOnFailureListener { e ->
+                dismissLoading()
+                Toast.makeText(
+                    context,
+                    "Failed to update db due to: ${e.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
     }
 
     private fun loadInfo() {
-        val reference = FirebaseDatabase.getInstance().getReference(DATA.OBJECTS)
-        reference.child(id!!).addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val item = snapshot.getValue(TaskItem::class.java)!!
-                val name = item.name
-                val points = item.points
+        val objectId = id ?: return
+        FirebaseDatabase.getInstance().getReference(DATA.OBJECTS).child(objectId)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val item = snapshot.getValue(TaskItem::class.java) ?: return
 
-                binding!!.nameEt.setText(name)
-                binding!!.PointsEt.setText(MessageFormat.format("{0}{1}", DATA.EMPTY, points))
-            }
+                    _binding?.let { b ->
+                        b.nameEt.setText(item.name)
+                        b.PointsEt.setText(MessageFormat.format("{0}{1}", DATA.EMPTY, item.points))
+                    }
+                }
 
-            override fun onCancelled(error: DatabaseError) {}
-        })
+                override fun onCancelled(error: DatabaseError) {}
+            })
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        dismissLoading()
+        _binding = null
     }
 }

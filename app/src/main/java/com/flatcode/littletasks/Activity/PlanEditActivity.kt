@@ -1,14 +1,15 @@
 package com.flatcode.littletasks.Activity
 
 import android.Manifest
-import android.app.Activity
-import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.text.TextUtils
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContract
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.Model.Plan
 import com.flatcode.littletasks.R
@@ -21,42 +22,96 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.UploadTask
 import com.theartofdev.edmodo.cropper.CropImage
 
 class PlanEditActivity : AppCompatActivity() {
 
-    private var binding: ActivityPlanAddBinding? = null
-    var activity: Activity? = null
-    var context: Context = also { activity = it }
-    var id: String? = null
+    private var _binding: ActivityPlanAddBinding? = null
+    private val binding get() = _binding!!
+
+    private val context: Context = this@PlanEditActivity
+    private var id: String? = null
     private var imageUri: Uri? = null
-    private var dialog: ProgressDialog? = null
+    private var progressDialog: AlertDialog? = null
+    private var name = DATA.EMPTY
+
+    private val cropImageLauncher = registerForActivityResult(
+        object : ActivityResultContract<Intent?, CropImage.ActivityResult?>() {
+            override fun createIntent(context: Context, input: Intent?): Intent {
+                return input ?: CropImage.activity().getIntent(context)
+            }
+            override fun parseResult(resultCode: Int, intent: Intent?): CropImage.ActivityResult? {
+                return if (intent != null) CropImage.getActivityResult(intent) else null
+            }
+        }
+    ) { result ->
+        if (result != null) {
+            if (result.error == null) {
+                imageUri = result.uri
+                binding.image.setImageURI(imageUri)
+            } else {
+                Toast.makeText(this, "Error! ${result.error}", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private val pickImageLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val uri = CropImage.getPickImageResultUri(context, result.data)
+            if (CropImage.isReadExternalStoragePermissionsRequired(context, uri)) {
+                imageUri = uri
+                requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+            } else {
+                cropImageLauncher.launch(CropImage.activity(uri).getIntent(this))
+            }
+        }
+    }
+
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            cropImageLauncher.launch(CropImage.activity(imageUri).getIntent(this))
+        } else {
+            Toast.makeText(context, "Permission denied...", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         THEME.setThemeOfApp(context)
         super.onCreate(savedInstanceState)
-        binding = ActivityPlanAddBinding.inflate(layoutInflater)
-        val view = binding!!.root
-        setContentView(view)
+        _binding = ActivityPlanAddBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        val intent = intent
         id = intent.getStringExtra(DATA.ID)
 
-        dialog = ProgressDialog(context)
-        dialog!!.setTitle("Please wait")
-        dialog!!.setCanceledOnTouchOutside(false)
-
         loadInfo()
-        binding!!.toolbar.nameSpace.setText(R.string.edit_plan)
-        binding!!.toolbar.back.setOnClickListener { onBackPressed() }
-        binding!!.editImage.setOnClickListener { VOID.CropImageSquare(activity) }
-        binding!!.toolbar.ok.setOnClickListener { validateData() }
+        binding.toolbar.nameSpace.setText(R.string.edit_plan)
+        binding.toolbar.back.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
+        binding.editImage.setOnClickListener {
+            pickImageLauncher.launch(CropImage.getPickImageChooserIntent(this))
+        }
+        binding.toolbar.ok.setOnClickListener { validateData() }
     }
 
-    private var name = DATA.EMPTY
+    private fun showLoading() {
+        if (progressDialog == null) {
+            progressDialog = AlertDialog.Builder(context)
+                .setView(R.layout.layout_loading_dialog)
+                .setCancelable(false)
+                .create()
+        }
+        progressDialog?.show()
+    }
+
+    private fun dismissLoading() {
+        progressDialog?.dismiss()
+    }
+
     private fun validateData() {
-        name = binding!!.planEt.text.toString().trim { it <= ' ' }
+        name = binding.planEt.text.toString().trim()
         if (TextUtils.isEmpty(name)) {
             Toast.makeText(context, "Enter name...", Toast.LENGTH_SHORT).show()
         } else {
@@ -69,80 +124,69 @@ class PlanEditActivity : AppCompatActivity() {
     }
 
     private fun uploadImage() {
-        dialog!!.setMessage("Updating Plan...")
-        dialog!!.show()
+        showLoading()
         val filePathAndName = "Images/Plans/$id"
         val reference = FirebaseStorage.getInstance()
             .getReference(filePathAndName + DATA.DOT + VOID.getFileExtension(imageUri, context))
+
         reference.putFile(imageUri!!)
-            .addOnSuccessListener { taskSnapshot: UploadTask.TaskSnapshot ->
-                val uriTask = taskSnapshot.storage.downloadUrl
-                while (!uriTask.isSuccessful);
-                val uploadedImageUrl = DATA.EMPTY + uriTask.result
-                update(uploadedImageUrl)
-            }.addOnFailureListener { e: Exception ->
-                dialog!!.dismiss()
-                Toast.makeText(
-                    context, "Failed to upload image due to " + e.message, Toast.LENGTH_SHORT
-                ).show()
+            .addOnSuccessListener { taskSnapshot ->
+                taskSnapshot.storage.downloadUrl.addOnSuccessListener { uri ->
+                    update(uri.toString())
+                }.addOnFailureListener { e ->
+                    dismissLoading()
+                    Toast.makeText(context, "Failed to get download URL: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }.addOnFailureListener { e ->
+                dismissLoading()
+                Toast.makeText(context, "Failed to upload image due to ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 
     private fun update(imageUrl: String?) {
-        dialog!!.setMessage("Updating Plan image...")
-        dialog!!.show()
-        val hashMap = HashMap<String?, Any>()
-        hashMap[DATA.NAME] = DATA.EMPTY + name
-        if (imageUri != null) {
-            hashMap[DATA.IMAGE] = DATA.EMPTY + imageUrl
+        val planId = id ?: return
+        showLoading()
+
+        val hashMap = HashMap<String, Any>().apply {
+            put(DATA.NAME, name)
+            if (imageUri != null && imageUrl != null) {
+                put(DATA.IMAGE, imageUrl)
+            }
         }
-        val reference = FirebaseDatabase.getInstance().getReference(DATA.PLANS)
-        reference.child(id!!).updateChildren(hashMap).addOnSuccessListener { unused: Void? ->
-            dialog!!.dismiss()
-            Toast.makeText(context, "Plan updated...", Toast.LENGTH_SHORT).show()
-        }.addOnFailureListener { e: Exception ->
-            dialog!!.dismiss()
-            Toast.makeText(context, "Failed to update db duo to " + e.message, Toast.LENGTH_SHORT)
-                .show()
-        }
+
+        FirebaseDatabase.getInstance().getReference(DATA.PLANS)
+            .child(planId)
+            .updateChildren(hashMap)
+            .addOnSuccessListener {
+                dismissLoading()
+                Toast.makeText(context, "Plan updated...", Toast.LENGTH_SHORT).show()
+                finish()
+            }.addOnFailureListener { e ->
+                dismissLoading()
+                Toast.makeText(context, "Failed to update db due to ${e.message}", Toast.LENGTH_SHORT).show()
+            }
     }
 
     private fun loadInfo() {
-        val reference = FirebaseDatabase.getInstance().getReference(DATA.PLANS)
-        reference.child(id!!).addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val item = snapshot.getValue(Plan::class.java)!!
-                val name = item.name
-                val image = item.image
+        val planId = id ?: return
+        FirebaseDatabase.getInstance().getReference(DATA.PLANS).child(planId)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val item = snapshot.getValue(Plan::class.java) ?: return
 
-                VOID.GlideImage(true, context, image, binding!!.image)
-                binding!!.planEt.setText(name)
-            }
+                    _binding?.let { b ->
+                        VOID.GlideImage(true, context, item.image, b.image)
+                        b.planEt.setText(item.name)
+                    }
+                }
 
-            override fun onCancelled(error: DatabaseError) {}
-        })
+                override fun onCancelled(error: DatabaseError) {}
+            })
     }
 
-    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == CropImage.PICK_IMAGE_CHOOSER_REQUEST_CODE && resultCode == RESULT_OK) {
-            val uri = CropImage.getPickImageResultUri(context, data)
-            if (CropImage.isReadExternalStoragePermissionsRequired(context, uri)) {
-                imageUri = uri
-                requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 0)
-            } else {
-                VOID.CropImageSquare(activity)
-            }
-        }
-        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
-            val result = CropImage.getActivityResult(data)
-            if (resultCode == RESULT_OK) {
-                imageUri = result.uri
-                binding!!.image.setImageURI(imageUri)
-            } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
-                val error = result.error
-                Toast.makeText(this, "Error! $error", Toast.LENGTH_SHORT).show()
-            }
-        }
+    override fun onDestroy() {
+        super.onDestroy()
+        dismissLoading()
+        _binding = null
     }
 }

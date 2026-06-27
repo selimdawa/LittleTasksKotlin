@@ -1,17 +1,18 @@
 package com.flatcode.littletasks.Activity
 
 import android.Manifest
-import android.app.Activity
-import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.text.TextUtils
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContract
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.flatcode.littletasks.Model.TaskItem
 import com.flatcode.littletasks.Model.Plan
+import com.flatcode.littletasks.Model.TaskItem
 import com.flatcode.littletasks.R
 import com.flatcode.littletasks.Unit.DATA
 import com.flatcode.littletasks.Unit.THEME
@@ -23,44 +24,98 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.UploadTask
 import com.theartofdev.edmodo.cropper.CropImage
 
 class CategoryAddActivity : AppCompatActivity() {
 
-    private var binding: ActivityCategoryAddBinding? = null
-    var activity: Activity? = null
-    var context: Context = also { activity = it }
+    private var _binding: ActivityCategoryAddBinding? = null
+    private val binding get() = _binding!!
+
+    private val context: Context = this@CategoryAddActivity
     private var imageUri: Uri? = null
-    private var dialog: ProgressDialog? = null
-    var planId: String? = null
+    private var progressDialog: AlertDialog? = null
+    private var planId: String? = null
+    private var title = DATA.EMPTY
+
+    private val cropImageLauncher = registerForActivityResult(
+        object : ActivityResultContract<Intent?, CropImage.ActivityResult?>() {
+            override fun createIntent(context: Context, input: Intent?): Intent {
+                return input ?: CropImage.activity().getIntent(context)
+            }
+
+            override fun parseResult(resultCode: Int, intent: Intent?): CropImage.ActivityResult? {
+                return if (intent != null) CropImage.getActivityResult(intent) else null
+            }
+        }
+    ) { result ->
+        if (result != null) {
+            if (result.error == null) {
+                imageUri = result.uri
+                binding.image.setImageURI(imageUri)
+            } else {
+                Toast.makeText(this, "Error! ${result.error}", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private val pickImageLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val uri = CropImage.getPickImageResultUri(context, result.data)
+            if (CropImage.isReadExternalStoragePermissionsRequired(context, uri)) {
+                imageUri = uri
+                requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+            } else {
+                cropImageLauncher.launch(CropImage.activity(uri).getIntent(this))
+            }
+        }
+    }
+
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            cropImageLauncher.launch(CropImage.activity(imageUri).getIntent(this))
+        } else {
+            Toast.makeText(context, "Permission denied...", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         THEME.setThemeOfApp(context)
         super.onCreate(savedInstanceState)
-        binding = ActivityCategoryAddBinding.inflate(layoutInflater)
-        val view = binding!!.root
-        setContentView(view)
+        _binding = ActivityCategoryAddBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         planId = intent.getStringExtra(DATA.ID)
 
-        dialog = ProgressDialog(context)
-        dialog!!.setTitle("Please wait...")
-        dialog!!.setCanceledOnTouchOutside(false)
-
-        binding!!.toolbar.nameSpace.setText(R.string.add_new_category)
-        binding!!.toolbar.back.setOnClickListener { onBackPressed() }
-        binding!!.editImage.setOnClickListener { VOID.CropImageSquare(activity) }
-        binding!!.toolbar.ok.setOnClickListener { validateData() }
-        PlanName()
+        binding.toolbar.nameSpace.setText(R.string.add_new_category)
+        binding.toolbar.back.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
+        binding.editImage.setOnClickListener {
+            pickImageLauncher.launch(CropImage.getPickImageChooserIntent(this))
+        }
+        binding.toolbar.ok.setOnClickListener { validateData() }
+        loadPlanName()
     }
 
-    private var title = DATA.EMPTY
-    private fun validateData() {
-        //get data
-        title = binding!!.categoryEt.text.toString().trim { it <= ' ' }
+    private fun showLoading() {
+        if (progressDialog == null) {
+            progressDialog = AlertDialog.Builder(context)
+                .setView(R.layout.layout_loading_dialog)
+                .setCancelable(false)
+                .create()
+        }
+        progressDialog?.show()
+    }
 
-        //validate data
+    private fun dismissLoading() {
+        progressDialog?.dismiss()
+    }
+
+    private fun validateData() {
+        title = binding.categoryEt.text.toString().trim()
+
         if (TextUtils.isEmpty(title)) {
             Toast.makeText(context, "Enter Title...", Toast.LENGTH_SHORT).show()
         } else if (imageUri == null) {
@@ -70,134 +125,129 @@ class CategoryAddActivity : AppCompatActivity() {
         }
     }
 
-    private fun PlanName() {
-        val reference = FirebaseDatabase.getInstance().getReference(DATA.PLANS).child(planId!!)
-        reference.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                val plan = dataSnapshot.getValue(Plan::class.java)!!
+    private fun loadPlanName() {
+        val pId = planId ?: return
+        FirebaseDatabase.getInstance().getReference(DATA.PLANS).child(pId)
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    val plan = dataSnapshot.getValue(Plan::class.java) ?: return
+                    val planName = DATA.EMPTY + plan.name
+                    _binding?.plan?.text = planName
+                }
 
-                val planName = DATA.EMPTY + plan.name
-                binding!!.plan.text = planName
-            }
-
-            override fun onCancelled(error: DatabaseError) {}
-        })
+                override fun onCancelled(error: DatabaseError) {}
+            })
     }
 
     private fun uploadToStorage() {
-        dialog!!.setMessage("Uploading Category...")
-        dialog!!.show()
+        showLoading()
         val ref = FirebaseDatabase.getInstance().getReference(DATA.CATEGORIES)
-        val id = ref.push().key
+        val id = ref.push().key ?: return
         val filePathAndName = "Images/Category/$id"
         val reference = FirebaseStorage.getInstance()
             .getReference(filePathAndName + DATA.DOT + VOID.getFileExtension(imageUri, context))
+
         reference.putFile(imageUri!!)
-            .addOnSuccessListener { taskSnapshot: UploadTask.TaskSnapshot ->
-                val uriTask = taskSnapshot.storage.downloadUrl
-                while (!uriTask.isSuccessful);
-                val uploadedImageUrl = DATA.EMPTY + uriTask.result
-                uploadInfoDB(uploadedImageUrl, id, ref)
-            }.addOnFailureListener { e: Exception ->
-                dialog!!.dismiss()
+            .addOnSuccessListener { taskSnapshot ->
+                taskSnapshot.storage.downloadUrl.addOnSuccessListener { uri ->
+                    uploadInfoDB(uri.toString(), id, ref)
+                }.addOnFailureListener { e ->
+                    dismissLoading()
+                    Toast.makeText(
+                        context,
+                        "Failed to get download URL: ${e.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }.addOnFailureListener { e ->
+                dismissLoading()
                 Toast.makeText(
-                    context, "Category upload failed due to " + e.message, Toast.LENGTH_SHORT
+                    context,
+                    "Category upload failed due to ${e.message}",
+                    Toast.LENGTH_SHORT
                 ).show()
             }
     }
 
-    private fun uploadInfoDB(uploadedImageUrl: String, id: String?, ref: DatabaseReference) {
-        dialog!!.setMessage("Uploading category info...")
-        dialog!!.show()
-        val hashMap = HashMap<String?, Any?>()
-        hashMap[DATA.PUBLISHER] = DATA.EMPTY + DATA.FirebaseUserUid
-        hashMap[DATA.TIMESTAMP] = System.currentTimeMillis()
-        hashMap[DATA.ID] = id
-        hashMap[DATA.NAME] = DATA.EMPTY + title
-        hashMap[DATA.PLAN] = DATA.EMPTY + planId
-        hashMap[DATA.IMAGE] = uploadedImageUrl
-        assert(id != null)
-        ref.child(id!!).setValue(hashMap).addOnSuccessListener {
-            dialog!!.dismiss()
+    private fun uploadInfoDB(uploadedImageUrl: String, id: String, ref: DatabaseReference) {
+        val hashMap = HashMap<String, Any?>().apply {
+            put(DATA.PUBLISHER, DATA.EMPTY + DATA.FirebaseUserUid)
+            put(DATA.TIMESTAMP, System.currentTimeMillis())
+            put(DATA.ID, id)
+            put(DATA.NAME, DATA.EMPTY + title)
+            put(DATA.PLAN, DATA.EMPTY + planId)
+            put(DATA.IMAGE, uploadedImageUrl)
+        }
+
+        ref.child(id).setValue(hashMap).addOnSuccessListener {
+            dismissLoading()
             getItems(id)
             Toast.makeText(context, "Successfully uploaded...", Toast.LENGTH_SHORT).show()
-        }.addOnFailureListener { e: Exception ->
-            dialog!!.dismiss()
+            finish()
+        }.addOnFailureListener { e ->
+            dismissLoading()
             Toast.makeText(
-                context, "Failure to upload to db due to : " + e.message, Toast.LENGTH_SHORT
+                context,
+                "Failure to upload to db due to : ${e.message}",
+                Toast.LENGTH_SHORT
             ).show()
         }
     }
 
-    private fun getItems(categoryId: String?) {
-        val ref = FirebaseDatabase.getInstance().getReference(DATA.OBJECTS)
-        ref.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                for (data in dataSnapshot.children) {
-                    val `object` = data.getValue(TaskItem::class.java)!!
-                    if (`object`.publisher == DATA.FirebaseUserUid) checkObject(
-                        `object`.id, categoryId, `object`.name, `object`.points
-                    )
+    private fun getItems(categoryId: String) {
+        val uid = DATA.FirebaseUserUid
+        FirebaseDatabase.getInstance().getReference(DATA.OBJECTS)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    for (data in dataSnapshot.children) {
+                        val taskItem = data.getValue(TaskItem::class.java) ?: continue
+                        if (taskItem.publisher == uid) {
+                            checkObject(taskItem.id, categoryId, taskItem.name, taskItem.points)
+                        }
+                    }
                 }
-            }
 
-            override fun onCancelled(databaseError: DatabaseError) {}
-        })
+                override fun onCancelled(databaseError: DatabaseError) {}
+            })
     }
 
-    private fun checkObject(objectId: String?, categoryId: String?, name: String?, points: Int) {
-        val reference = FirebaseDatabase.getInstance().getReference(DATA.PLANS)
-            .child(planId!!).child(DATA.AUTO_TASKS)
-        reference.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                if (dataSnapshot.child(objectId!!).exists()) {
-                    addAutoTasks(name, points, categoryId)
+    private fun checkObject(objectId: String?, categoryId: String, name: String?, points: Int) {
+        val pId = planId ?: return
+        val objId = objectId ?: return
+        FirebaseDatabase.getInstance().getReference(DATA.PLANS)
+            .child(pId).child(DATA.AUTO_TASKS)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    if (dataSnapshot.child(objId).exists()) {
+                        addAutoTasks(name, points, categoryId)
+                    }
                 }
-            }
 
-            override fun onCancelled(databaseError: DatabaseError) {}
-        })
+                override fun onCancelled(databaseError: DatabaseError) {}
+            })
     }
 
-    private fun addAutoTasks(name: String?, point: Int, categoryId: String?) {
-        dialog!!.setMessage("Uploading Objects...")
+    private fun addAutoTasks(name: String?, point: Int, categoryId: String) {
         val ref = FirebaseDatabase.getInstance().getReference(DATA.TASKS)
-        val id = ref.push().key
-        val hashMap = HashMap<String?, Any?>()
-        hashMap[DATA.PUBLISHER] = DATA.EMPTY + DATA.FirebaseUserUid
-        hashMap[DATA.ID] = id
-        hashMap[DATA.NAME] = DATA.EMPTY + name
-        hashMap[DATA.POINTS] = point
-        hashMap[DATA.AVAILABLE_POINTS] = DATA.ZERO
-        hashMap[DATA.RANK] = DATA.ZERO
-        hashMap[DATA.CATEGORY] = DATA.EMPTY + categoryId
-        hashMap[DATA.TIMESTAMP] = System.currentTimeMillis()
-        hashMap[DATA.START] = DATA.ZERO
-        hashMap[DATA.END] = DATA.ZERO
-        assert(id != null)
-        ref.child(id!!).setValue(hashMap)
+        val id = ref.push().key ?: return
+        val hashMap = HashMap<String, Any?>().apply {
+            put(DATA.PUBLISHER, DATA.EMPTY + DATA.FirebaseUserUid)
+            put(DATA.ID, id)
+            put(DATA.NAME, DATA.EMPTY + name)
+            put(DATA.POINTS, point)
+            put(DATA.AVAILABLE_POINTS, DATA.ZERO)
+            put(DATA.RANK, DATA.ZERO)
+            put(DATA.CATEGORY, categoryId)
+            put(DATA.TIMESTAMP, System.currentTimeMillis())
+            put(DATA.START, DATA.ZERO)
+            put(DATA.END, DATA.ZERO)
+        }
+        ref.child(id).setValue(hashMap)
     }
 
-    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == CropImage.PICK_IMAGE_CHOOSER_REQUEST_CODE && resultCode == RESULT_OK) {
-            val uri = CropImage.getPickImageResultUri(context, data)
-            if (CropImage.isReadExternalStoragePermissionsRequired(context, uri)) {
-                imageUri = uri
-                requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 0)
-            } else {
-                VOID.CropImageSquare(activity)
-            }
-        }
-        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
-            val result = CropImage.getActivityResult(data)
-            if (resultCode == RESULT_OK) {
-                imageUri = result.uri
-                binding!!.image.setImageURI(imageUri)
-            } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
-                val error = result.error
-                Toast.makeText(this, "Error! $error", Toast.LENGTH_SHORT).show()
-            }
-        }
+    override fun onDestroy() {
+        super.onDestroy()
+        dismissLoading()
+        _binding = null
     }
 }

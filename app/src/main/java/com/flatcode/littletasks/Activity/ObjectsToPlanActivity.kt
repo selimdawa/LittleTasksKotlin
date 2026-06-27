@@ -19,91 +19,105 @@ import com.google.firebase.database.ValueEventListener
 
 class ObjectsToPlanActivity : AppCompatActivity() {
 
-    private var binding: ActivityObjectsBinding? = null
+    private var _binding: ActivityObjectsBinding? = null
+    private val binding get() = _binding!!
+
     private val context: Context = this@ObjectsToPlanActivity
-    var list: ArrayList<TaskItem?>? = null
-    var adapter: ObjectOptionAdapter? = null
-    var id: String? = null
+    private val list = ArrayList<TaskItem?>()
+    private var adapter: ObjectOptionAdapter? = null
+    private var id: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         THEME.setThemeOfApp(context)
         super.onCreate(savedInstanceState)
-        binding = ActivityObjectsBinding.inflate(layoutInflater)
-        val view = binding!!.root
-        setContentView(view)
+        _binding = ActivityObjectsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         id = intent.getStringExtra(DATA.ID)
 
-        binding!!.toolbar.nameSpace.setText(R.string.add_object_to_plan)
-        binding!!.toolbar.back.setOnClickListener { onBackPressed() }
-        binding!!.toolbar.close.setOnClickListener { onBackPressed() }
-        binding!!.add.item.visibility = View.GONE
+        binding.toolbar.nameSpace.setText(R.string.add_object_to_plan)
+        binding.toolbar.back.setOnClickListener { handleBackPressed() }
+        binding.toolbar.close.setOnClickListener { handleBackPressed() }
+        binding.add.item.visibility = View.GONE
 
-        binding!!.toolbar.search.setOnClickListener {
-            binding!!.toolbar.toolbar.visibility = View.GONE
-            binding!!.toolbar.toolbarSearch.visibility = View.VISIBLE
+        binding.toolbar.search.setOnClickListener {
+            binding.toolbar.toolbar.visibility = View.GONE
+            binding.toolbar.toolbarSearch.visibility = View.VISIBLE
             DATA.searchStatus = true
         }
-        binding!!.toolbar.textSearch.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-                try {
-                    adapter!!.filter.filter(s)
-                } catch (e: Exception) {
-                    //None
-                }
-            }
 
-            override fun afterTextChanged(s: Editable) {}
+        binding.toolbar.textSearch.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                adapter?.filter?.filter(s)
+            }
+            override fun afterTextChanged(s: Editable?) {}
         })
 
-        //binding.recyclerView.setHasFixedSize(true);
-        list = ArrayList()
-        adapter = ObjectOptionAdapter(context, list!!, id)
-        binding!!.recyclerView.adapter = adapter
+        adapter = ObjectOptionAdapter(context, list, id)
+        binding.recyclerView.adapter = adapter
     }
 
-    private val items: Unit
-        get() {
-            val ref = FirebaseDatabase.getInstance().getReference(DATA.OBJECTS)
-            ref.addValueEventListener(object : ValueEventListener {
+    private fun loadItems() {
+        val uid = DATA.FirebaseUserUid
+        FirebaseDatabase.getInstance().getReference(DATA.OBJECTS)
+            .orderByChild("publisher")
+            .equalTo(uid)
+            .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    list!!.clear()
+                    val newList = ArrayList<TaskItem?>()
                     for (data in dataSnapshot.children) {
-                        val `object` = data.getValue(TaskItem::class.java)!!
-                        if (`object`.publisher == DATA.FirebaseUserUid) list!!.add(`object`)
+                        val taskItem = data.getValue(TaskItem::class.java) ?: continue
+                        newList.add(taskItem)
                     }
-                    binding!!.bar.visibility = View.GONE
-                    if (list!!.isNotEmpty()) {
-                        binding!!.recyclerView.visibility = View.VISIBLE
-                        binding!!.emptyText.visibility = View.GONE
-                    } else {
-                        binding!!.recyclerView.visibility = View.GONE
-                        binding!!.emptyText.visibility = View.VISIBLE
+
+                    val oldSize = list.size
+                    val newSize = newList.size
+
+                    if (list != newList) {
+                        list.clear()
+                        list.addAll(newList)
+
+                        adapter?.let { adp ->
+                            adp.notifyItemRangeRemoved(0, oldSize)
+                            adp.notifyItemRangeInserted(0, newSize)
+                        }
                     }
-                    adapter!!.notifyDataSetChanged()
+
+                    _binding?.let { b ->
+                        b.bar.visibility = View.GONE
+                        if (list.isNotEmpty()) {
+                            b.recyclerView.visibility = View.VISIBLE
+                            b.emptyText.visibility = View.GONE
+                        } else {
+                            b.recyclerView.visibility = View.GONE
+                            b.emptyText.visibility = View.VISIBLE
+                        }
+                    }
                 }
 
                 override fun onCancelled(databaseError: DatabaseError) {}
             })
-        }
+    }
 
-    override fun onBackPressed() {
+    private fun handleBackPressed() {
         if (DATA.searchStatus) {
-            binding!!.toolbar.toolbar.visibility = View.VISIBLE
-            binding!!.toolbar.toolbarSearch.visibility = View.GONE
+            binding.toolbar.toolbar.visibility = View.VISIBLE
+            binding.toolbar.toolbarSearch.visibility = View.GONE
             DATA.searchStatus = false
-            binding!!.toolbar.textSearch.setText(DATA.EMPTY)
-        } else super.onBackPressed()
+            binding.toolbar.textSearch.setText(DATA.EMPTY)
+        } else {
+            onBackPressedDispatcher.onBackPressed()
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        items
+        loadItems()
     }
 
-    override fun onRestart() {
-        super.onRestart()
-        items
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
     }
 }

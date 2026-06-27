@@ -40,11 +40,7 @@ class PlanAdapter(private val context: Context, var list: ArrayList<Plan?>, var 
             holder.binding.name.text = name
         }
 
-        if (isNew) {
-            holder.binding.more.visibility = View.GONE
-        } else {
-            holder.binding.more.visibility = View.VISIBLE
-        }
+        holder.binding.more.visibility = if (isNew) View.GONE else View.VISIBLE
 
         holder.binding.more.setOnClickListener { VOID.morePlan(context, item) }
         holder.binding.item.setOnClickListener {

@@ -61,4 +61,5 @@
     <string name="add_task">Add Task</string>
     <string name="add_plan">Add Plan</string>
     <string name="search">Search Here</string>
+    <string name="please_wait">Please wait…</string>
 </resources>

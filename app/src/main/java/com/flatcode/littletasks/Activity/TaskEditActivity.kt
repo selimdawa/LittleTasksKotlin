@@ -1,10 +1,10 @@
 package com.flatcode.littletasks.Activity
 
-import android.app.ProgressDialog
 import android.content.Context
 import android.os.Bundle
 import android.text.TextUtils
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.Model.Category
 import com.flatcode.littletasks.Model.Task
@@ -20,99 +20,123 @@ import com.google.firebase.database.ValueEventListener
 
 class TaskEditActivity : AppCompatActivity() {
 
-    private var binding: ActivityTaskAddBinding? = null
+    private var _binding: ActivityTaskAddBinding? = null
+    private val binding get() = _binding!!
+
     private val context: Context = this@TaskEditActivity
-    private var dialog: ProgressDialog? = null
+    private var progressDialog: AlertDialog? = null
     private var taskId: String? = null
     private var categoryId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         THEME.setThemeOfApp(context)
         super.onCreate(savedInstanceState)
-        binding = ActivityTaskAddBinding.inflate(layoutInflater)
-        val view = binding!!.root
-        setContentView(view)
+        _binding = ActivityTaskAddBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         taskId = intent.getStringExtra(DATA.TASK_ID)
         categoryId = intent.getStringExtra(DATA.CATEGORY_ID)
 
-        dialog = ProgressDialog(context)
-        dialog!!.setTitle("Please wait...")
-        dialog!!.setCanceledOnTouchOutside(false)
         loadBooksInfo()
         loadCategories()
 
-        binding!!.toolbar.nameSpace.setText(R.string.edit_task)
-        binding!!.toolbar.back.setOnClickListener { onBackPressed() }
-        binding!!.name.setText(R.string.task_name)
-        binding!!.toolbar.ok.setOnClickListener { validateData() }
+        binding.toolbar.nameSpace.setText(R.string.edit_task)
+        binding.toolbar.back.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
+        binding.name.setText(R.string.task_name)
+        binding.toolbar.ok.setOnClickListener { validateData() }
     }
 
-    private var name = DATA.EMPTY
-    private var points = DATA.ZERO.toString() + DATA.EMPTY
-    private fun validateData() {
-        //get data
-        name = binding!!.nameEt.text.toString().trim { it <= ' ' }
-        points = binding!!.PointsEt.text.toString().trim { it <= ' ' }
+    private fun showLoading() {
+        if (progressDialog == null) {
+            progressDialog = AlertDialog.Builder(context)
+                .setView(R.layout.layout_loading_dialog)
+                .setCancelable(false)
+                .create()
+        }
+        progressDialog?.show()
+    }
 
-        //validate data
+    private fun dismissLoading() {
+        progressDialog?.dismiss()
+    }
+
+    private fun validateData() {
+        val name = binding.nameEt.text.toString().trim()
+        val points = binding.PointsEt.text.toString().trim()
+
         if (TextUtils.isEmpty(name)) {
             Toast.makeText(context, "Enter Name...", Toast.LENGTH_SHORT).show()
         } else if (TextUtils.isEmpty(points)) {
             Toast.makeText(context, "Enter Points...", Toast.LENGTH_SHORT).show()
         } else {
-            uploadTaskInfoDB()
+            uploadTaskInfoDB(name, points)
         }
     }
 
-    private fun uploadTaskInfoDB() {
-        dialog!!.setMessage("Uploading task info...")
-        dialog!!.show()
-        val point = points.toInt()
-        val hashMap = HashMap<String?, Any>()
-        hashMap[DATA.NAME] = DATA.EMPTY + name
-        hashMap[DATA.POINTS] = point
-        val ref = FirebaseDatabase.getInstance().getReference(DATA.TASKS)
-        ref.child(taskId!!).updateChildren(hashMap).addOnSuccessListener {
-            dialog!!.dismiss()
-            Toast.makeText(context, "Task info updated...", Toast.LENGTH_SHORT).show()
-        }.addOnFailureListener { e: Exception ->
-            dialog!!.dismiss()
-            Toast.makeText(context, DATA.EMPTY + e.message, Toast.LENGTH_SHORT).show()
+    private fun uploadTaskInfoDB(name: String, points: String) {
+        val tId = taskId ?: return
+        showLoading()
+
+        val point = points.toIntOrNull() ?: 0
+        val hashMap = HashMap<String, Any>().apply {
+            put(DATA.NAME, name)
+            put(DATA.POINTS, point)
         }
+
+        FirebaseDatabase.getInstance().getReference(DATA.TASKS)
+            .child(tId)
+            .updateChildren(hashMap)
+            .addOnSuccessListener {
+                dismissLoading()
+                Toast.makeText(context, "Task info updated...", Toast.LENGTH_SHORT).show()
+                finish()
+            }.addOnFailureListener { e ->
+                dismissLoading()
+                Toast.makeText(context, DATA.EMPTY + e.message, Toast.LENGTH_SHORT).show()
+            }
     }
 
     private fun loadBooksInfo() {
-        val refBooks = FirebaseDatabase.getInstance().getReference(DATA.TASKS)
-        refBooks.child(taskId!!).addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val item = snapshot.getValue(Task::class.java)!!
-                val points = DATA.EMPTY + item.points
-                val title = DATA.EMPTY + item.name
+        val tId = taskId ?: return
+        FirebaseDatabase.getInstance().getReference(DATA.TASKS).child(tId)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val item = snapshot.getValue(Task::class.java) ?: return
+                    val points = DATA.EMPTY + item.points
+                    val title = DATA.EMPTY + item.name
 
-                binding!!.nameEt.setText(title)
-                binding!!.PointsEt.setText(points)
-            }
+                    _binding?.let { b ->
+                        b.nameEt.setText(title)
+                        b.PointsEt.setText(points)
+                    }
+                }
 
-            override fun onCancelled(error: DatabaseError) {}
-        })
+                override fun onCancelled(error: DatabaseError) {}
+            })
     }
 
     private fun loadCategories() {
-        val ref = FirebaseDatabase.getInstance().getReference(DATA.CATEGORIES).child(
-            categoryId!!
-        )
-        ref.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val item = snapshot.getValue(Category::class.java)!!
-                val categoryImage = DATA.EMPTY + item.image
-                val categoryName = DATA.EMPTY + item.name
+        val catId = categoryId ?: return
+        FirebaseDatabase.getInstance().getReference(DATA.CATEGORIES).child(catId)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val item = snapshot.getValue(Category::class.java) ?: return
+                    val categoryImage = DATA.EMPTY + item.image
+                    val categoryName = DATA.EMPTY + item.name
 
-                VOID.GlideImage(false, context, categoryImage, binding!!.image)
-                binding!!.category.text = categoryName
-            }
+                    _binding?.let { b ->
+                        VOID.GlideImage(false, context, categoryImage, b.image)
+                        b.category.text = categoryName
+                    }
+                }
 
-            override fun onCancelled(error: DatabaseError) {}
-        })
+                override fun onCancelled(error: DatabaseError) {}
+            })
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        dismissLoading()
+        _binding = null
     }
 }
