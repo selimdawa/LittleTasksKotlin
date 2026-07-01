@@ -6,15 +6,12 @@ import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
+import androidx.navigation.NavController
+import androidx.navigation.fragment.NavHostFragment
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
-import com.flatcode.littletasks.Fragment.CategoriesFragment
-import com.flatcode.littletasks.Fragment.HomeFragment
-import com.flatcode.littletasks.Fragment.SettingsFragment
 import com.flatcode.littletasks.R
 import com.flatcode.littletasks.Unit.CLASS
 import com.flatcode.littletasks.Unit.DATA
@@ -35,6 +32,8 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
     private var activity: Activity? = null
     private val context: Context = also { activity = it }
 
+    private lateinit var navController: NavController
+
     override fun onCreate(savedInstanceState: Bundle?) {
         PreferenceManager.getDefaultSharedPreferences(baseContext)
             .registerOnSharedPreferenceChangeListener(this)
@@ -49,59 +48,24 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
             }
         })
 
-        supportFragmentManager
-            .beginTransaction()
-            .replace(R.id.settings, SettingFragment())
-            .commit()
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.fragmentContainer) as NavHostFragment
+        navController = navHostFragment.navController
+
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            if (destination.id == R.id.homeFragment) {
+                binding.toolbar.card.visibility = View.VISIBLE
+            } else {
+                binding.toolbar.card.visibility = View.GONE
+            }
+        }
+
+        supportFragmentManager.beginTransaction().replace(R.id.settings, SettingFragment()).commit()
 
         binding.bottomNavigation.apply {
-            add(NafisBottomNavigation.Model(1, R.drawable.ic_settings))
-            add(NafisBottomNavigation.Model(2, R.drawable.ic_home))
-            add(NafisBottomNavigation.Model(3, R.drawable.ic_group))
-
-            setOnShowListener { item ->
-                val fragment = when (item.id) {
-                    1 -> {
-                        binding.toolbar.card.visibility = View.GONE
-                        SettingsFragment()
-                    }
-
-                    2 -> {
-                        binding.toolbar.card.visibility = View.VISIBLE
-                        HomeFragment()
-                    }
-
-                    3 -> {
-                        binding.toolbar.card.visibility = View.GONE
-                        CategoriesFragment()
-                    }
-
-                    else -> null
-                }
-                loadFragment(fragment)
-            }
-
-            setOnClickMenuListener { item ->
-                val textRes = when (item.id) {
-                    1 -> R.string.settings
-                    2 -> R.string.home
-                    3 -> R.string.categories
-                    else -> return@setOnClickMenuListener
-                }
-                Toast.makeText(applicationContext, textRes, Toast.LENGTH_SHORT).show()
-            }
-
-            setOnReselectListener { item ->
-                val textRes = when (item.id) {
-                    1 -> R.string.settings
-                    2 -> R.string.home
-                    3 -> R.string.categories
-                    else -> return@setOnReselectListener
-                }
-                Toast.makeText(applicationContext, textRes, Toast.LENGTH_SHORT).show()
-            }
-
-            show(2, true)
+            setupAppMenu()
+            setOnShowListener { item -> navController.navigate(item.id) }
+            show(R.id.homeFragment, true)
         }
 
         binding.toolbar.image.setOnClickListener {
@@ -109,12 +73,6 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
         }
 
         loadUserInfo()
-    }
-
-    private fun loadFragment(fragment: Fragment?) {
-        fragment?.let {
-            supportFragmentManager.beginTransaction().replace(R.id.fragmentContainer, it).commit()
-        }
     }
 
     private fun loadUserInfo() {
@@ -150,5 +108,12 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey)
         }
+    }
+
+    fun NafisBottomNavigation.setupAppMenu() {
+        add(NafisBottomNavigation.Model(R.id.settingsFragment, R.drawable.ic_settings))
+        add(NafisBottomNavigation.Model(R.id.homeFragment, R.drawable.ic_home))
+        add(NafisBottomNavigation.Model(R.id.categoriesFragment, R.drawable.ic_group))
+        show(R.id.homeFragment, true)
     }
 }
