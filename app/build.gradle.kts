@@ -49,7 +49,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures {
-        dataBinding = true
+        dataBinding = true                              //For Bottom Navigation
         viewBinding = true
     }
 }

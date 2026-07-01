@@ -62,17 +62,20 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
             setOnShowListener { item ->
                 val fragment = when (item.id) {
                     1 -> {
-                        _binding?.toolbar?.card?.visibility = View.GONE
+                        binding.toolbar.card.visibility = View.GONE
                         SettingsFragment()
                     }
+
                     2 -> {
-                        _binding?.toolbar?.card?.visibility = View.VISIBLE
+                        binding.toolbar.card.visibility = View.VISIBLE
                         HomeFragment()
                     }
+
                     3 -> {
-                        _binding?.toolbar?.card?.visibility = View.GONE
+                        binding.toolbar.card.visibility = View.GONE
                         CategoriesFragment()
                     }
+
                     else -> null
                 }
                 loadFragment(fragment)
