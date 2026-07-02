@@ -22,7 +22,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.nafis.bottomnavigation.NafisBottomNavigation
+import io.selimdawa.bubblebottom.BubbleBottomNavigation
 
 class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
 
@@ -110,10 +110,10 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
         }
     }
 
-    fun NafisBottomNavigation.setupAppMenu() {
-        add(NafisBottomNavigation.Model(R.id.settingsFragment, R.drawable.ic_settings))
-        add(NafisBottomNavigation.Model(R.id.homeFragment, R.drawable.ic_home))
-        add(NafisBottomNavigation.Model(R.id.categoriesFragment, R.drawable.ic_group))
+    fun BubbleBottomNavigation.setupAppMenu() {
+        add(BubbleBottomNavigation.Model(R.id.settingsFragment, R.drawable.ic_settings))
+        add(BubbleBottomNavigation.Model(R.id.homeFragment, R.drawable.ic_home))
+        add(BubbleBottomNavigation.Model(R.id.categoriesFragment, R.drawable.ic_group))
         show(R.id.homeFragment, true)
     }
 }

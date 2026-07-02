@@ -16,8 +16,6 @@
         <item name="colorOnError">@color/night_corner_2</item>
     </style>
 
-    <style name="Theme.MainApp" parent="Base.Theme.MainApp" />
-
     <!--style for ripple library-->
     <style name="RippleStyleWhite">
         <item name="mrl_rippleOverlay">true</item>

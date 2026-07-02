@@ -13,8 +13,8 @@ android {
         applicationId = "com.flatcode.littletasks"
         minSdk = 24
         targetSdk = 37
-        versionCode = 7
-        versionName = "1.35"
+        versionCode = 8
+        versionName = "1.38"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -49,7 +49,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures {
-        dataBinding = true                              //For Bottom Navigation
         viewBinding = true
     }
 }
@@ -82,6 +81,6 @@ dependencies {
     implementation(libs.firebase.analytics)
     //implementation(libs.firebase.crashlytics)
     //Other's
-    implementation(libs.nafisbottomnav)                 //Bottom Navigation
+    implementation(libs.bubblebottom)                   //Bottom Navigation
     implementation(libs.material.ripple)                //Ripple Effect
 }

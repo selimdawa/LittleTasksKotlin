@@ -1,6 +1,7 @@
 [versions]
 agp = "9.2.1"
 androidImageCropper = "2.8.0"
+bubblebottom = "1.0.1"
 circleimageview = "3.1.0"
 firebaseBom = "34.15.0"
 glide = "5.0.7"
@@ -15,7 +16,6 @@ activityKtx = "1.13.0"
 fragmentKtx = "1.8.9"
 constraintlayout = "2.2.1"
 materialRipple = "1.0.2"
-nafisbottomnav = "5.0"
 preferenceKtx = "1.2.1"
 googleServices = "4.5.0"
 navigation = "2.9.8"
@@ -48,8 +48,8 @@ firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 firebase-database = { module = "com.google.firebase:firebase-database" }
 firebase-storage = { module = "com.google.firebase:firebase-storage" }
 #Other's
+bubblebottom = { module = "com.github.selimdawa:BubbleBottom", version.ref = "bubblebottom" }
 material-ripple = { module = "com.balysv:material-ripple", version.ref = "materialRipple" }
-nafisbottomnav = { module = "com.github.Foysalofficial:NafisBottomNav", version.ref = "nafisbottomnav" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
