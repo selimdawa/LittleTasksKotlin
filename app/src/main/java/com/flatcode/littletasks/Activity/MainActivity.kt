@@ -53,10 +53,10 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
         navController = navHostFragment.navController
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            if (destination.id == R.id.homeFragment) {
-                binding.toolbar.card.visibility = View.VISIBLE
+            _binding?.toolbar?.card?.visibility = if (destination.id == R.id.homeFragment) {
+                View.VISIBLE
             } else {
-                binding.toolbar.card.visibility = View.GONE
+                View.GONE
             }
         }
 
@@ -78,11 +78,11 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
     private fun loadUserInfo() {
         val uid = DATA.FirebaseUserUid
         FirebaseDatabase.getInstance().getReference(DATA.USERS).child(uid)
-            .addValueEventListener(object : ValueEventListener {
+            .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val profileImage = DATA.EMPTY + snapshot.child(DATA.PROFILE_IMAGE).value
                     _binding?.let { b ->
-                        VOID.GlideImage(true, context, profileImage, b.toolbar.image)
+                        VOID.GlideImage(true, this@MainActivity, profileImage, b.toolbar.image)
                     }
                 }
 
