@@ -18,6 +18,7 @@ materialRipple = "1.0.2"
 preferenceKtx = "1.2.1"
 googleServices = "4.5.0"
 navigation = "2.10.0"
+multicolors = "1.0.8-beta3"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -28,6 +29,7 @@ androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-co
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 androidx-activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref = "activityKtx" }
 androidx-fragment-ktx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "fragmentKtx" }
+multicolors = { module = "com.github.selimdawa:MultiColors", version.ref = "multicolors" }
 #Layout
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 #Image

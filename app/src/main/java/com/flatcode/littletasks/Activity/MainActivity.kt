@@ -2,20 +2,16 @@ package com.flatcode.littletasks.Activity
 
 import android.app.Activity
 import android.content.Context
-import android.content.SharedPreferences
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
-import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.PreferenceManager
 import com.flatcode.littletasks.R
 import com.flatcode.littletasks.Unit.CLASS
 import com.flatcode.littletasks.Unit.DATA
-import com.flatcode.littletasks.Unit.THEME
 import com.flatcode.littletasks.Unit.VOID
 import com.flatcode.littletasks.databinding.ActivityMainBinding
 import com.google.firebase.database.DataSnapshot
@@ -24,7 +20,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import io.selimdawa.bubblebottom.BubbleBottomNavigation
 
-class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
+class MainActivity : AppCompatActivity() {
 
     private var _binding: ActivityMainBinding? = null
     private val binding get() = _binding!!
@@ -35,9 +31,6 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
     private lateinit var navController: NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        PreferenceManager.getDefaultSharedPreferences(baseContext)
-            .registerOnSharedPreferenceChangeListener(this)
-        THEME.setThemeOfApp(context)
         super.onCreate(savedInstanceState)
         _binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -59,8 +52,6 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
                 View.GONE
             }
         }
-
-        supportFragmentManager.beginTransaction().replace(R.id.settings, SettingFragment()).commit()
 
         binding.bottomNavigation.apply {
             setupAppMenu()
@@ -90,24 +81,17 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
             })
     }
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        if (key == DATA.COLOR_OPTION) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == SETTINGS_CODE) {
             recreate()
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        PreferenceManager.getDefaultSharedPreferences(baseContext)
-            .unregisterOnSharedPreferenceChangeListener(this)
         activity = null
         _binding = null
-    }
-
-    class SettingFragment : PreferenceFragmentCompat() {
-        override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-            setPreferencesFromResource(R.xml.root_preferences, rootKey)
-        }
     }
 
     fun BubbleBottomNavigation.setupAppMenu() {
@@ -115,5 +99,9 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
         add(BubbleBottomNavigation.Model(R.id.homeFragment, R.drawable.ic_home))
         add(BubbleBottomNavigation.Model(R.id.categoriesFragment, R.drawable.ic_group))
         show(R.id.homeFragment, true)
+    }
+
+    companion object {
+        private const val SETTINGS_CODE = 234
     }
 }
