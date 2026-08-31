@@ -20,8 +20,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
+import coil.load
 import com.flatcode.littletasks.Model.Category
 import com.flatcode.littletasks.Model.TaskItem
 import com.flatcode.littletasks.Model.Plan
@@ -39,7 +38,6 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.theartofdev.edmodo.cropper.CropImage
 import com.theartofdev.edmodo.cropper.CropImageView
-import jp.wasabeef.glide.transformations.BlurTransformation
 import java.text.MessageFormat
 
 object VOID {
@@ -110,7 +108,10 @@ object VOID {
                     Image.setImageResource(R.drawable.basic_book)
                 }
             } else {
-                Glide.with(context!!).load(Url).placeholder(R.color.image_profile).into(Image)
+                Image.load(Url) {
+                    placeholder(R.color.image_profile)
+                    crossfade(true)
+                }
             }
         } catch (_: Exception) {
             Image.setImageResource(R.drawable.basic_book)
@@ -126,8 +127,10 @@ object VOID {
                     Image.setImageResource(R.drawable.basic_book)
                 }
             } else {
-                Glide.with(context!!).load(Url).placeholder(R.color.image_profile)
-                    .apply(RequestOptions.bitmapTransform(BlurTransformation(level))).into(Image)
+                Image.load(Url) {
+                    placeholder(R.color.image_profile)
+                    transformations(SimpleBlurTransformation(level.toFloat()))
+                }
             }
         } catch (_: Exception) {
             Image.setImageResource(R.drawable.basic_book)
