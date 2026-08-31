@@ -1,10 +1,10 @@
-﻿[versions]
+[versions]
 agp = "9.3.2"
 androidImageCropper = "2.8.0"
-bubblebottom = "1.0.1"
+bubblebottom = "1.0.2"
 circleimageview = "3.1.0"
-firebaseBom = "34.15.0"
-glide = "5.0.7"
+firebaseBom = "34.18.0"
+glide = "5.0.9"
 glideTransformations = "4.3.0"
 coreKtx = "1.19.0"
 junit = "4.13.2"
@@ -14,7 +14,6 @@ appcompat = "1.8.0"
 material = "1.14.0"
 activityKtx = "1.13.0"
 fragmentKtx = "1.9.0"
-constraintlayout = "2.2.1"
 materialRipple = "1.0.2"
 preferenceKtx = "1.2.1"
 googleServices = "4.5.0"
@@ -31,7 +30,6 @@ androidx-activity-ktx = { group = "androidx.activity", name = "activity-ktx", ve
 androidx-fragment-ktx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "fragmentKtx" }
 #Layout
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
-androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 #Image
 circleimageview = { module = "de.hdodenhof:circleimageview", version.ref = "circleimageview" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
@@ -44,7 +42,6 @@ navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx",
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-auth = { module = "com.google.firebase:firebase-auth" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
-firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 firebase-database = { module = "com.google.firebase:firebase-database" }
 firebase-storage = { module = "com.google.firebase:firebase-storage" }
 #Other's
