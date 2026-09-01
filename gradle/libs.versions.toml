@@ -2,7 +2,6 @@
 agp = "9.3.2"
 androidImageCropper = "2.8.0"
 bubblebottom = "1.0.2"
-circleimageview = "3.1.0"
 coil = "2.7.0"
 firebaseBom = "34.18.0"
 coreKtx = "1.19.0"
@@ -32,7 +31,6 @@ multicolors = { module = "com.github.selimdawa:MultiColors", version.ref = "mult
 #Layout
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 #Image
-circleimageview = { module = "de.hdodenhof:circleimageview", version.ref = "circleimageview" }
 coil = { module = "io.coil-kt:coil", version.ref = "coil" }
 android-image-cropper = { module = "com.theartofdev.edmodo:android-image-cropper", version.ref = "androidImageCropper" }
 #Navigation

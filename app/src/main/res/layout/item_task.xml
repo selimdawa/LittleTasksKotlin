@@ -22,14 +22,15 @@
             android:layout_height="match_parent"
             android:orientation="horizontal">
 
-            <de.hdodenhof.circleimageview.CircleImageView
+            <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/image"
                 android:layout_width="45sp"
                 android:layout_height="45sp"
                 android:layout_gravity="center"
                 android:paddingStart="5sp"
                 android:paddingTop="5sp"
-                android:src="@color/image_profile" />
+                android:src="@color/image_profile"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.App.Circle" />
 
             <TextView
                 android:id="@+id/name"
