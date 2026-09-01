@@ -8,7 +8,6 @@ import com.flatcode.littletasks.Model.Task
 import com.flatcode.littletasks.Model.User
 import com.flatcode.littletasks.Unit.CLASS
 import com.flatcode.littletasks.Unit.DATA
-import com.flatcode.littletasks.Unit.THEME
 import com.flatcode.littletasks.Unit.VOID
 import com.flatcode.littletasks.databinding.ActivityProfileBinding
 import com.google.firebase.database.DataSnapshot
@@ -26,7 +25,6 @@ class ProfileActivity : AppCompatActivity() {
     private var profileId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        THEME.setThemeOfApp(context)
         super.onCreate(savedInstanceState)
         _binding = ActivityProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)

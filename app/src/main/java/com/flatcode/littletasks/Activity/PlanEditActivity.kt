@@ -14,7 +14,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.Model.Plan
 import com.flatcode.littletasks.R
 import com.flatcode.littletasks.Unit.DATA
-import com.flatcode.littletasks.Unit.THEME
 import com.flatcode.littletasks.Unit.VOID
 import com.flatcode.littletasks.databinding.ActivityPlanAddBinding
 import com.google.firebase.database.DataSnapshot
@@ -80,7 +79,6 @@ class PlanEditActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        THEME.setThemeOfApp(context)
         super.onCreate(savedInstanceState)
         _binding = ActivityPlanAddBinding.inflate(layoutInflater)
         setContentView(binding.root)

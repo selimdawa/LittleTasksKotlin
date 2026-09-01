@@ -6,7 +6,6 @@ import android.os.Handler
 import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.Unit.CLASS
-import com.flatcode.littletasks.Unit.THEME
 import com.flatcode.littletasks.Unit.VOID
 import com.flatcode.littletasks.databinding.ActivitySplashBinding
 import com.google.firebase.auth.FirebaseAuth
@@ -23,7 +22,6 @@ class SplashActivity : AppCompatActivity() {
     private val timeFinal = TIME_PER_MILLIS * timePerSecond
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        THEME.setThemeOfApp(context)
         super.onCreate(savedInstanceState)
         _binding = ActivitySplashBinding.inflate(layoutInflater)
         setContentView(binding.root)

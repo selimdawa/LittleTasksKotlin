@@ -81,13 +81,6 @@ class MainActivity : AppCompatActivity() {
             })
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == SETTINGS_CODE) {
-            recreate()
-        }
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         activity = null
@@ -102,6 +95,5 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val SETTINGS_CODE = 234
     }
 }

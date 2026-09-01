@@ -9,7 +9,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.Model.Category
 import com.flatcode.littletasks.R
 import com.flatcode.littletasks.Unit.DATA
-import com.flatcode.littletasks.Unit.THEME
 import com.flatcode.littletasks.Unit.VOID
 import com.flatcode.littletasks.databinding.ActivityTaskAddBinding
 import com.google.firebase.database.DataSnapshot
@@ -27,7 +26,6 @@ class TaskAddActivity : AppCompatActivity() {
     private var categoryId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        THEME.setThemeOfApp(context)
         super.onCreate(savedInstanceState)
         _binding = ActivityTaskAddBinding.inflate(layoutInflater)
         setContentView(binding.root)

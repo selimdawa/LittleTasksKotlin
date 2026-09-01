@@ -13,7 +13,6 @@ import com.flatcode.littletasks.Model.Task
 import com.flatcode.littletasks.R
 import com.flatcode.littletasks.Unit.CLASS
 import com.flatcode.littletasks.Unit.DATA
-import com.flatcode.littletasks.Unit.THEME
 import com.flatcode.littletasks.Unit.VOID
 import com.flatcode.littletasks.databinding.ActivityPageSwitchBinding
 import com.google.firebase.database.DataSnapshot
@@ -35,7 +34,6 @@ class CategoryTasksActivity : AppCompatActivity() {
     private var currentSortType = DATA.TIMESTAMP
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        THEME.setThemeOfApp(context)
         super.onCreate(savedInstanceState)
         _binding = ActivityPageSwitchBinding.inflate(layoutInflater)
         setContentView(binding.root)

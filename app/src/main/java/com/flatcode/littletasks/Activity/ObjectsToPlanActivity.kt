@@ -10,7 +10,6 @@ import com.flatcode.littletasks.Adapter.ObjectOptionAdapter
 import com.flatcode.littletasks.Model.TaskItem
 import com.flatcode.littletasks.R
 import com.flatcode.littletasks.Unit.DATA
-import com.flatcode.littletasks.Unit.THEME
 import com.flatcode.littletasks.databinding.ActivityObjectsBinding
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -28,7 +27,6 @@ class ObjectsToPlanActivity : AppCompatActivity() {
     private var id: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        THEME.setThemeOfApp(context)
         super.onCreate(savedInstanceState)
         _binding = ActivityObjectsBinding.inflate(layoutInflater)
         setContentView(binding.root)

@@ -9,7 +9,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.Model.TaskItem
 import com.flatcode.littletasks.R
 import com.flatcode.littletasks.Unit.DATA
-import com.flatcode.littletasks.Unit.THEME
 import com.flatcode.littletasks.databinding.ActivityObjectEditBinding
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -27,7 +26,6 @@ class ObjectEditActivity : AppCompatActivity() {
     private var progressDialog: AlertDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        THEME.setThemeOfApp(context)
         super.onCreate(savedInstanceState)
         _binding = ActivityObjectEditBinding.inflate(layoutInflater)
         setContentView(binding.root)

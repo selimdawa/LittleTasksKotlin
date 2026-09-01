@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.Unit.CLASS
-import com.flatcode.littletasks.Unit.THEME
 import com.flatcode.littletasks.Unit.VOID
 import com.flatcode.littletasks.databinding.ActivityAuthBinding
 
@@ -13,7 +12,6 @@ class AuthActivity : AppCompatActivity() {
     var context: Context = this@AuthActivity
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        THEME.setThemeOfApp(context)
         super.onCreate(savedInstanceState)
         val binding = ActivityAuthBinding.inflate(layoutInflater)
         val view = binding.root

@@ -13,14 +13,14 @@ material = "1.14.0"
 activityKtx = "1.13.0"
 fragmentKtx = "1.9.0"
 materialRipple = "1.0.2"
-preferenceKtx = "1.2.1"
+datastore = "1.2.1"
 googleServices = "4.5.0"
 navigation = "2.10.0"
 multicolors = "1.0.8-beta3"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
-androidx-preference-ktx = { module = "androidx.preference:preference-ktx", version.ref = "preferenceKtx" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }

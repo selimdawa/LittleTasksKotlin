@@ -12,7 +12,6 @@ import com.flatcode.littletasks.Adapter.TaskAdapter
 import com.flatcode.littletasks.Model.Task
 import com.flatcode.littletasks.R
 import com.flatcode.littletasks.Unit.DATA
-import com.flatcode.littletasks.Unit.THEME
 import com.flatcode.littletasks.databinding.ActivityFavoritesBinding
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -33,7 +32,6 @@ class FavoritesActivity : AppCompatActivity() {
     private var tasksType: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        THEME.setThemeOfApp(context)
         super.onCreate(savedInstanceState)
         _binding = ActivityFavoritesBinding.inflate(layoutInflater)
         setContentView(binding.root)

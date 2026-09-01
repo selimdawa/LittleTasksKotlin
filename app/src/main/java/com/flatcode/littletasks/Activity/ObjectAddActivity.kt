@@ -6,7 +6,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.Adapter.ObjectAddAdapter
 import com.flatcode.littletasks.Model.TaskItem
 import com.flatcode.littletasks.R
-import com.flatcode.littletasks.Unit.THEME
 import com.flatcode.littletasks.databinding.ActivityObjectAddBinding
 
 class ObjectAddActivity : AppCompatActivity() {
@@ -20,7 +19,6 @@ class ObjectAddActivity : AppCompatActivity() {
     private val editorsChoice = TaskItem()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        THEME.setThemeOfApp(context)
         super.onCreate(savedInstanceState)
         _binding = ActivityObjectAddBinding.inflate(layoutInflater)
         setContentView(binding.root)

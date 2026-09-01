@@ -11,7 +11,6 @@ import com.flatcode.littletasks.Model.Category
 import com.flatcode.littletasks.R
 import com.flatcode.littletasks.Unit.CLASS
 import com.flatcode.littletasks.Unit.DATA
-import com.flatcode.littletasks.Unit.THEME
 import com.flatcode.littletasks.Unit.VOID
 import com.flatcode.littletasks.databinding.ActivityPageStaggeredBinding
 import com.google.firebase.database.DataSnapshot
@@ -30,7 +29,6 @@ class CategoriesActivity : AppCompatActivity() {
     private var adapter: CategoriesAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        THEME.setThemeOfApp(context)
         super.onCreate(savedInstanceState)
         _binding = ActivityPageStaggeredBinding.inflate(layoutInflater)
         setContentView(binding.root)

@@ -11,7 +11,6 @@ import com.flatcode.littletasks.Model.Plan
 import com.flatcode.littletasks.R
 import com.flatcode.littletasks.Unit.CLASS
 import com.flatcode.littletasks.Unit.DATA
-import com.flatcode.littletasks.Unit.THEME
 import com.flatcode.littletasks.Unit.VOID
 import com.flatcode.littletasks.databinding.ActivityPlansBinding
 import com.google.firebase.database.DataSnapshot
@@ -31,7 +30,6 @@ class PlansActivity : AppCompatActivity() {
     private var isNew = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        THEME.setThemeOfApp(context)
         super.onCreate(savedInstanceState)
         _binding = ActivityPlansBinding.inflate(layoutInflater)
         setContentView(binding.root)
