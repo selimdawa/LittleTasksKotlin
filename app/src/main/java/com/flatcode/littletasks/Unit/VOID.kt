@@ -20,7 +20,9 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import coil.load
+import coil3.load
+import coil3.request.crossfade
+import coil3.request.placeholder
 import com.flatcode.littletasks.Model.Category
 import com.flatcode.littletasks.Model.TaskItem
 import com.flatcode.littletasks.Model.Plan
