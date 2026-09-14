@@ -1,7 +1,5 @@
 package com.flatcode.littletasks.ui.settings
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.flatcode.littletasks.core.utils.DATA
 import com.flatcode.littletasks.data.model.Task
@@ -12,6 +10,10 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -20,17 +22,17 @@ class SettingsViewModel @Inject constructor(
     private val database: FirebaseDatabase
 ) : ViewModel() {
 
-    private val _userInfo = MutableLiveData<User>()
-    val userInfo: LiveData<User> = _userInfo
+    private val _userInfo = MutableStateFlow<User?>(null)
+    val userInfo: StateFlow<User?> = _userInfo.asStateFlow()
 
-    private val _pointsSummary = MutableLiveData<Triple<Int, Int, Int>>()
-    val pointsSummary: LiveData<Triple<Int, Int, Int>> = _pointsSummary
+    private val _pointsSummary = MutableStateFlow(Triple(0, 0, 0))
+    val pointsSummary: StateFlow<Triple<Int, Int, Int>> = _pointsSummary.asStateFlow()
 
-    private val _itemCounts = MutableLiveData<Map<String, Int>>()
-    val itemCounts: LiveData<Map<String, Int>> = _itemCounts
+    private val _itemCounts = MutableStateFlow<Map<String, Int>>(emptyMap())
+    val itemCounts: StateFlow<Map<String, Int>> = _itemCounts.asStateFlow()
 
-    private val _privacyPolicy = MutableLiveData<String>()
-    val privacyPolicy: LiveData<String> = _privacyPolicy
+    private val _privacyPolicy = MutableStateFlow("")
+    val privacyPolicy: StateFlow<String> = _privacyPolicy.asStateFlow()
 
     fun loadUserInfo() {
         val uid = auth.currentUser?.uid ?: return
@@ -40,7 +42,10 @@ class SettingsViewModel @Inject constructor(
                     val user = snapshot.getValue(User::class.java) ?: return
                     _userInfo.value = user
                 }
-                override fun onCancelled(error: DatabaseError) {}
+
+                override fun onCancelled(error: DatabaseError) {
+                    Timber.e(error.toException(), "Error loading user info for settings")
+                }
             })
     }
 
@@ -58,7 +63,10 @@ class SettingsViewModel @Inject constructor(
                     val level = levelPoint(av, 10)
                     _pointsSummary.value = Triple(total, av, level)
                 }
-                override fun onCancelled(error: DatabaseError) {}
+
+                override fun onCancelled(error: DatabaseError) {
+                    Timber.e(error.toException(), "Error loading points summary")
+                }
             })
     }
 
@@ -76,7 +84,10 @@ class SettingsViewModel @Inject constructor(
                     counts[ref] = count
                     if (counts.size == 4) _itemCounts.value = counts
                 }
-                override fun onCancelled(error: DatabaseError) {}
+
+                override fun onCancelled(error: DatabaseError) {
+                    Timber.e(error.toException(), "Error counting items in $ref")
+                }
             })
         }
 
@@ -85,7 +96,10 @@ class SettingsViewModel @Inject constructor(
                 counts[DATA.FAVORITES] = snapshot.childrenCount.toInt()
                 if (counts.size == 4) _itemCounts.value = counts
             }
-            override fun onCancelled(error: DatabaseError) {}
+
+            override fun onCancelled(error: DatabaseError) {
+                Timber.e(error.toException(), "Error counting favorites")
+            }
         })
     }
 
@@ -95,7 +109,10 @@ class SettingsViewModel @Inject constructor(
                 override fun onDataChange(snapshot: DataSnapshot) {
                     _privacyPolicy.value = snapshot.value?.toString().orEmpty()
                 }
-                override fun onCancelled(error: DatabaseError) {}
+
+                override fun onCancelled(error: DatabaseError) {
+                    Timber.e(error.toException(), "Error loading privacy policy")
+                }
             })
     }
 

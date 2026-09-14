@@ -19,6 +19,12 @@ import com.flatcode.littletasks.ui.task.TaskAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.MessageFormat
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+
 @AndroidEntryPoint
 class CategoryTasksActivity : AppCompatActivity() {
 
@@ -80,26 +86,34 @@ class CategoryTasksActivity : AppCompatActivity() {
         binding.filter.start.setOnClickListener { toggleSortDirection(binding.filter.a4, DATA.START) }
         binding.filter.end.setOnClickListener { toggleSortDirection(binding.filter.a5, DATA.END) }
 
-        viewModel.categoryTasks.observe(this) { newList ->
-            list.clear()
-            list.addAll(newList)
-            adapter?.notifyDataSetChanged()
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.categoryTasks.collectLatest { newList ->
+                    list.clear()
+                    list.addAll(newList)
+                    adapter?.notifyDataSetChanged()
 
-            binding.toolbar.number.text = MessageFormat.format("( {0} )", list.size)
-            binding.bar.visibility = View.GONE
-            if (list.isNotEmpty()) {
-                binding.emptyText.visibility = View.GONE
-            } else {
-                binding.recyclerView.visibility = View.GONE
-                binding.recyclerViewReverse.visibility = View.GONE
-                binding.emptyText.visibility = View.VISIBLE
+                    binding.toolbar.number.text = MessageFormat.format("( {0} )", list.size)
+                    binding.bar.visibility = View.GONE
+                    if (list.isNotEmpty()) {
+                        binding.emptyText.visibility = View.GONE
+                    } else {
+                        binding.recyclerView.visibility = View.GONE
+                        binding.recyclerViewReverse.visibility = View.GONE
+                        binding.emptyText.visibility = View.VISIBLE
+                    }
+                }
             }
         }
 
-        viewModel.pointsSummary.observe(this) { (all, av, level) ->
-            binding.allPoints.text = all.toString()
-            binding.av.text = av.toString()
-            binding.level.text = level.toString()
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.pointsSummary.collectLatest { (all, av, level) ->
+                    binding.allPoints.text = all.toString()
+                    binding.av.text = av.toString()
+                    binding.level.text = level.toString()
+                }
+            }
         }
     }
 

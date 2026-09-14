@@ -19,6 +19,12 @@ import com.flatcode.littletasks.databinding.ActivityPlanAddBinding
 import com.theartofdev.edmodo.cropper.CropImage
 import dagger.hilt.android.AndroidEntryPoint
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+
 @AndroidEntryPoint
 class PlanEditActivity : AppCompatActivity() {
 
@@ -89,18 +95,30 @@ class PlanEditActivity : AppCompatActivity() {
         }
         binding.toolbar.ok.setOnClickListener { validateData() }
 
-        viewModel.planInfo.observe(this) { plan ->
-            binding.planEt.setText(plan.name)
-            VOID.GlideImage(true, context, plan.image, binding.image)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.planInfo.collectLatest { plan ->
+                    plan?.let {
+                        binding.planEt.setText(it.name)
+                        VOID.GlideImage(true, context, it.image, binding.image)
+                    }
+                }
+            }
         }
 
-        viewModel.actionResult.observe(this) { result ->
-            dismissLoading()
-            result.onSuccess {
-                Toast.makeText(context, "Plan updated...", Toast.LENGTH_SHORT).show()
-                finish()
-            }.onFailure { e ->
-                Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.actionResult.collectLatest { result ->
+                    result?.let {
+                        dismissLoading()
+                        it.onSuccess {
+                            Toast.makeText(context, "Plan updated...", Toast.LENGTH_SHORT).show()
+                            finish()
+                        }.onFailure { e ->
+                            Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
             }
         }
 

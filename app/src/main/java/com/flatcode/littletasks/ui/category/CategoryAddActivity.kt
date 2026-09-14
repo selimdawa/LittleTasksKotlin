@@ -19,6 +19,12 @@ import com.flatcode.littletasks.databinding.ActivityCategoryAddBinding
 import com.theartofdev.edmodo.cropper.CropImage
 import dagger.hilt.android.AndroidEntryPoint
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+
 @AndroidEntryPoint
 class CategoryAddActivity : AppCompatActivity() {
 
@@ -90,17 +96,27 @@ class CategoryAddActivity : AppCompatActivity() {
         }
         binding.toolbar.ok.setOnClickListener { validateData() }
 
-        viewModel.planName.observe(this) { name ->
-            binding.plan.text = name
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.planName.collectLatest { name ->
+                    binding.plan.text = name
+                }
+            }
         }
 
-        viewModel.uploadResult.observe(this) { result ->
-            dismissLoading()
-            result.onSuccess {
-                Toast.makeText(context, "Successfully uploaded...", Toast.LENGTH_SHORT).show()
-                finish()
-            }.onFailure { e ->
-                Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uploadResult.collectLatest { result ->
+                    result?.let {
+                        dismissLoading()
+                        it.onSuccess {
+                            Toast.makeText(context, "Successfully uploaded...", Toast.LENGTH_SHORT).show()
+                            finish()
+                        }.onFailure { e ->
+                            Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
             }
         }
 

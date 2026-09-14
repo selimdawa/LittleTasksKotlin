@@ -19,6 +19,12 @@ import com.flatcode.littletasks.databinding.ActivityProfileEditBinding
 import com.theartofdev.edmodo.cropper.CropImage
 import dagger.hilt.android.AndroidEntryPoint
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+
 @AndroidEntryPoint
 class ProfileEditActivity : AppCompatActivity() {
 
@@ -86,18 +92,30 @@ class ProfileEditActivity : AppCompatActivity() {
         }
         binding.go.setOnClickListener { validateData() }
 
-        viewModel.userInfo.observe(this) { user ->
-            binding.nameEt.setText(user.username)
-            VOID.GlideImage(true, context, user.profileImage, binding.profileImage)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.userInfo.collectLatest { user ->
+                    user?.let {
+                        binding.nameEt.setText(it.username)
+                        VOID.GlideImage(true, context, it.profileImage, binding.profileImage)
+                    }
+                }
+            }
         }
 
-        viewModel.actionResult.observe(this) { result ->
-            dismissLoading()
-            result.onSuccess {
-                Toast.makeText(context, "Profile updated...", Toast.LENGTH_SHORT).show()
-                finish()
-            }.onFailure { e ->
-                Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.actionResult.collectLatest { result ->
+                    result?.let {
+                        dismissLoading()
+                        it.onSuccess {
+                            Toast.makeText(context, "Profile updated...", Toast.LENGTH_SHORT).show()
+                            finish()
+                        }.onFailure { e ->
+                            Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
             }
         }
 

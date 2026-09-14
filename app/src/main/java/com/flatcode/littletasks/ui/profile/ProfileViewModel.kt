@@ -1,8 +1,6 @@
 package com.flatcode.littletasks.ui.profile
 
 import android.net.Uri
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.flatcode.littletasks.core.utils.DATA
 import com.flatcode.littletasks.data.model.Task
@@ -14,6 +12,10 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -23,26 +25,26 @@ class ProfileViewModel @Inject constructor(
     private val storage: FirebaseStorage
 ) : ViewModel() {
 
-    private val _userInfo = MutableLiveData<User>()
-    val userInfo: LiveData<User> = _userInfo
+    private val _userInfo = MutableStateFlow<User?>(null)
+    val userInfo: StateFlow<User?> = _userInfo.asStateFlow()
 
-    private val _nrTasks = MutableLiveData<Int>()
-    val nrTasks: LiveData<Int> = _nrTasks
+    private val _nrTasks = MutableStateFlow(0)
+    val nrTasks: StateFlow<Int> = _nrTasks.asStateFlow()
 
-    private val _nrPlans = MutableLiveData<Int>()
-    val nrPlans: LiveData<Int> = _nrPlans
+    private val _nrPlans = MutableStateFlow(0)
+    val nrPlans: StateFlow<Int> = _nrPlans.asStateFlow()
 
-    private val _nrObjects = MutableLiveData<Int>()
-    val nrObjects: LiveData<Int> = _nrObjects
+    private val _nrObjects = MutableStateFlow(0)
+    val nrObjects: StateFlow<Int> = _nrObjects.asStateFlow()
 
-    private val _nrCategories = MutableLiveData<Int>()
-    val nrCategories: LiveData<Int> = _nrCategories
+    private val _nrCategories = MutableStateFlow(0)
+    val nrCategories: StateFlow<Int> = _nrCategories.asStateFlow()
 
-    private val _favoriteTasks = MutableLiveData<List<Task>>()
-    val favoriteTasks: LiveData<List<Task>> = _favoriteTasks
+    private val _favoriteTasks = MutableStateFlow<List<Task>>(emptyList())
+    val favoriteTasks: StateFlow<List<Task>> = _favoriteTasks.asStateFlow()
 
-    private val _actionResult = MutableLiveData<Result<String>>()
-    val actionResult: LiveData<Result<String>> = _actionResult
+    private val _actionResult = MutableStateFlow<Result<String>?>(null)
+    val actionResult: StateFlow<Result<String>?> = _actionResult.asStateFlow()
 
     fun loadUserInfo(userId: String) {
         database.getReference(DATA.USERS).child(userId)
@@ -51,7 +53,10 @@ class ProfileViewModel @Inject constructor(
                     val user = snapshot.getValue(User::class.java) ?: return
                     _userInfo.value = user
                 }
-                override fun onCancelled(error: DatabaseError) {}
+
+                override fun onCancelled(error: DatabaseError) {
+                    Timber.e(error.toException(), "Error loading user info for userId: $userId")
+                }
             })
     }
 
@@ -71,7 +76,10 @@ class ProfileViewModel @Inject constructor(
                         DATA.CATEGORIES -> _nrCategories.value = i
                     }
                 }
-                override fun onCancelled(error: DatabaseError) {}
+
+                override fun onCancelled(error: DatabaseError) {
+                    Timber.e(error.toException(), "Error counting items in $databaseName for userId: $userId")
+                }
             })
     }
 
@@ -87,6 +95,7 @@ class ProfileViewModel @Inject constructor(
                     updateProfileInDB(uid, username, uri.toString())
                 }
             }.addOnFailureListener {
+                Timber.e(it, "Failed to upload profile image for uid: $uid")
                 _actionResult.value = Result.failure(it)
             }
         }
@@ -98,8 +107,14 @@ class ProfileViewModel @Inject constructor(
             imageUrl?.let { put(DATA.PROFILE_IMAGE, it) }
         }
         database.getReference(DATA.USERS).child(uid).updateChildren(hashMap)
-            .addOnSuccessListener { _actionResult.value = Result.success("Profile updated") }
-            .addOnFailureListener { _actionResult.value = Result.failure(it) }
+            .addOnSuccessListener {
+                Timber.d("Profile updated successfully for uid: $uid")
+                _actionResult.value = Result.success("Profile updated")
+            }
+            .addOnFailureListener { e ->
+                Timber.e(e, "Failed to update profile in database for uid: $uid")
+                _actionResult.value = Result.failure(e)
+            }
     }
 
     fun fetchFavoriteTasks(tasksType: String, orderBy: String) {
@@ -125,10 +140,16 @@ class ProfileViewModel @Inject constructor(
                                 }
                                 _favoriteTasks.value = list
                             }
-                            override fun onCancelled(error: DatabaseError) {}
+
+                            override fun onCancelled(error: DatabaseError) {
+                                Timber.e(error.toException(), "Error fetching tasks for favorites")
+                            }
                         })
                 }
-                override fun onCancelled(error: DatabaseError) {}
+
+                override fun onCancelled(error: DatabaseError) {
+                    Timber.e(error.toException(), "Error fetching favorite keys for uid: $uid")
+                }
             })
     }
 }

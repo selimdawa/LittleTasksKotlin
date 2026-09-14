@@ -13,6 +13,12 @@ import com.flatcode.littletasks.core.utils.VOID
 import com.flatcode.littletasks.databinding.ActivityRegisterBinding
 import dagger.hilt.android.AndroidEntryPoint
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+
 @AndroidEntryPoint
 class RegisterActivity : AppCompatActivity() {
 
@@ -40,14 +46,20 @@ class RegisterActivity : AppCompatActivity() {
         binding.forget.setOnClickListener { VOID.Intent1(context, CLASS.FORGET_PASSWORD) }
         binding.go.setOnClickListener { validateData() }
 
-        viewModel.authResult.observe(this) { result ->
-            dialog?.dismiss()
-            result.onSuccess {
-                Toast.makeText(context, "Account created...", Toast.LENGTH_SHORT).show()
-                VOID.IntentClear(context, CLASS.MAIN)
-                finish()
-            }.onFailure { e ->
-                Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.authResult.collectLatest { result ->
+                    result?.let {
+                        dialog?.dismiss()
+                        it.onSuccess {
+                            Toast.makeText(context, "Account created...", Toast.LENGTH_SHORT).show()
+                            VOID.IntentClear(context, CLASS.MAIN)
+                            finish()
+                        }.onFailure { e ->
+                            Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
             }
         }
     }

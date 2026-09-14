@@ -8,6 +8,12 @@ import com.flatcode.littletasks.R
 import com.flatcode.littletasks.databinding.ActivityPrivacyPolicyBinding
 import dagger.hilt.android.AndroidEntryPoint
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+
 @AndroidEntryPoint
 class PrivacyPolicyActivity : AppCompatActivity() {
 
@@ -25,8 +31,12 @@ class PrivacyPolicyActivity : AppCompatActivity() {
         binding.toolbar.back.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
         binding.toolbar.search.visibility = View.GONE
 
-        viewModel.privacyPolicy.observe(this) { text ->
-            binding.text.text = text
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.privacyPolicy.collectLatest { text ->
+                    binding.text.text = text
+                }
+            }
         }
     }
 

@@ -17,6 +17,12 @@ import com.flatcode.littletasks.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
 import io.selimdawa.bubblebottom.BubbleBottomNavigation
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
@@ -63,8 +69,14 @@ class MainActivity : AppCompatActivity() {
             VOID.IntentExtra(context, CLASS.PROFILE, DATA.PROFILE_ID, DATA.FirebaseUserUid)
         }
 
-        viewModel.profileImage.observe(this) { profileImage ->
-            VOID.GlideImage(true, this@MainActivity, profileImage, binding.toolbar.image)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.profileImage.collectLatest { profileImage ->
+                    if (profileImage.isNotEmpty()) {
+                        VOID.GlideImage(true, this@MainActivity, profileImage, binding.toolbar.image)
+                    }
+                }
+            }
         }
         viewModel.loadUserInfo()
     }

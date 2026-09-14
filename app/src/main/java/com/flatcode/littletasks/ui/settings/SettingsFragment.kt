@@ -15,6 +15,12 @@ import com.flatcode.littletasks.databinding.FragmentSettingsBinding
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.MessageFormat
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+
 @AndroidEntryPoint
 class SettingsFragment : Fragment() {
 
@@ -38,22 +44,36 @@ class SettingsFragment : Fragment() {
             VOID.IntentExtra(context, CLASS.PROFILE, DATA.PROFILE_ID, DATA.FirebaseUserUid)
         }
 
-        viewModel.userInfo.observe(viewLifecycleOwner) { user ->
-            VOID.GlideImage(true, context, user.profileImage, binding.toolbar.imageProfile)
-            binding.toolbar.username.text = user.username
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.userInfo.collectLatest { user ->
+                    user?.let {
+                        VOID.GlideImage(true, context, it.profileImage, binding.toolbar.imageProfile)
+                        binding.toolbar.username.text = it.username
+                    }
+                }
+            }
         }
 
-        viewModel.pointsSummary.observe(viewLifecycleOwner) { (total, av, level) ->
-            binding.toolbar.all.text = total.toString()
-            binding.toolbar.availablePoints.text = av.toString()
-            binding.toolbar.level.text = level.toString()
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.pointsSummary.collectLatest { (total, av, level) ->
+                    binding.toolbar.all.text = total.toString()
+                    binding.toolbar.availablePoints.text = av.toString()
+                    binding.toolbar.level.text = level.toString()
+                }
+            }
         }
 
-        viewModel.itemCounts.observe(viewLifecycleOwner) { counts ->
-            updateSettingNumber(1, counts[DATA.CATEGORIES] ?: 0)
-            updateSettingNumber(2, counts[DATA.PLANS] ?: 0)
-            updateSettingNumber(3, counts[DATA.OBJECTS] ?: 0)
-            updateSettingNumber(4, counts[DATA.FAVORITES] ?: 0)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.itemCounts.collectLatest { counts ->
+                    updateSettingNumber(1, counts[DATA.CATEGORIES] ?: 0)
+                    updateSettingNumber(2, counts[DATA.PLANS] ?: 0)
+                    updateSettingNumber(3, counts[DATA.OBJECTS] ?: 0)
+                    updateSettingNumber(4, counts[DATA.FAVORITES] ?: 0)
+                }
+            }
         }
 
         return binding.root

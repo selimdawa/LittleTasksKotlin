@@ -1,8 +1,6 @@
 package com.flatcode.littletasks.ui.plan
 
 import android.net.Uri
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.flatcode.littletasks.core.utils.DATA
 import com.flatcode.littletasks.data.model.Plan
@@ -13,6 +11,10 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -22,14 +24,14 @@ class PlanViewModel @Inject constructor(
     private val storage: FirebaseStorage
 ) : ViewModel() {
 
-    private val _plans = MutableLiveData<List<Plan>>()
-    val plans: LiveData<List<Plan>> = _plans
+    private val _plans = MutableStateFlow<List<Plan>>(emptyList())
+    val plans: StateFlow<List<Plan>> = _plans.asStateFlow()
 
-    private val _planInfo = MutableLiveData<Plan>()
-    val planInfo: LiveData<Plan> = _planInfo
+    private val _planInfo = MutableStateFlow<Plan?>(null)
+    val planInfo: StateFlow<Plan?> = _planInfo.asStateFlow()
 
-    private val _actionResult = MutableLiveData<Result<String>>()
-    val actionResult: LiveData<Result<String>> = _actionResult
+    private val _actionResult = MutableStateFlow<Result<String>?>(null)
+    val actionResult: StateFlow<Result<String>?> = _actionResult.asStateFlow()
 
     fun loadPlans() {
         val uid = auth.currentUser?.uid ?: return
@@ -45,7 +47,10 @@ class PlanViewModel @Inject constructor(
                     }
                     _plans.value = list
                 }
-                override fun onCancelled(error: DatabaseError) {}
+
+                override fun onCancelled(error: DatabaseError) {
+                    Timber.e(error.toException(), "Error loading plans for uid: $uid")
+                }
             })
     }
 
@@ -56,7 +61,10 @@ class PlanViewModel @Inject constructor(
                     val item = snapshot.getValue(Plan::class.java) ?: return
                     _planInfo.value = item
                 }
-                override fun onCancelled(error: DatabaseError) {}
+
+                override fun onCancelled(error: DatabaseError) {
+                    Timber.e(error.toException(), "Error loading plan info for planId: $planId")
+                }
             })
     }
 
@@ -77,12 +85,15 @@ class PlanViewModel @Inject constructor(
                     put(DATA.IMAGE, uri.toString())
                 }
                 ref.child(id).setValue(hashMap).addOnSuccessListener {
+                    Timber.d("Plan added successfully: $id")
                     _actionResult.value = Result.success("Plan added")
                 }.addOnFailureListener { e ->
+                    Timber.e(e, "Failed to add plan to database")
                     _actionResult.value = Result.failure(e)
                 }
             }
         }.addOnFailureListener {
+            Timber.e(it, "Failed to upload plan image")
             _actionResult.value = Result.failure(it)
         }
     }
@@ -98,6 +109,7 @@ class PlanViewModel @Inject constructor(
                     updatePlanInDB(planId, name, uri.toString())
                 }
             }.addOnFailureListener {
+                Timber.e(it, "Failed to upload updated plan image")
                 _actionResult.value = Result.failure(it)
             }
         }
@@ -110,9 +122,11 @@ class PlanViewModel @Inject constructor(
         }
         database.getReference(DATA.PLANS).child(planId).updateChildren(hashMap)
             .addOnSuccessListener {
+                Timber.d("Plan updated successfully: $planId")
                 _actionResult.value = Result.success("Plan updated")
-            }.addOnFailureListener {
-                _actionResult.value = Result.failure(it)
+            }.addOnFailureListener { e ->
+                Timber.e(e, "Failed to update plan in database")
+                _actionResult.value = Result.failure(e)
             }
     }
 }

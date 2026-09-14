@@ -10,6 +10,12 @@ import com.flatcode.littletasks.core.utils.VOID
 import com.flatcode.littletasks.databinding.ActivityProfileBinding
 import dagger.hilt.android.AndroidEntryPoint
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+
 @AndroidEntryPoint
 class ProfileActivity : AppCompatActivity() {
 
@@ -30,15 +36,37 @@ class ProfileActivity : AppCompatActivity() {
         binding.edit.setOnClickListener { VOID.Intent1(context, CLASS.PROFILE_EDIT) }
         binding.back.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
 
-        viewModel.userInfo.observe(this) { item ->
-            binding.username.text = item.username
-            VOID.GlideImage(true, context, item.profileImage, binding.profile)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.userInfo.collectLatest { item ->
+                    item?.let {
+                        binding.username.text = it.username
+                        VOID.GlideImage(true, context, it.profileImage, binding.profile)
+                    }
+                }
+            }
         }
 
-        viewModel.nrTasks.observe(this) { binding.numberTasks.text = it.toString() }
-        viewModel.nrPlans.observe(this) { binding.numberPlans.text = it.toString() }
-        viewModel.nrObjects.observe(this) { binding.numberObjects.text = it.toString() }
-        viewModel.nrCategories.observe(this) { binding.numberCategories.text = it.toString() }
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.nrTasks.collectLatest { binding.numberTasks.text = it.toString() }
+            }
+        }
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.nrPlans.collectLatest { binding.numberPlans.text = it.toString() }
+            }
+        }
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.nrObjects.collectLatest { binding.numberObjects.text = it.toString() }
+            }
+        }
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.nrCategories.collectLatest { binding.numberCategories.text = it.toString() }
+            }
+        }
     }
 
     private fun init() {

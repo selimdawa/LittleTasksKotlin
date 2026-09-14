@@ -11,6 +11,12 @@ import com.flatcode.littletasks.data.model.Category
 import com.flatcode.littletasks.databinding.FragmentCategoriesBinding
 import dagger.hilt.android.AndroidEntryPoint
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+
 @AndroidEntryPoint
 class CategoriesFragment : Fragment() {
 
@@ -29,18 +35,22 @@ class CategoriesFragment : Fragment() {
         adapter = CategoryMainAdapter(context, list)
         binding.recyclerView.adapter = adapter
 
-        viewModel.categories.observe(viewLifecycleOwner) { newList ->
-            list.clear()
-            list.addAll(newList)
-            adapter?.notifyDataSetChanged()
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.categories.collectLatest { newList ->
+                    list.clear()
+                    list.addAll(newList)
+                    adapter?.notifyDataSetChanged()
 
-            binding.bar.visibility = View.GONE
-            if (list.isNotEmpty()) {
-                binding.recyclerView.visibility = View.VISIBLE
-                binding.emptyText.visibility = View.GONE
-            } else {
-                binding.recyclerView.visibility = View.GONE
-                binding.emptyText.visibility = View.VISIBLE
+                    binding.bar.visibility = View.GONE
+                    if (list.isNotEmpty()) {
+                        binding.recyclerView.visibility = View.VISIBLE
+                        binding.emptyText.visibility = View.GONE
+                    } else {
+                        binding.recyclerView.visibility = View.GONE
+                        binding.emptyText.visibility = View.VISIBLE
+                    }
+                }
             }
         }
 

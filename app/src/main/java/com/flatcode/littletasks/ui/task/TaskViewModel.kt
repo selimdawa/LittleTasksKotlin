@@ -1,7 +1,5 @@
 package com.flatcode.littletasks.ui.task
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.flatcode.littletasks.core.utils.DATA
 import com.flatcode.littletasks.data.model.Category
@@ -12,6 +10,10 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -20,14 +22,14 @@ class TaskViewModel @Inject constructor(
     private val database: FirebaseDatabase
 ) : ViewModel() {
 
-    private val _categoryInfo = MutableLiveData<Category>()
-    val categoryInfo: LiveData<Category> = _categoryInfo
+    private val _categoryInfo = MutableStateFlow<Category?>(null)
+    val categoryInfo: StateFlow<Category?> = _categoryInfo.asStateFlow()
 
-    private val _taskInfo = MutableLiveData<Task>()
-    val taskInfo: LiveData<Task> = _taskInfo
+    private val _taskInfo = MutableStateFlow<Task?>(null)
+    val taskInfo: StateFlow<Task?> = _taskInfo.asStateFlow()
 
-    private val _actionResult = MutableLiveData<Result<String>>()
-    val actionResult: LiveData<Result<String>> = _actionResult
+    private val _actionResult = MutableStateFlow<Result<String>?>(null)
+    val actionResult: StateFlow<Result<String>?> = _actionResult.asStateFlow()
 
     fun loadCategoryInfo(catId: String) {
         database.getReference(DATA.CATEGORIES).child(catId)
@@ -36,7 +38,10 @@ class TaskViewModel @Inject constructor(
                     val item = snapshot.getValue(Category::class.java) ?: return
                     _categoryInfo.value = item
                 }
-                override fun onCancelled(error: DatabaseError) {}
+
+                override fun onCancelled(error: DatabaseError) {
+                    Timber.e(error.toException(), "Error loading category info for catId: $catId")
+                }
             })
     }
 
@@ -47,7 +52,10 @@ class TaskViewModel @Inject constructor(
                     val item = snapshot.getValue(Task::class.java) ?: return
                     _taskInfo.value = item
                 }
-                override fun onCancelled(error: DatabaseError) {}
+
+                override fun onCancelled(error: DatabaseError) {
+                    Timber.e(error.toException(), "Error loading task info for taskId: $taskId")
+                }
             })
     }
 
@@ -70,8 +78,10 @@ class TaskViewModel @Inject constructor(
         }
 
         ref.child(id).setValue(hashMap).addOnSuccessListener {
+            Timber.d("Task added successfully: $id")
             _actionResult.value = Result.success("Task uploaded")
         }.addOnFailureListener { e ->
+            Timber.e(e, "Failed to add task to database")
             _actionResult.value = Result.failure(e)
         }
     }
@@ -84,8 +94,10 @@ class TaskViewModel @Inject constructor(
 
         database.getReference(DATA.TASKS).child(taskId).updateChildren(hashMap)
             .addOnSuccessListener {
+                Timber.d("Task updated successfully: $taskId")
                 _actionResult.value = Result.success("Task updated")
             }.addOnFailureListener { e ->
+                Timber.e(e, "Failed to update task: $taskId")
                 _actionResult.value = Result.failure(e)
             }
     }

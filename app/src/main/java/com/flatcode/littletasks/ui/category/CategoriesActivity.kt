@@ -16,6 +16,12 @@ import com.flatcode.littletasks.databinding.ActivityPageStaggeredBinding
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.MessageFormat
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+
 @AndroidEntryPoint
 class CategoriesActivity : AppCompatActivity() {
 
@@ -58,19 +64,23 @@ class CategoriesActivity : AppCompatActivity() {
         adapter = CategoriesAdapter(context, list)
         binding.recyclerView.adapter = adapter
 
-        viewModel.categories.observe(this) { newList ->
-            list.clear()
-            list.addAll(newList)
-            adapter?.notifyDataSetChanged()
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.categories.collectLatest { newList ->
+                    list.clear()
+                    list.addAll(newList)
+                    adapter?.notifyDataSetChanged()
 
-            binding.toolbar.number.text = MessageFormat.format("( {0} )", list.size)
-            binding.bar.visibility = View.GONE
-            if (list.isNotEmpty()) {
-                binding.recyclerView.visibility = View.VISIBLE
-                binding.emptyText.visibility = View.GONE
-            } else {
-                binding.recyclerView.visibility = View.GONE
-                binding.emptyText.visibility = View.VISIBLE
+                    binding.toolbar.number.text = MessageFormat.format("( {0} )", list.size)
+                    binding.bar.visibility = View.GONE
+                    if (list.isNotEmpty()) {
+                        binding.recyclerView.visibility = View.VISIBLE
+                        binding.emptyText.visibility = View.GONE
+                    } else {
+                        binding.recyclerView.visibility = View.GONE
+                        binding.emptyText.visibility = View.VISIBLE
+                    }
+                }
             }
         }
     }

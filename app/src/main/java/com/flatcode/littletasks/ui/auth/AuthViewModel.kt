@@ -1,12 +1,14 @@
 package com.flatcode.littletasks.ui.auth
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.flatcode.littletasks.core.utils.DATA
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -15,15 +17,17 @@ class AuthViewModel @Inject constructor(
     private val database: FirebaseDatabase
 ) : ViewModel() {
 
-    private val _authResult = MutableLiveData<Result<Unit>>()
-    val authResult: LiveData<Result<Unit>> = _authResult
+    private val _authResult = MutableStateFlow<Result<Unit>?>(null)
+    val authResult: StateFlow<Result<Unit>?> = _authResult.asStateFlow()
 
     fun login(email: String, password: String) {
         auth.signInWithEmailAndPassword(email, password)
             .addOnSuccessListener {
+                Timber.d("Login success for email: $email")
                 _authResult.value = Result.success(Unit)
             }
             .addOnFailureListener {
+                Timber.e(it, "Login failed for email: $email")
                 _authResult.value = Result.failure(it)
             }
     }
@@ -31,9 +35,11 @@ class AuthViewModel @Inject constructor(
     fun register(name: String, email: String, password: String) {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnSuccessListener {
+                Timber.d("Registration success for email: $email")
                 updateUserInfo(name, email)
             }
             .addOnFailureListener {
+                Timber.e(it, "Registration failed for email: $email")
                 _authResult.value = Result.failure(it)
             }
     }
@@ -50,9 +56,11 @@ class AuthViewModel @Inject constructor(
 
         database.getReference(DATA.USERS).child(id).setValue(hashMap)
             .addOnSuccessListener {
+                Timber.d("User info update success for id: $id")
                 _authResult.value = Result.success(Unit)
             }
             .addOnFailureListener {
+                Timber.e(it, "User info update failed for id: $id")
                 _authResult.value = Result.failure(it)
             }
     }
@@ -60,9 +68,11 @@ class AuthViewModel @Inject constructor(
     fun recoverPassword(email: String) {
         auth.sendPasswordResetEmail(email)
             .addOnSuccessListener {
+                Timber.d("Password reset email sent to: $email")
                 _authResult.value = Result.success(Unit)
             }
             .addOnFailureListener {
+                Timber.e(it, "Password reset email failed for: $email")
                 _authResult.value = Result.failure(it)
             }
     }

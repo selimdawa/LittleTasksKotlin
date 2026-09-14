@@ -12,6 +12,12 @@ import com.flatcode.littletasks.core.utils.VOID
 import com.flatcode.littletasks.databinding.ActivityForgetPasswordBinding
 import dagger.hilt.android.AndroidEntryPoint
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+
 @AndroidEntryPoint
 class ForgetPasswordActivity : AppCompatActivity() {
 
@@ -42,14 +48,20 @@ class ForgetPasswordActivity : AppCompatActivity() {
         }
         binding.go.setOnClickListener { validateDate() }
 
-        viewModel.authResult.observe(this) { result ->
-            dialog?.dismiss()
-            result.onSuccess {
-                Toast.makeText(
-                    context, "Instructions to reset password sent", Toast.LENGTH_SHORT
-                ).show()
-            }.onFailure { e ->
-                Toast.makeText(context, "Failed to send: " + e.message, Toast.LENGTH_SHORT).show()
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.authResult.collectLatest { result ->
+                    result?.let {
+                        dialog?.dismiss()
+                        it.onSuccess {
+                            Toast.makeText(
+                                context, "Instructions to reset password sent", Toast.LENGTH_SHORT
+                            ).show()
+                        }.onFailure { e ->
+                            Toast.makeText(context, "Failed to send: " + e.message, Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
             }
         }
     }

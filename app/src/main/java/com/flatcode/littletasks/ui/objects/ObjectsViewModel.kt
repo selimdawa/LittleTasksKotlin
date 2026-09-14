@@ -1,7 +1,5 @@
 package com.flatcode.littletasks.ui.objects
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.flatcode.littletasks.core.utils.DATA
 import com.flatcode.littletasks.data.model.TaskItem
@@ -11,6 +9,10 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -19,14 +21,14 @@ class ObjectsViewModel @Inject constructor(
     private val database: FirebaseDatabase
 ) : ViewModel() {
 
-    private val _objects = MutableLiveData<List<TaskItem>>()
-    val objects: LiveData<List<TaskItem>> = _objects
+    private val _objects = MutableStateFlow<List<TaskItem>>(emptyList())
+    val objects: StateFlow<List<TaskItem>> = _objects.asStateFlow()
 
-    private val _objectInfo = MutableLiveData<TaskItem>()
-    val objectInfo: LiveData<TaskItem> = _objectInfo
+    private val _objectInfo = MutableStateFlow<TaskItem?>(null)
+    val objectInfo: StateFlow<TaskItem?> = _objectInfo.asStateFlow()
 
-    private val _actionResult = MutableLiveData<Result<String>>()
-    val actionResult: LiveData<Result<String>> = _actionResult
+    private val _actionResult = MutableStateFlow<Result<String>?>(null)
+    val actionResult: StateFlow<Result<String>?> = _actionResult.asStateFlow()
 
     fun loadAllObjects() {
         val uid = auth.currentUser?.uid ?: return
@@ -42,7 +44,10 @@ class ObjectsViewModel @Inject constructor(
                     }
                     _objects.value = list
                 }
-                override fun onCancelled(error: DatabaseError) {}
+
+                override fun onCancelled(error: DatabaseError) {
+                    Timber.e(error.toException(), "Error loading all objects for uid: $uid")
+                }
             })
     }
 
@@ -64,10 +69,16 @@ class ObjectsViewModel @Inject constructor(
                                 }
                                 _objects.value = list
                             }
-                            override fun onCancelled(error: DatabaseError) {}
+
+                            override fun onCancelled(error: DatabaseError) {
+                                Timber.e(error.toException(), "Error loading objects for plan: $planId")
+                            }
                         })
                 }
-                override fun onCancelled(error: DatabaseError) {}
+
+                override fun onCancelled(error: DatabaseError) {
+                    Timber.e(error.toException(), "Error loading auto tasks for plan: $planId")
+                }
             })
     }
 
@@ -78,7 +89,10 @@ class ObjectsViewModel @Inject constructor(
                     val item = snapshot.getValue(TaskItem::class.java) ?: return
                     _objectInfo.value = item
                 }
-                override fun onCancelled(error: DatabaseError) {}
+
+                override fun onCancelled(error: DatabaseError) {
+                    Timber.e(error.toException(), "Error loading object info for objectId: $objectId")
+                }
             })
     }
 
@@ -88,7 +102,13 @@ class ObjectsViewModel @Inject constructor(
             put(DATA.POINTS, points)
         }
         database.getReference(DATA.OBJECTS).child(objectId).updateChildren(hashMap)
-            .addOnSuccessListener { _actionResult.value = Result.success("Object updated") }
-            .addOnFailureListener { _actionResult.value = Result.failure(it) }
+            .addOnSuccessListener {
+                Timber.d("Object updated successfully: $objectId")
+                _actionResult.value = Result.success("Object updated")
+            }
+            .addOnFailureListener { e ->
+                Timber.e(e, "Failed to update object: $objectId")
+                _actionResult.value = Result.failure(e)
+            }
     }
 }

@@ -13,6 +13,12 @@ import com.flatcode.littletasks.core.utils.VOID
 import com.flatcode.littletasks.databinding.ActivityTaskAddBinding
 import dagger.hilt.android.AndroidEntryPoint
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+
 @AndroidEntryPoint
 class TaskAddActivity : AppCompatActivity() {
 
@@ -35,18 +41,30 @@ class TaskAddActivity : AppCompatActivity() {
         binding.toolbar.back.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
         binding.toolbar.ok.setOnClickListener { validateData() }
 
-        viewModel.categoryInfo.observe(this) { category ->
-            binding.category.text = category.name
-            VOID.GlideImage(false, context, category.image, binding.image)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.categoryInfo.collectLatest { category ->
+                    category?.let {
+                        binding.category.text = it.name
+                        VOID.GlideImage(false, context, it.image, binding.image)
+                    }
+                }
+            }
         }
 
-        viewModel.actionResult.observe(this) { result ->
-            dismissLoading()
-            result.onSuccess {
-                Toast.makeText(context, "Successfully uploaded...", Toast.LENGTH_SHORT).show()
-                finish()
-            }.onFailure { e ->
-                Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.actionResult.collectLatest { result ->
+                    result?.let {
+                        dismissLoading()
+                        it.onSuccess {
+                            Toast.makeText(context, "Successfully uploaded...", Toast.LENGTH_SHORT).show()
+                            finish()
+                        }.onFailure { e ->
+                            Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
             }
         }
 

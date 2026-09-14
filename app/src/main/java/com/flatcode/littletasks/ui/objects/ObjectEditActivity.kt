@@ -12,6 +12,12 @@ import com.flatcode.littletasks.core.utils.DATA
 import com.flatcode.littletasks.databinding.ActivityObjectEditBinding
 import dagger.hilt.android.AndroidEntryPoint
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+
 @AndroidEntryPoint
 class ObjectEditActivity : AppCompatActivity() {
 
@@ -35,18 +41,30 @@ class ObjectEditActivity : AppCompatActivity() {
         binding.name.setText(R.string.object_name)
         binding.go.setOnClickListener { validateData() }
 
-        viewModel.objectInfo.observe(this) { item ->
-            binding.nameEt.setText(item.name)
-            binding.PointsEt.setText(item.points.toString())
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.objectInfo.collectLatest { item ->
+                    item?.let {
+                        binding.nameEt.setText(it.name)
+                        binding.PointsEt.setText(it.points.toString())
+                    }
+                }
+            }
         }
 
-        viewModel.actionResult.observe(this) { result ->
-            dismissLoading()
-            result.onSuccess {
-                Toast.makeText(context, "Object updated...", Toast.LENGTH_SHORT).show()
-                finish()
-            }.onFailure { e ->
-                Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.actionResult.collectLatest { result ->
+                    result?.let {
+                        dismissLoading()
+                        it.onSuccess {
+                            Toast.makeText(context, "Object updated...", Toast.LENGTH_SHORT).show()
+                            finish()
+                        }.onFailure { e ->
+                            Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
             }
         }
 

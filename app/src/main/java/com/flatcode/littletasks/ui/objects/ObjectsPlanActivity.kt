@@ -15,6 +15,12 @@ import com.flatcode.littletasks.data.model.TaskItem
 import com.flatcode.littletasks.databinding.ActivityObjectsBinding
 import dagger.hilt.android.AndroidEntryPoint
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+
 @AndroidEntryPoint
 class ObjectsPlanActivity : AppCompatActivity() {
 
@@ -60,18 +66,22 @@ class ObjectsPlanActivity : AppCompatActivity() {
         adapter = ObjectAdapter(context, list)
         binding.recyclerView.adapter = adapter
 
-        viewModel.objects.observe(this) { newList ->
-            list.clear()
-            list.addAll(newList)
-            adapter?.notifyDataSetChanged()
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.objects.collectLatest { newList ->
+                    list.clear()
+                    list.addAll(newList)
+                    adapter?.notifyDataSetChanged()
 
-            binding.bar.visibility = View.GONE
-            if (list.isNotEmpty()) {
-                binding.recyclerView.visibility = View.VISIBLE
-                binding.emptyText.visibility = View.GONE
-            } else {
-                binding.recyclerView.visibility = View.GONE
-                binding.emptyText.visibility = View.VISIBLE
+                    binding.bar.visibility = View.GONE
+                    if (list.isNotEmpty()) {
+                        binding.recyclerView.visibility = View.VISIBLE
+                        binding.emptyText.visibility = View.GONE
+                    } else {
+                        binding.recyclerView.visibility = View.GONE
+                        binding.emptyText.visibility = View.VISIBLE
+                    }
+                }
             }
         }
     }

@@ -1,8 +1,6 @@
 package com.flatcode.littletasks.ui.category
 
 import android.net.Uri
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.flatcode.littletasks.core.utils.DATA
 import com.flatcode.littletasks.data.model.Category
@@ -16,6 +14,10 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -25,20 +27,20 @@ class CategoryViewModel @Inject constructor(
     private val storage: FirebaseStorage
 ) : ViewModel() {
 
-    private val _categories = MutableLiveData<List<Category>>()
-    val categories: LiveData<List<Category>> = _categories
+    private val _categories = MutableStateFlow<List<Category>>(emptyList())
+    val categories: StateFlow<List<Category>> = _categories.asStateFlow()
 
-    private val _planName = MutableLiveData<String>()
-    val planName: LiveData<String> = _planName
+    private val _planName = MutableStateFlow("")
+    val planName: StateFlow<String> = _planName.asStateFlow()
 
-    private val _uploadResult = MutableLiveData<Result<String>>()
-    val uploadResult: LiveData<Result<String>> = _uploadResult
+    private val _uploadResult = MutableStateFlow<Result<String>?>(null)
+    val uploadResult: StateFlow<Result<String>?> = _uploadResult.asStateFlow()
 
-    private val _categoryTasks = MutableLiveData<List<Task>>()
-    val categoryTasks: LiveData<List<Task>> = _categoryTasks
+    private val _categoryTasks = MutableStateFlow<List<Task>>(emptyList())
+    val categoryTasks: StateFlow<List<Task>> = _categoryTasks.asStateFlow()
 
-    private val _pointsSummary = MutableLiveData<Triple<Int, Int, Int>>() // all, av, level
-    val pointsSummary: LiveData<Triple<Int, Int, Int>> = _pointsSummary
+    private val _pointsSummary = MutableStateFlow(Triple(0, 0, 0)) // all, av, level
+    val pointsSummary: StateFlow<Triple<Int, Int, Int>> = _pointsSummary.asStateFlow()
 
     fun getCategories(orderBy: String) {
         val uid = auth.currentUser?.uid ?: return
@@ -56,7 +58,9 @@ class CategoryViewModel @Inject constructor(
                     _categories.value = list.reversed()
                 }
 
-                override fun onCancelled(error: DatabaseError) {}
+                override fun onCancelled(error: DatabaseError) {
+                    Timber.e(error.toException(), "Error fetching categories")
+                }
             })
     }
 
@@ -68,7 +72,9 @@ class CategoryViewModel @Inject constructor(
                     _planName.value = plan.name ?: ""
                 }
 
-                override fun onCancelled(error: DatabaseError) {}
+                override fun onCancelled(error: DatabaseError) {
+                    Timber.e(error.toException(), "Error loading plan name for planId: $planId")
+                }
             })
     }
 
@@ -92,13 +98,18 @@ class CategoryViewModel @Inject constructor(
                     }
                     ref.child(id).setValue(hashMap).addOnSuccessListener {
                         addAutoTasksForCategory(id, planId)
+                        Timber.d("Category added successfully: $id")
                         _uploadResult.value = Result.success("Category uploaded")
                     }.addOnFailureListener { e ->
+                        Timber.e(e, "Failed to add category to database")
                         _uploadResult.value = Result.failure(e)
                     }
                 }
             }
-            .addOnFailureListener { _uploadResult.value = Result.failure(it) }
+            .addOnFailureListener {
+                Timber.e(it, "Failed to upload category image")
+                _uploadResult.value = Result.failure(it)
+            }
     }
 
     private fun addAutoTasksForCategory(categoryId: String, planId: String) {
@@ -114,7 +125,9 @@ class CategoryViewModel @Inject constructor(
                     }
                 }
 
-                override fun onCancelled(error: DatabaseError) {}
+                override fun onCancelled(error: DatabaseError) {
+                    Timber.e(error.toException(), "Error adding auto tasks for category: $categoryId")
+                }
             })
     }
 
@@ -139,10 +152,14 @@ class CategoryViewModel @Inject constructor(
                             put(DATA.END, DATA.ZERO)
                         }
                         ref.child(id).setValue(hashMap)
+                            .addOnSuccessListener { Timber.d("Auto task added: $id") }
+                            .addOnFailureListener { e -> Timber.e(e, "Failed to add auto task") }
                     }
                 }
 
-                override fun onCancelled(error: DatabaseError) {}
+                override fun onCancelled(error: DatabaseError) {
+                    Timber.e(error.toException(), "Error checking object for auto task")
+                }
             })
     }
 
@@ -156,6 +173,9 @@ class CategoryViewModel @Inject constructor(
                 it.storage.downloadUrl.addOnSuccessListener { uri ->
                     updateCategoryInDB(categoryId, name, uri.toString())
                 }
+            }.addOnFailureListener {
+                Timber.e(it, "Failed to upload updated category image")
+                _uploadResult.value = Result.failure(it)
             }
         }
     }
@@ -166,8 +186,14 @@ class CategoryViewModel @Inject constructor(
             imageUrl?.let { put(DATA.IMAGE, it) }
         }
         database.getReference(DATA.CATEGORIES).child(categoryId).updateChildren(hashMap)
-            .addOnSuccessListener { _uploadResult.value = Result.success("Category updated") }
-            .addOnFailureListener { _uploadResult.value = Result.failure(it) }
+            .addOnSuccessListener {
+                Timber.d("Category updated successfully: $categoryId")
+                _uploadResult.value = Result.success("Category updated")
+            }
+            .addOnFailureListener { e ->
+                Timber.e(e, "Failed to update category in database")
+                _uploadResult.value = Result.failure(e)
+            }
     }
 
     fun getCategoryTasks(categoryId: String, orderBy: String) {
@@ -193,7 +219,9 @@ class CategoryViewModel @Inject constructor(
                     _pointsSummary.value = Triple(totalPoints, avPoints, level)
                 }
 
-                override fun onCancelled(error: DatabaseError) {}
+                override fun onCancelled(error: DatabaseError) {
+                    Timber.e(error.toException(), "Error fetching tasks for category: $categoryId")
+                }
             })
     }
 
