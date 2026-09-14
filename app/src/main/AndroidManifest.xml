@@ -31,7 +31,7 @@
         tools:replace="android:supportsRtl"
         tools:targetApi="31">
         <activity
-            android:name=".Activity.SplashActivity"
+            android:name=".ui.main.SplashActivity"
             android:exported="true"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -41,73 +41,73 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Activity.MainActivity"
+            android:name=".ui.main.MainActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Activity.ObjectsPlanActivity"
+            android:name=".ui.objects.ObjectsPlanActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Activity.ObjectsActivity"
+            android:name=".ui.objects.ObjectsActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Activity.ObjectEditActivity"
+            android:name=".ui.objects.ObjectEditActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Activity.ObjectAddActivity"
+            android:name=".ui.objects.ObjectAddActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Activity.PlanEditActivity"
+            android:name=".ui.plan.PlanEditActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Activity.PlanAddActivity"
+            android:name=".ui.plan.PlanAddActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Activity.PlansActivity"
+            android:name=".ui.plan.PlansActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Activity.TaskAddActivity"
+            android:name=".ui.task.TaskAddActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Activity.ProfileEditActivity"
+            android:name=".ui.profile.ProfileEditActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Activity.ProfileActivity"
+            android:name=".ui.profile.ProfileActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Activity.TaskEditActivity"
+            android:name=".ui.task.TaskEditActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Activity.CategoryAddActivity"
+            android:name=".ui.category.CategoryAddActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Auth.ForgetPasswordActivity"
+            android:name=".ui.auth.ForgetPasswordActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Auth.LoginActivity"
+            android:name=".ui.auth.LoginActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Auth.RegisterActivity"
+            android:name=".ui.auth.RegisterActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Auth.AuthActivity"
+            android:name=".ui.auth.AuthActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Activity.CategoryTasksActivity"
+            android:name=".ui.category.CategoryTasksActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Activity.FavoritesActivity"
+            android:name=".ui.profile.FavoritesActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Activity.ObjectsToPlanActivity"
+            android:name=".ui.objects.ObjectsToPlanActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Activity.PrivacyPolicyActivity"
+            android:name=".ui.settings.PrivacyPolicyActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Activity.CategoryEditActivity"
+            android:name=".ui.category.CategoryEditActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Activity.CategoriesActivity"
+            android:name=".ui.category.CategoriesActivity"
             android:screenOrientation="portrait" />
 
         <activity

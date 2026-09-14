@@ -1,0 +1,94 @@
+package com.flatcode.littletasks.ui.settings
+
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import com.flatcode.littletasks.R
+import com.flatcode.littletasks.core.utils.CLASS
+import com.flatcode.littletasks.core.utils.DATA
+import com.flatcode.littletasks.core.utils.VOID
+import com.flatcode.littletasks.data.model.Setting
+import com.flatcode.littletasks.databinding.FragmentSettingsBinding
+import dagger.hilt.android.AndroidEntryPoint
+import java.text.MessageFormat
+
+@AndroidEntryPoint
+class SettingsFragment : Fragment() {
+
+    private var _binding: FragmentSettingsBinding? = null
+    private val binding get() = _binding!!
+
+    private val list = ArrayList<Setting>()
+    private var adapter: SettingAdapter? = null
+    private val viewModel: SettingsViewModel by viewModels()
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
+    ): View {
+        _binding = FragmentSettingsBinding.inflate(inflater, container, false)
+
+        initStaticSettings()
+        adapter = SettingAdapter(context, list)
+        binding.recyclerView.adapter = adapter
+
+        binding.toolbar.item.setOnClickListener {
+            VOID.IntentExtra(context, CLASS.PROFILE, DATA.PROFILE_ID, DATA.FirebaseUserUid)
+        }
+
+        viewModel.userInfo.observe(viewLifecycleOwner) { user ->
+            VOID.GlideImage(true, context, user.profileImage, binding.toolbar.imageProfile)
+            binding.toolbar.username.text = user.username
+        }
+
+        viewModel.pointsSummary.observe(viewLifecycleOwner) { (total, av, level) ->
+            binding.toolbar.all.text = total.toString()
+            binding.toolbar.availablePoints.text = av.toString()
+            binding.toolbar.level.text = level.toString()
+        }
+
+        viewModel.itemCounts.observe(viewLifecycleOwner) { counts ->
+            updateSettingNumber(1, counts[DATA.CATEGORIES] ?: 0)
+            updateSettingNumber(2, counts[DATA.PLANS] ?: 0)
+            updateSettingNumber(3, counts[DATA.OBJECTS] ?: 0)
+            updateSettingNumber(4, counts[DATA.FAVORITES] ?: 0)
+        }
+
+        return binding.root
+    }
+
+    private fun initStaticSettings() {
+        list.clear()
+        list.add(Setting("1", "Edit Profile", R.drawable.ic_edit_white, 0, CLASS.PROFILE_EDIT))
+        list.add(Setting("2", "Categories", R.drawable.ic_category, 0, CLASS.CATEGORIES))
+        list.add(Setting("4", "Plans", R.drawable.ic_list, 0, type = DATA.PLANS))
+        list.add(Setting("7", "Objects", R.drawable.ic_object, 0, CLASS.OBJECTS))
+        list.add(Setting("9", "Favorites", R.drawable.ic_star_selected, 0, CLASS.FAVORITES))
+        list.add(Setting("10", "About App", R.drawable.ic_info, 0))
+        list.add(Setting("11", "Logout", R.drawable.ic_logout_white, 0))
+        list.add(Setting("12", "Share App", R.drawable.ic_share, 0))
+        list.add(Setting("13", "Rate APP", R.drawable.ic_heart_selected, 0))
+        list.add(Setting("14", "Privacy Policy", R.drawable.ic_privacy_policy, 0, CLASS.PRIVACY_POLICY))
+    }
+
+    private fun updateSettingNumber(index: Int, count: Int) {
+        if (index in list.indices && list[index].number != count) {
+            list[index].number = count
+            adapter?.notifyItemChanged(index)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.loadUserInfo()
+        viewModel.loadPoints()
+        viewModel.loadItemCounts()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+}

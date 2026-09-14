@@ -1,0 +1,56 @@
+package com.flatcode.littletasks.core.utils.filter
+
+import android.widget.Filter
+import com.flatcode.littletasks.ui.objects.ObjectOptionAdapter
+import com.flatcode.littletasks.data.model.TaskItem
+import java.util.*
+
+class ObjectOptionFilter(var list: ArrayList<TaskItem?>, var adapter: ObjectOptionAdapter) : Filter() {
+
+    override fun performFiltering(constraint: CharSequence?): FilterResults {
+        val results = FilterResults()
+        if (!constraint.isNullOrEmpty()) {
+            val query = constraint.toString().uppercase(Locale.getDefault())
+            val filteredList = ArrayList<TaskItem?>()
+            for (item in list) {
+                if (item?.name?.uppercase(Locale.getDefault())?.contains(query) == true) {
+                    filteredList.add(item)
+                }
+            }
+            results.count = filteredList.size
+            results.values = filteredList
+        } else {
+            results.count = list.size
+            results.values = list
+        }
+        return results
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun publishResults(constraint: CharSequence?, results: FilterResults) {
+        val oldList = adapter.list
+        val newList = results.values as ArrayList<TaskItem?>
+
+        adapter.list = newList
+
+        val oldSize = oldList.size
+        val newSize = newList.size
+
+        when {
+            oldSize == 0 && newSize > 0 -> adapter.notifyItemRangeInserted(0, newSize)
+            oldSize > 0 && newSize == 0 -> adapter.notifyItemRangeRemoved(0, oldSize)
+            else -> {
+                for (i in 0 until minOf(oldSize, newSize)) {
+                    if (oldList[i] != newList[i]) {
+                        adapter.notifyItemChanged(i)
+                    }
+                }
+                if (newSize > oldSize) {
+                    adapter.notifyItemRangeInserted(oldSize, newSize - oldSize)
+                } else if (oldSize > newSize) {
+                    adapter.notifyItemRangeRemoved(newSize, oldSize - newSize)
+                }
+            }
+        }
+    }
+}
