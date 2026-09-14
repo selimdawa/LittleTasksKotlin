@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="?colorOnBackground"
     android:orientation="vertical"
-    tools:context=".Fragment.SettingsFragment">
+    tools:context=".ui.settings.SettingsFragment">
 
     <include
         android:id="@+id/toolbar"

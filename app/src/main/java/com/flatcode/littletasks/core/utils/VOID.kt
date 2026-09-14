@@ -24,6 +24,7 @@ import androidx.appcompat.app.AlertDialog
 import coil3.load
 import coil3.request.crossfade
 import coil3.request.placeholder
+import coil3.request.transformations
 import com.flatcode.littletasks.data.model.Category
 import com.flatcode.littletasks.data.model.Plan
 import com.flatcode.littletasks.data.model.Setting

@@ -81,16 +81,16 @@ class SettingsFragment : Fragment() {
 
     private fun initStaticSettings() {
         list.clear()
-        list.add(Setting("1", "Edit Profile", R.drawable.ic_edit_white, 0, CLASS.PROFILE_EDIT))
-        list.add(Setting("2", "Categories", R.drawable.ic_category, 0, CLASS.CATEGORIES))
-        list.add(Setting("4", "Plans", R.drawable.ic_list, 0, type = DATA.PLANS))
-        list.add(Setting("7", "Objects", R.drawable.ic_object, 0, CLASS.OBJECTS))
-        list.add(Setting("9", "Favorites", R.drawable.ic_star_selected, 0, CLASS.FAVORITES))
-        list.add(Setting("10", "About App", R.drawable.ic_info, 0))
-        list.add(Setting("11", "Logout", R.drawable.ic_logout_white, 0))
-        list.add(Setting("12", "Share App", R.drawable.ic_share, 0))
-        list.add(Setting("13", "Rate APP", R.drawable.ic_heart_selected, 0))
-        list.add(Setting("14", "Privacy Policy", R.drawable.ic_privacy_policy, 0, CLASS.PRIVACY_POLICY))
+        list.add(Setting("1", "Edit Profile", null, R.drawable.ic_edit_white, 0, CLASS.PROFILE_EDIT))
+        list.add(Setting("2", "Categories", null, R.drawable.ic_category, 0, CLASS.CATEGORIES))
+        list.add(Setting("4", "Plans", DATA.PLANS, R.drawable.ic_list, 0))
+        list.add(Setting("7", "Objects", null, R.drawable.ic_object, 0, CLASS.OBJECTS))
+        list.add(Setting("9", "Favorites", null, R.drawable.ic_star_selected, 0, CLASS.FAVORITES))
+        list.add(Setting("10", "About App", null, R.drawable.ic_info, 0))
+        list.add(Setting("11", "Logout", null, R.drawable.ic_logout_white, 0))
+        list.add(Setting("12", "Share App", null, R.drawable.ic_share, 0))
+        list.add(Setting("13", "Rate APP", null, R.drawable.ic_heart_selected, 0))
+        list.add(Setting("14", "Privacy Policy", null, R.drawable.ic_privacy_policy, 0, CLASS.PRIVACY_POLICY))
     }
 
     private fun updateSettingNumber(index: Int, count: Int) {
