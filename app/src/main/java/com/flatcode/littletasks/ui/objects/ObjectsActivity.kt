@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.R
@@ -30,6 +31,7 @@ class ObjectsActivity : AppCompatActivity(), ObjectAdapter.ObjectListener {
     private val viewModel: ObjectsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         _binding = ActivityObjectsBinding.inflate(layoutInflater)
         setContentView(binding.root)

@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.text.TextUtils
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -30,6 +31,7 @@ class ObjectEditActivity : AppCompatActivity() {
     private val viewModel: ObjectsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         _binding = ActivityObjectEditBinding.inflate(layoutInflater)
         setContentView(binding.root)

@@ -2,6 +2,7 @@ package com.flatcode.littletasks.ui.profile
 
 import android.content.Context
 import android.os.Bundle
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.core.utils.DATA
@@ -27,6 +28,7 @@ class ProfileActivity : AppCompatActivity() {
     private val viewModel: ProfileViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         _binding = ActivityProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)

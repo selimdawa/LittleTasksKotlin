@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.core.utils.openActivity
 import com.flatcode.littletasks.databinding.ActivitySplashBinding
@@ -27,6 +28,7 @@ class SplashActivity : AppCompatActivity() {
     private val timeFinal = TIME_PER_MILLIS * timePerSecond
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         _binding = ActivitySplashBinding.inflate(layoutInflater)
         setContentView(binding.root)

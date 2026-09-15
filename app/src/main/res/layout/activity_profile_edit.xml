@@ -6,7 +6,8 @@
     android:layout_height="match_parent"
     android:background="?mc_bg"
     android:orientation="vertical"
-    tools:context=".ui.profile.ProfileEditActivity">
+    tools:context=".ui.profile.ProfileEditActivity"
+    android:fitsSystemWindows="true">
 
     <include
         android:id="@+id/toolbar"

@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.text.TextUtils
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -31,6 +32,7 @@ class TaskAddActivity : AppCompatActivity() {
     private val viewModel: TaskViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         _binding = ActivityTaskAddBinding.inflate(layoutInflater)
         setContentView(binding.root)

@@ -2,6 +2,7 @@ package com.flatcode.littletasks.ui.objects
 
 import android.content.Context
 import android.os.Bundle
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.R
 import com.flatcode.littletasks.data.model.TaskItem
@@ -20,6 +21,7 @@ class ObjectAddActivity : AppCompatActivity() {
     private val editorsChoice = TaskItem()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         _binding = ActivityObjectAddBinding.inflate(layoutInflater)
         setContentView(binding.root)

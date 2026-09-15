@@ -6,7 +6,8 @@
     android:layout_height="match_parent"
     android:background="?mc_bg"
     android:orientation="vertical"
-    tools:context=".ui.objects.ObjectEditActivity">
+    tools:context=".ui.objects.ObjectEditActivity"
+    android:fitsSystemWindows="true">
 
     <include
         android:id="@+id/toolbar"

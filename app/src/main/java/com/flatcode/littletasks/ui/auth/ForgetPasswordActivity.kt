@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Bundle
 import android.util.Patterns
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.core.utils.openActivity
@@ -28,6 +29,7 @@ class ForgetPasswordActivity : AppCompatActivity() {
     private var dialog: ProgressDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         _binding = ActivityForgetPasswordBinding.inflate(layoutInflater)
         setContentView(binding.root)
