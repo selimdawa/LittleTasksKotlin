@@ -10,11 +10,11 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.flatcode.littletasks.R
-import com.flatcode.littletasks.core.utils.CLASS
 import com.flatcode.littletasks.core.utils.DATA
-import com.flatcode.littletasks.core.utils.VOID
+import com.flatcode.littletasks.core.utils.openActivity
 import com.flatcode.littletasks.data.model.Task
 import com.flatcode.littletasks.databinding.ActivityPageSwitchBinding
+import com.flatcode.littletasks.ui.task.TaskAddActivity
 import com.flatcode.littletasks.ui.task.TaskAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.MessageFormat
@@ -53,7 +53,7 @@ class CategoryTasksActivity : AppCompatActivity() {
         binding.toolbar.close.setOnClickListener { handleBackPressed() }
         binding.add.add.setText(R.string.add_task)
         binding.add.item.setOnClickListener {
-            VOID.IntentExtra(context, CLASS.TASK_ADD, DATA.CATEGORY_ID, id)
+            context.openActivity(TaskAddActivity::class.java, DATA.CATEGORY_ID to id)
         }
 
         binding.toolbar.search.setOnClickListener {

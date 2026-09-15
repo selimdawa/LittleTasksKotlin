@@ -8,9 +8,10 @@ import android.widget.Filter
 import android.widget.Filterable
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.flatcode.littletasks.core.utils.CLASS
 import com.flatcode.littletasks.core.utils.DATA
-import com.flatcode.littletasks.core.utils.VOID
+import com.flatcode.littletasks.core.utils.loadImage
+import com.flatcode.littletasks.core.utils.moreCategory
+import com.flatcode.littletasks.core.utils.openActivity
 import com.flatcode.littletasks.core.utils.filter.CategoriesFilter
 import com.flatcode.littletasks.data.model.Category
 import com.flatcode.littletasks.data.model.Task
@@ -38,7 +39,7 @@ class CategoriesAdapter(private val context: Context, var list: ArrayList<Catego
         val name = DATA.EMPTY + item.name
         val image = DATA.EMPTY + item.image
 
-        VOID.GlideImage(false, context, image, holder.binding.image)
+        holder.binding.image.loadImage(false, image)
 
         if (name == DATA.EMPTY) {
             holder.binding.name.visibility = View.GONE
@@ -48,10 +49,10 @@ class CategoriesAdapter(private val context: Context, var list: ArrayList<Catego
         }
 
         nrBooks(holder.binding.number, id)
-        holder.binding.more.setOnClickListener { VOID.moreCategory(context, item) }
+        holder.binding.more.setOnClickListener { context.moreCategory(item) }
 
         holder.binding.card.setOnClickListener {
-            VOID.IntentExtra2(context, CLASS.CATEGORY_TASKS, DATA.ID, id, DATA.NAME, name)
+            context.openActivity(CategoryTasksActivity::class.java, DATA.ID to id, DATA.NAME to name)
         }
     }
 

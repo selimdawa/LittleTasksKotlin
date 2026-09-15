@@ -7,12 +7,15 @@ import android.view.ViewGroup
 import android.widget.Filter
 import android.widget.Filterable
 import androidx.recyclerview.widget.RecyclerView
-import com.flatcode.littletasks.core.utils.CLASS
 import com.flatcode.littletasks.core.utils.DATA
-import com.flatcode.littletasks.core.utils.VOID
+import com.flatcode.littletasks.core.utils.loadImage
+import com.flatcode.littletasks.core.utils.morePlan
+import com.flatcode.littletasks.core.utils.openActivity
 import com.flatcode.littletasks.core.utils.filter.PlansFilter
 import com.flatcode.littletasks.data.model.Plan
 import com.flatcode.littletasks.databinding.ItemPlanBinding
+import com.flatcode.littletasks.ui.category.CategoryAddActivity
+import com.flatcode.littletasks.ui.objects.ObjectsPlanActivity
 
 class PlanAdapter(private val context: Context, var list: ArrayList<Plan?>, var isNew: Boolean) :
     RecyclerView.Adapter<PlanAdapter.ViewHolder>(), Filterable {
@@ -31,7 +34,7 @@ class PlanAdapter(private val context: Context, var list: ArrayList<Plan?>, var 
         val name = DATA.EMPTY + item.name
         val image = DATA.EMPTY + item.image
 
-        VOID.GlideImage(false, context, image, holder.binding.image)
+        holder.binding.image.loadImage(false, image)
 
         if (name == DATA.EMPTY) {
             holder.binding.name.visibility = View.GONE
@@ -42,12 +45,12 @@ class PlanAdapter(private val context: Context, var list: ArrayList<Plan?>, var 
 
         holder.binding.more.visibility = if (isNew) View.GONE else View.VISIBLE
 
-        holder.binding.more.setOnClickListener { VOID.morePlan(context, item) }
+        holder.binding.more.setOnClickListener { context.morePlan(item) }
         holder.binding.item.setOnClickListener {
             if (isNew) {
-                VOID.IntentExtra(context, CLASS.CATEGORY_ADD, DATA.ID, id)
+                context.openActivity(CategoryAddActivity::class.java, DATA.ID to id)
             } else {
-                VOID.IntentExtra2(context, CLASS.OBJECTS_PLAN, DATA.ID, id, DATA.NAME, name)
+                context.openActivity(ObjectsPlanActivity::class.java, DATA.ID to id, DATA.NAME to name)
             }
         }
     }

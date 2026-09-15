@@ -8,7 +8,7 @@ import android.widget.Filter
 import android.widget.Filterable
 import androidx.recyclerview.widget.RecyclerView
 import com.flatcode.littletasks.core.utils.DATA
-import com.flatcode.littletasks.core.utils.VOID
+import com.flatcode.littletasks.core.utils.moreObject
 import com.flatcode.littletasks.core.utils.filter.ObjectsFilter
 import com.flatcode.littletasks.data.model.TaskItem
 import com.flatcode.littletasks.databinding.ItemObjectBinding
@@ -43,7 +43,7 @@ class ObjectAdapter(private val context: Context, var list: ArrayList<TaskItem?>
             holder.binding.points.text = points
         }
 
-        holder.binding.more.setOnClickListener { VOID.moreObject(context, item) }
+        holder.binding.more.setOnClickListener { context.moreObject(item) }
     }
 
     override fun getItemCount(): Int = list.size

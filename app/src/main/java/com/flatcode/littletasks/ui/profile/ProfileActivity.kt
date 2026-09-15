@@ -4,9 +4,9 @@ import android.content.Context
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.flatcode.littletasks.core.utils.CLASS
 import com.flatcode.littletasks.core.utils.DATA
-import com.flatcode.littletasks.core.utils.VOID
+import com.flatcode.littletasks.core.utils.loadImage
+import com.flatcode.littletasks.core.utils.openActivity
 import com.flatcode.littletasks.databinding.ActivityProfileBinding
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -33,7 +33,7 @@ class ProfileActivity : AppCompatActivity() {
 
         profileId = intent.getStringExtra(DATA.PROFILE_ID)
 
-        binding.edit.setOnClickListener { VOID.Intent1(context, CLASS.PROFILE_EDIT) }
+        binding.edit.setOnClickListener { context.openActivity(ProfileEditActivity::class.java) }
         binding.back.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
 
         lifecycleScope.launch {
@@ -41,7 +41,7 @@ class ProfileActivity : AppCompatActivity() {
                 viewModel.userInfo.collectLatest { item ->
                     item?.let {
                         binding.username.text = it.username
-                        VOID.GlideImage(true, context, it.profileImage, binding.profile)
+                        binding.profile.loadImage(true, it.profileImage)
                     }
                 }
             }

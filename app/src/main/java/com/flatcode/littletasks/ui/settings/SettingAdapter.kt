@@ -6,11 +6,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.flatcode.littletasks.core.utils.CLASS
 import com.flatcode.littletasks.core.utils.DATA
-import com.flatcode.littletasks.core.utils.VOID
+import com.flatcode.littletasks.core.utils.dialogAboutApp
+import com.flatcode.littletasks.core.utils.dialogLogout
+import com.flatcode.littletasks.core.utils.openActivity
+import com.flatcode.littletasks.core.utils.rateApp
+import com.flatcode.littletasks.core.utils.shareApp
 import com.flatcode.littletasks.data.model.Setting
 import com.flatcode.littletasks.databinding.ItemSettingBinding
+import com.flatcode.littletasks.ui.plan.PlansActivity
 import java.text.MessageFormat
 
 class SettingAdapter(private val context: Context?, private val list: ArrayList<Setting>) :
@@ -43,17 +47,17 @@ class SettingAdapter(private val context: Context?, private val list: ArrayList<
         holder.binding.item.setOnClickListener {
             if (type != null) {
                 if (type == DATA.PLANS) {
-                    VOID.IntentExtra(context, CLASS.PLANS, DATA.NEW_PLAN, DATA.EMPTY + false)
+                    context?.openActivity(PlansActivity::class.java, DATA.NEW_PLAN to "false")
                 } else if (type == DATA.CHOOSE_PLAN) {
-                    VOID.IntentExtra(context, CLASS.PLANS, DATA.NEW_PLAN, DATA.EMPTY + true)
+                    context?.openActivity(PlansActivity::class.java, DATA.NEW_PLAN to "true")
                 }
             } else {
                 when (id) {
-                    "10" -> VOID.dialogAboutApp(context as? Activity)
-                    "11" -> VOID.dialogLogout(context as? Activity)
-                    "12" -> VOID.shareApp(context)
-                    "13" -> VOID.rateApp(context)
-                    else -> VOID.Intent1(context, to)
+                    "10" -> (context as? Activity)?.dialogAboutApp()
+                    "11" -> (context as? Activity)?.dialogLogout()
+                    "12" -> context?.shareApp()
+                    "13" -> context?.rateApp()
+                    else -> if (to != null) context?.openActivity(to)
                 }
             }
         }

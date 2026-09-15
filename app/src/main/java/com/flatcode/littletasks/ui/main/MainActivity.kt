@@ -10,10 +10,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.flatcode.littletasks.R
-import com.flatcode.littletasks.core.utils.CLASS
 import com.flatcode.littletasks.core.utils.DATA
-import com.flatcode.littletasks.core.utils.VOID
+import com.flatcode.littletasks.core.utils.closeApp
+import com.flatcode.littletasks.core.utils.loadImage
+import com.flatcode.littletasks.core.utils.openActivity
 import com.flatcode.littletasks.databinding.ActivityMainBinding
+import com.flatcode.littletasks.ui.profile.ProfileActivity
 import dagger.hilt.android.AndroidEntryPoint
 import io.selimdawa.bubblebottom.BubbleBottomNavigation
 
@@ -43,7 +45,7 @@ class MainActivity : AppCompatActivity() {
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                VOID.closeApp(this@MainActivity)
+                this@MainActivity.closeApp()
             }
         })
 
@@ -66,14 +68,14 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.toolbar.image.setOnClickListener {
-            VOID.IntentExtra(context, CLASS.PROFILE, DATA.PROFILE_ID, DATA.FirebaseUserUid)
+            context.openActivity(ProfileActivity::class.java, DATA.PROFILE_ID to DATA.FirebaseUserUid)
         }
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.profileImage.collectLatest { profileImage ->
                     if (profileImage.isNotEmpty()) {
-                        VOID.GlideImage(true, this@MainActivity, profileImage, binding.toolbar.image)
+                        binding.toolbar.image.loadImage(true, profileImage)
                     }
                 }
             }

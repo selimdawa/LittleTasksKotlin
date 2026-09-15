@@ -14,7 +14,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.R
 import com.flatcode.littletasks.core.utils.DATA
-import com.flatcode.littletasks.core.utils.VOID
+import com.flatcode.littletasks.core.utils.getFileExtension
+import com.flatcode.littletasks.core.utils.loadImage
 import com.flatcode.littletasks.databinding.ActivityProfileEditBinding
 import com.theartofdev.edmodo.cropper.CropImage
 import dagger.hilt.android.AndroidEntryPoint
@@ -97,7 +98,7 @@ class ProfileEditActivity : AppCompatActivity() {
                 viewModel.userInfo.collectLatest { user ->
                     user?.let {
                         binding.nameEt.setText(it.username)
-                        VOID.GlideImage(true, context, it.profileImage, binding.profileImage)
+                        binding.profileImage.loadImage(true, it.profileImage)
                     }
                 }
             }
@@ -142,7 +143,7 @@ class ProfileEditActivity : AppCompatActivity() {
             Toast.makeText(context, "Enter name...", Toast.LENGTH_SHORT).show()
         } else {
             showLoading()
-            val extension = imageUri?.let { VOID.getFileExtension(it, context) }
+            val extension = imageUri?.getFileExtension(context)
             viewModel.updateProfile(username, imageUri, extension)
         }
     }

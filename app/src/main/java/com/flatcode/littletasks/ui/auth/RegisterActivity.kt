@@ -8,9 +8,10 @@ import android.util.Patterns
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.flatcode.littletasks.core.utils.CLASS
-import com.flatcode.littletasks.core.utils.VOID
+import com.flatcode.littletasks.core.utils.openActivity
+import com.flatcode.littletasks.core.utils.openActivityAndClear
 import com.flatcode.littletasks.databinding.ActivityRegisterBinding
+import com.flatcode.littletasks.ui.main.MainActivity
 import dagger.hilt.android.AndroidEntryPoint
 
 import androidx.lifecycle.Lifecycle
@@ -40,10 +41,10 @@ class RegisterActivity : AppCompatActivity() {
         }
 
         binding.login.setOnClickListener {
-            VOID.Intent1(context, CLASS.LOGIN)
+            context.openActivity(LoginActivity::class.java)
             finish()
         }
-        binding.forget.setOnClickListener { VOID.Intent1(context, CLASS.FORGET_PASSWORD) }
+        binding.forget.setOnClickListener { context.openActivity(ForgetPasswordActivity::class.java) }
         binding.go.setOnClickListener { validateData() }
 
         lifecycleScope.launch {
@@ -53,7 +54,7 @@ class RegisterActivity : AppCompatActivity() {
                         dialog?.dismiss()
                         it.onSuccess {
                             Toast.makeText(context, "Account created...", Toast.LENGTH_SHORT).show()
-                            VOID.IntentClear(context, CLASS.MAIN)
+                            context.openActivityAndClear(MainActivity::class.java)
                             finish()
                         }.onFailure { e ->
                             Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()

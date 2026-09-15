@@ -8,7 +8,8 @@ import android.widget.Filter
 import android.widget.Filterable
 import androidx.recyclerview.widget.RecyclerView
 import com.flatcode.littletasks.core.utils.DATA
-import com.flatcode.littletasks.core.utils.VOID
+import com.flatcode.littletasks.core.utils.checkPlan
+import com.flatcode.littletasks.core.utils.isPlan
 import com.flatcode.littletasks.core.utils.filter.ObjectOptionFilter
 import com.flatcode.littletasks.data.model.TaskItem
 import com.flatcode.littletasks.databinding.ItemObjectBinding
@@ -48,8 +49,8 @@ class ObjectOptionAdapter(
             holder.binding.points.text = points
         }
 
-        VOID.isPlan(holder.binding.option, id, planId)
-        holder.binding.option.setOnClickListener { VOID.checkPlan(holder.binding.option, id, planId) }
+        holder.binding.option.isPlan(id, planId)
+        holder.binding.option.setOnClickListener { holder.binding.option.checkPlan(id, planId) }
     }
 
     override fun getItemCount(): Int = list.size

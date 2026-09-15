@@ -7,8 +7,7 @@ import android.util.Patterns
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.flatcode.littletasks.core.utils.CLASS
-import com.flatcode.littletasks.core.utils.VOID
+import com.flatcode.littletasks.core.utils.openActivity
 import com.flatcode.littletasks.databinding.ActivityForgetPasswordBinding
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -39,11 +38,11 @@ class ForgetPasswordActivity : AppCompatActivity() {
         }
 
         binding.noAccount.setOnClickListener {
-            VOID.Intent1(context, CLASS.REGISTER)
+            context.openActivity(RegisterActivity::class.java)
             finish()
         }
         binding.login.setOnClickListener {
-            VOID.Intent1(context, CLASS.LOGIN)
+            context.openActivity(LoginActivity::class.java)
             finish()
         }
         binding.go.setOnClickListener { validateDate() }

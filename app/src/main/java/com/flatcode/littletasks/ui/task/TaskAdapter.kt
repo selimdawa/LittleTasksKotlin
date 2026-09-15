@@ -11,7 +11,11 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.flatcode.littletasks.core.utils.DATA
 import com.flatcode.littletasks.core.utils.GetTimeAgo
-import com.flatcode.littletasks.core.utils.VOID
+import com.flatcode.littletasks.core.utils.checkFavorite
+import com.flatcode.littletasks.core.utils.isFavorite
+import com.flatcode.littletasks.core.utils.isTask
+import com.flatcode.littletasks.core.utils.loadImage
+import com.flatcode.littletasks.core.utils.moreTask
 import com.flatcode.littletasks.core.utils.filter.TaskCategoryFilter
 import com.flatcode.littletasks.data.model.Category
 import com.flatcode.littletasks.data.model.Task
@@ -72,11 +76,11 @@ class TaskAdapter(private val context: Context, var list: ArrayList<Task?>) :
         }
 
         getData(category, holder.binding.category, holder.binding.image)
-        VOID.isFavorite(holder.binding.favorites, id, publisher)
-        holder.binding.favorites.setOnClickListener { VOID.checkFavorite(holder.binding.favorites, id) }
-        VOID.isTask(context, holder.binding.task, id)
+        holder.binding.favorites.isFavorite(id, publisher)
+        holder.binding.favorites.setOnClickListener { holder.binding.favorites.checkFavorite(id) }
+        holder.binding.task.isTask(context, id)
 
-        holder.binding.more.setOnClickListener { VOID.moreTask(context, item) }
+        holder.binding.more.setOnClickListener { context.moreTask(item) }
     }
 
     override fun getItemCount(): Int = list.size
@@ -96,7 +100,7 @@ class TaskAdapter(private val context: Context, var list: ArrayList<Task?>) :
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val item = dataSnapshot.getValue(Category::class.java) ?: return
                     name.text = item.name
-                    VOID.GlideImage(false, context, item.image, image)
+                    image.loadImage(false, item.image)
                 }
 
                 override fun onCancelled(databaseError: DatabaseError) {}

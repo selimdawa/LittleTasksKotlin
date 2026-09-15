@@ -9,7 +9,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.R
 import com.flatcode.littletasks.core.utils.DATA
-import com.flatcode.littletasks.core.utils.VOID
+import com.flatcode.littletasks.core.utils.loadImage
 import com.flatcode.littletasks.databinding.ActivityTaskAddBinding
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -46,7 +46,7 @@ class TaskAddActivity : AppCompatActivity() {
                 viewModel.categoryInfo.collectLatest { category ->
                     category?.let {
                         binding.category.text = it.name
-                        VOID.GlideImage(false, context, it.image, binding.image)
+                        binding.image.loadImage(false, it.image)
                     }
                 }
             }

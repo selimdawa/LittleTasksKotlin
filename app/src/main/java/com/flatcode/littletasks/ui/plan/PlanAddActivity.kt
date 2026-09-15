@@ -13,7 +13,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.R
-import com.flatcode.littletasks.core.utils.VOID
+import com.flatcode.littletasks.core.utils.getFileExtension
 import com.flatcode.littletasks.databinding.ActivityPlanAddBinding
 import com.theartofdev.edmodo.cropper.CropImage
 import dagger.hilt.android.AndroidEntryPoint
@@ -131,7 +131,7 @@ class PlanAddActivity : AppCompatActivity() {
             Toast.makeText(context, "Pick Image...", Toast.LENGTH_SHORT).show()
         } else {
             showLoading()
-            val ext = VOID.getFileExtension(imageUri, context)
+            val ext = imageUri?.getFileExtension(context) ?: "jpg"
             viewModel.addPlan(title, imageUri!!, ext)
         }
     }

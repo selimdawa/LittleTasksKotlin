@@ -7,11 +7,17 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.flatcode.littletasks.R
-import com.flatcode.littletasks.core.utils.CLASS
 import com.flatcode.littletasks.core.utils.DATA
-import com.flatcode.littletasks.core.utils.VOID
+import com.flatcode.littletasks.core.utils.loadImage
+import com.flatcode.littletasks.core.utils.openActivity
 import com.flatcode.littletasks.data.model.Setting
 import com.flatcode.littletasks.databinding.FragmentSettingsBinding
+import com.flatcode.littletasks.ui.category.CategoriesActivity
+import com.flatcode.littletasks.ui.objects.ObjectsActivity
+import com.flatcode.littletasks.ui.profile.FavoritesActivity
+import com.flatcode.littletasks.ui.profile.ProfileActivity
+import com.flatcode.littletasks.ui.profile.ProfileEditActivity
+import com.flatcode.littletasks.ui.settings.PrivacyPolicyActivity
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.MessageFormat
 
@@ -41,14 +47,14 @@ class SettingsFragment : Fragment() {
         binding.recyclerView.adapter = adapter
 
         binding.toolbar.item.setOnClickListener {
-            VOID.IntentExtra(context, CLASS.PROFILE, DATA.PROFILE_ID, DATA.FirebaseUserUid)
+            context?.openActivity(ProfileActivity::class.java, DATA.PROFILE_ID to DATA.FirebaseUserUid)
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.userInfo.collectLatest { user ->
                     user?.let {
-                        VOID.GlideImage(true, context, it.profileImage, binding.toolbar.imageProfile)
+                        binding.toolbar.imageProfile.loadImage(true, it.profileImage)
                         binding.toolbar.username.text = it.username
                     }
                 }
@@ -81,16 +87,16 @@ class SettingsFragment : Fragment() {
 
     private fun initStaticSettings() {
         list.clear()
-        list.add(Setting("1", "Edit Profile", null, R.drawable.ic_edit_white, 0, CLASS.PROFILE_EDIT))
-        list.add(Setting("2", "Categories", null, R.drawable.ic_category, 0, CLASS.CATEGORIES))
+        list.add(Setting("1", "Edit Profile", null, R.drawable.ic_edit_white, 0, ProfileEditActivity::class.java))
+        list.add(Setting("2", "Categories", null, R.drawable.ic_category, 0, CategoriesActivity::class.java))
         list.add(Setting("4", "Plans", DATA.PLANS, R.drawable.ic_list, 0))
-        list.add(Setting("7", "Objects", null, R.drawable.ic_object, 0, CLASS.OBJECTS))
-        list.add(Setting("9", "Favorites", null, R.drawable.ic_star_selected, 0, CLASS.FAVORITES))
+        list.add(Setting("7", "Objects", null, R.drawable.ic_object, 0, ObjectsActivity::class.java))
+        list.add(Setting("9", "Favorites", null, R.drawable.ic_star_selected, 0, FavoritesActivity::class.java))
         list.add(Setting("10", "About App", null, R.drawable.ic_info, 0))
         list.add(Setting("11", "Logout", null, R.drawable.ic_logout_white, 0))
         list.add(Setting("12", "Share App", null, R.drawable.ic_share, 0))
         list.add(Setting("13", "Rate APP", null, R.drawable.ic_heart_selected, 0))
-        list.add(Setting("14", "Privacy Policy", null, R.drawable.ic_privacy_policy, 0, CLASS.PRIVACY_POLICY))
+        list.add(Setting("14", "Privacy Policy", null, R.drawable.ic_privacy_policy, 0, PrivacyPolicyActivity::class.java))
     }
 
     private fun updateSettingNumber(index: Int, count: Int) {

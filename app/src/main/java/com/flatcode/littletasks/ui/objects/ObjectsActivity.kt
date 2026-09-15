@@ -8,9 +8,8 @@ import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.R
-import com.flatcode.littletasks.core.utils.CLASS
 import com.flatcode.littletasks.core.utils.DATA
-import com.flatcode.littletasks.core.utils.VOID
+import com.flatcode.littletasks.core.utils.openActivity
 import com.flatcode.littletasks.data.model.TaskItem
 import com.flatcode.littletasks.databinding.ActivityObjectsBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -41,7 +40,7 @@ class ObjectsActivity : AppCompatActivity() {
         binding.toolbar.back.setOnClickListener { handleBackPressed() }
         binding.toolbar.close.setOnClickListener { handleBackPressed() }
         binding.add.add.setText(R.string.add_object)
-        binding.add.item.setOnClickListener { VOID.Intent1(context, CLASS.OBJECT_ADD) }
+        binding.add.item.setOnClickListener { context.openActivity(ObjectAddActivity::class.java) }
 
         binding.toolbar.search.setOnClickListener {
             binding.toolbar.toolbar.visibility = View.GONE

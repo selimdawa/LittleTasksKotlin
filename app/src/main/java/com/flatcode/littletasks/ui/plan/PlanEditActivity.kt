@@ -14,7 +14,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.R
 import com.flatcode.littletasks.core.utils.DATA
-import com.flatcode.littletasks.core.utils.VOID
+import com.flatcode.littletasks.core.utils.getFileExtension
+import com.flatcode.littletasks.core.utils.loadImage
 import com.flatcode.littletasks.databinding.ActivityPlanAddBinding
 import com.theartofdev.edmodo.cropper.CropImage
 import dagger.hilt.android.AndroidEntryPoint
@@ -100,7 +101,7 @@ class PlanEditActivity : AppCompatActivity() {
                 viewModel.planInfo.collectLatest { plan ->
                     plan?.let {
                         binding.planEt.setText(it.name)
-                        VOID.GlideImage(true, context, it.image, binding.image)
+                        binding.image.loadImage(true, it.image)
                     }
                 }
             }
@@ -145,7 +146,7 @@ class PlanEditActivity : AppCompatActivity() {
             Toast.makeText(context, "Enter name...", Toast.LENGTH_SHORT).show()
         } else {
             showLoading()
-            val ext = imageUri?.let { VOID.getFileExtension(it, context) }
+            val ext = imageUri?.getFileExtension(context)
             viewModel.updatePlan(id ?: "", name, imageUri, ext)
         }
     }

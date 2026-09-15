@@ -8,11 +8,11 @@ import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.R
-import com.flatcode.littletasks.core.utils.CLASS
 import com.flatcode.littletasks.core.utils.DATA
-import com.flatcode.littletasks.core.utils.VOID
+import com.flatcode.littletasks.core.utils.openActivity
 import com.flatcode.littletasks.data.model.Category
 import com.flatcode.littletasks.databinding.ActivityPageStaggeredBinding
+import com.flatcode.littletasks.ui.plan.PlansActivity
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.MessageFormat
 
@@ -43,7 +43,7 @@ class CategoriesActivity : AppCompatActivity() {
         binding.toolbar.close.setOnClickListener { handleBackPressed() }
         binding.add.add.setText(R.string.add_category)
         binding.add.item.setOnClickListener {
-            VOID.IntentExtra(context, CLASS.PLANS, DATA.NEW_PLAN, "true")
+            context.openActivity(PlansActivity::class.java, DATA.NEW_PLAN to "true")
         }
 
         binding.toolbar.search.setOnClickListener {

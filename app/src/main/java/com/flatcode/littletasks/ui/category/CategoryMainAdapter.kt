@@ -5,9 +5,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.flatcode.littletasks.core.utils.CLASS
 import com.flatcode.littletasks.core.utils.DATA
-import com.flatcode.littletasks.core.utils.VOID
+import com.flatcode.littletasks.core.utils.loadBlurImage
+import com.flatcode.littletasks.core.utils.loadImage
+import com.flatcode.littletasks.core.utils.moreCategory
+import com.flatcode.littletasks.core.utils.openActivity
 import com.flatcode.littletasks.data.model.Category
 import com.flatcode.littletasks.databinding.ItemCategoryBinding
 
@@ -25,8 +27,8 @@ class CategoryMainAdapter(private val context: Context?, var list: ArrayList<Cat
         val name = DATA.EMPTY + item.name
         val image = DATA.EMPTY + item.image
 
-        VOID.GlideImage(false, context, image, holder.binding.image)
-        VOID.GlideBlur(false, context, image, holder.binding.imageBlur, 50)
+        holder.binding.image.loadImage(false, image)
+        holder.binding.imageBlur.loadBlurImage(false, image, 50)
 
         if (name == DATA.EMPTY) {
             holder.binding.name.visibility = View.GONE
@@ -35,9 +37,9 @@ class CategoryMainAdapter(private val context: Context?, var list: ArrayList<Cat
             holder.binding.name.text = name
         }
 
-        holder.binding.more.setOnClickListener { VOID.moreCategory(context, item) }
+        holder.binding.more.setOnClickListener { context?.moreCategory(item) }
         holder.binding.card.setOnClickListener {
-            VOID.IntentExtra2(context, CLASS.CATEGORY_TASKS, DATA.ID, id, DATA.NAME, name)
+            context?.openActivity(CategoryTasksActivity::class.java, DATA.ID to id, DATA.NAME to name)
         }
     }
 

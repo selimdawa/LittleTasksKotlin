@@ -14,7 +14,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.R
 import com.flatcode.littletasks.core.utils.DATA
-import com.flatcode.littletasks.core.utils.VOID
+import com.flatcode.littletasks.core.utils.getFileExtension
+import com.flatcode.littletasks.core.utils.loadImage
 import com.flatcode.littletasks.data.model.Category
 import com.flatcode.littletasks.databinding.ActivityCategoryAddBinding
 import com.google.firebase.database.DataSnapshot
@@ -151,7 +152,7 @@ class CategoryEditActivity : AppCompatActivity() {
             Toast.makeText(context, "Enter name...", Toast.LENGTH_SHORT).show()
         } else {
             showLoading()
-            val ext = imageUri?.let { VOID.getFileExtension(it, context) }
+            val ext = imageUri?.getFileExtension(context)
             viewModel.updateCategory(categoryId ?: "", name, imageUri, ext)
         }
     }
@@ -163,7 +164,7 @@ class CategoryEditActivity : AppCompatActivity() {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val item = snapshot.getValue(Category::class.java) ?: return
                     binding.categoryEt.setText(item.name)
-                    VOID.GlideImage(true, context, item.image, binding.image)
+                    binding.image.loadImage(true, item.image)
                 }
 
                 override fun onCancelled(error: DatabaseError) {}

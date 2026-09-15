@@ -5,9 +5,9 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
-import com.flatcode.littletasks.core.utils.CLASS
-import com.flatcode.littletasks.core.utils.VOID
+import com.flatcode.littletasks.core.utils.openActivity
 import com.flatcode.littletasks.databinding.ActivitySplashBinding
+import com.flatcode.littletasks.ui.auth.AuthActivity
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -37,9 +37,9 @@ class SplashActivity : AppCompatActivity() {
     private fun checkUser() {
         val firebaseUser = auth.currentUser
         if (firebaseUser == null) {
-            VOID.Intent1(context, CLASS.AUTH)
+            context.openActivity(AuthActivity::class.java)
         } else {
-            VOID.Intent1(context, CLASS.MAIN)
+            context.openActivity(MainActivity::class.java)
         }
         finish()
     }

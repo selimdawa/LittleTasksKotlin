@@ -8,9 +8,10 @@ import android.util.Patterns
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.flatcode.littletasks.core.utils.CLASS
-import com.flatcode.littletasks.core.utils.VOID
+import com.flatcode.littletasks.core.utils.openActivity
+import com.flatcode.littletasks.core.utils.openActivityAndClear
 import com.flatcode.littletasks.databinding.ActivityLoginBinding
+import com.flatcode.littletasks.ui.main.MainActivity
 import dagger.hilt.android.AndroidEntryPoint
 
 import androidx.lifecycle.Lifecycle
@@ -40,8 +41,8 @@ class LoginActivity : AppCompatActivity() {
             setCanceledOnTouchOutside(false)
         }
 
-        binding.forget.setOnClickListener { VOID.Intent1(context, CLASS.FORGET_PASSWORD) }
-        binding.noAccount.setOnClickListener { VOID.Intent1(context, CLASS.REGISTER) }
+        binding.forget.setOnClickListener { context.openActivity(ForgetPasswordActivity::class.java) }
+        binding.noAccount.setOnClickListener { context.openActivity(RegisterActivity::class.java) }
         binding.loginBtn.setOnClickListener { validateDate() }
 
         lifecycleScope.launch {
@@ -50,7 +51,7 @@ class LoginActivity : AppCompatActivity() {
                     result?.let {
                         dialog?.dismiss()
                         it.onSuccess {
-                            VOID.IntentClear(context, CLASS.MAIN)
+                            context.openActivityAndClear(MainActivity::class.java)
                         }.onFailure { e ->
                             Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
                         }

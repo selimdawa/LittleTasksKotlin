@@ -8,9 +8,8 @@ import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.R
-import com.flatcode.littletasks.core.utils.CLASS
 import com.flatcode.littletasks.core.utils.DATA
-import com.flatcode.littletasks.core.utils.VOID
+import com.flatcode.littletasks.core.utils.openActivity
 import com.flatcode.littletasks.data.model.Plan
 import com.flatcode.littletasks.databinding.ActivityPlansBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -46,7 +45,7 @@ class PlansActivity : AppCompatActivity() {
         binding.toolbar.back.setOnClickListener { handleBackPressed() }
         binding.toolbar.close.setOnClickListener { handleBackPressed() }
         binding.add.add.setText(R.string.add_plan)
-        binding.add.item.setOnClickListener { VOID.Intent1(context, CLASS.PLAN_ADD) }
+        binding.add.item.setOnClickListener { context.openActivity(PlanAddActivity::class.java) }
 
         binding.toolbar.search.setOnClickListener {
             binding.toolbar.toolbar.visibility = View.GONE
