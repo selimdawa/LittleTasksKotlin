@@ -6,18 +6,25 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Filter
 import android.widget.Filterable
+import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.flatcode.littletasks.core.utils.DATA
-import com.flatcode.littletasks.core.utils.checkPlan
-import com.flatcode.littletasks.core.utils.isPlan
 import com.flatcode.littletasks.core.utils.filter.ObjectOptionFilter
 import com.flatcode.littletasks.data.model.TaskItem
 import com.flatcode.littletasks.databinding.ItemObjectBinding
 import java.text.MessageFormat
 
 class ObjectOptionAdapter(
-    private val context: Context, var list: ArrayList<TaskItem?>, var planId: String?
+    private val context: Context,
+    var list: ArrayList<TaskItem?>,
+    var planId: String?,
+    private val listener: ObjectOptionListener
 ) : RecyclerView.Adapter<ObjectOptionAdapter.ViewHolder>(), Filterable {
+
+    interface ObjectOptionListener {
+        fun onOptionClick(item: TaskItem)
+        fun isPlan(objectId: String, planId: String, imageView: ImageView)
+    }
 
     var filterList: ArrayList<TaskItem?> = list
     private var filter: ObjectOptionFilter? = null
@@ -49,8 +56,8 @@ class ObjectOptionAdapter(
             holder.binding.points.text = points
         }
 
-        holder.binding.option.isPlan(id, planId)
-        holder.binding.option.setOnClickListener { holder.binding.option.checkPlan(id, planId) }
+        listener.isPlan(id, planId ?: "", holder.binding.option)
+        holder.binding.option.setOnClickListener { listener.onOptionClick(item) }
     }
 
     override fun getItemCount(): Int = list.size

@@ -9,24 +9,28 @@ import android.widget.Filterable
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.flatcode.littletasks.R
 import com.flatcode.littletasks.core.utils.DATA
 import com.flatcode.littletasks.core.utils.GetTimeAgo
-import com.flatcode.littletasks.core.utils.checkFavorite
-import com.flatcode.littletasks.core.utils.isFavorite
-import com.flatcode.littletasks.core.utils.isTask
 import com.flatcode.littletasks.core.utils.loadImage
-import com.flatcode.littletasks.core.utils.moreTask
 import com.flatcode.littletasks.core.utils.filter.TaskCategoryFilter
 import com.flatcode.littletasks.data.model.Category
 import com.flatcode.littletasks.data.model.Task
 import com.flatcode.littletasks.databinding.ItemTaskBinding
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.*
 
-class TaskAdapter(private val context: Context, var list: ArrayList<Task?>) :
-    RecyclerView.Adapter<TaskAdapter.ViewHolder>(), Filterable {
+class TaskAdapter(
+    private val context: Context,
+    var list: ArrayList<Task?>,
+    private val listener: TaskListener
+) : RecyclerView.Adapter<TaskAdapter.ViewHolder>(), Filterable {
+
+    interface TaskListener {
+        fun onMoreClick(item: Task)
+        fun onFavoriteClick(item: Task)
+        fun onTaskClick(item: Task)
+        fun isFavorite(taskId: String, userId: String, imageView: ImageView)
+    }
 
     var filterList: ArrayList<Task?> = list
     private var filter: TaskCategoryFilter? = null
@@ -48,39 +52,32 @@ class TaskAdapter(private val context: Context, var list: ArrayList<Task?>) :
         val points = DATA.EMPTY + item.points
         val avPoints = DATA.EMPTY + item.aVPoints
 
-        if (name == DATA.EMPTY) {
-            holder.binding.name.visibility = View.GONE
-        } else {
-            holder.binding.name.visibility = View.VISIBLE
-            holder.binding.name.text = name
-        }
-
+        holder.binding.name.text = name
+        holder.binding.name.visibility = if (name.isEmpty()) View.GONE else View.VISIBLE
+        
         holder.binding.points.text = points
         holder.binding.AVPoints.text = avPoints
 
         val addTime = timestamp.toLongOrNull() ?: 0L
         holder.binding.add.text = GetTimeAgo.getMessageAgo(addTime)
 
-        if (start == "0") {
-            holder.binding.start.text = "-"
-        } else {
-            val startTime = start.toLongOrNull() ?: 0L
-            holder.binding.start.text = GetTimeAgo.getMessageAgo(startTime)
-        }
+        holder.binding.start.text = if (start == "0") "-" else GetTimeAgo.getMessageAgo(start.toLongOrNull() ?: 0L)
+        holder.binding.end.text = if (end == "0") "-" else GetTimeAgo.getMessageAgo(end.toLongOrNull() ?: 0L)
 
-        if (end == "0") {
-            holder.binding.end.text = "-"
-        } else {
-            val endTime = end.toLongOrNull() ?: 0L
-            holder.binding.end.text = GetTimeAgo.getMessageAgo(endTime)
+        // UI Updates for task status stars
+        when {
+            item.end != 0L -> holder.binding.task.setImageResource(R.drawable.ic_star_selected)
+            item.start != 0L -> holder.binding.task.setImageResource(R.drawable.ic_star_half)
+            else -> holder.binding.task.setImageResource(R.drawable.ic_star_unselected)
         }
 
         getData(category, holder.binding.category, holder.binding.image)
-        holder.binding.favorites.isFavorite(id, publisher)
-        holder.binding.favorites.setOnClickListener { holder.binding.favorites.checkFavorite(id) }
-        holder.binding.task.isTask(context, id)
-
-        holder.binding.more.setOnClickListener { context.moreTask(item) }
+        
+        listener.isFavorite(id, publisher, holder.binding.favorites)
+        
+        holder.binding.favorites.setOnClickListener { listener.onFavoriteClick(item) }
+        holder.binding.task.setOnClickListener { listener.onTaskClick(item) }
+        holder.binding.more.setOnClickListener { listener.onMoreClick(item) }
     }
 
     override fun getItemCount(): Int = list.size
@@ -96,13 +93,12 @@ class TaskAdapter(private val context: Context, var list: ArrayList<Task?>) :
 
     private fun getData(categoryId: String, name: TextView, image: ImageView) {
         FirebaseDatabase.getInstance().getReference(DATA.CATEGORIES).child(categoryId)
-            .addValueEventListener(object : ValueEventListener {
+            .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val item = dataSnapshot.getValue(Category::class.java) ?: return
                     name.text = item.name
                     image.loadImage(false, item.image)
                 }
-
                 override fun onCancelled(databaseError: DatabaseError) {}
             })
     }

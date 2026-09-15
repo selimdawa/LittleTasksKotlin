@@ -8,14 +8,13 @@ import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.R
-import com.flatcode.littletasks.core.utils.DATA
-import com.flatcode.littletasks.core.utils.openActivity
+import com.flatcode.littletasks.core.utils.*
 import com.flatcode.littletasks.data.model.Category
 import com.flatcode.littletasks.databinding.ActivityPageStaggeredBinding
 import com.flatcode.littletasks.ui.plan.PlansActivity
+import com.flatcode.littletasks.ui.task.TaskAddActivity
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.MessageFormat
-
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -23,7 +22,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class CategoriesActivity : AppCompatActivity() {
+class CategoriesActivity : AppCompatActivity(), CategoriesAdapter.CategoryListener {
 
     private var _binding: ActivityPageStaggeredBinding? = null
     private val binding get() = _binding!!
@@ -57,11 +56,10 @@ class CategoriesActivity : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 adapter?.filter?.filter(s)
             }
-
             override fun afterTextChanged(s: Editable?) {}
         })
 
-        adapter = CategoriesAdapter(context, list)
+        adapter = CategoriesAdapter(context, list, this)
         binding.recyclerView.adapter = adapter
 
         lifecycleScope.launch {
@@ -80,6 +78,19 @@ class CategoriesActivity : AppCompatActivity() {
                         binding.recyclerView.visibility = View.GONE
                         binding.emptyText.visibility = View.VISIBLE
                     }
+                }
+            }
+        }
+    }
+
+    override fun onMoreClick(item: Category) {
+        val options = arrayOf("Add Task", "Edit", "Delete")
+        context.showMoreOptions(options) { which ->
+            when (which) {
+                0 -> context.openActivity(TaskAddActivity::class.java, DATA.CATEGORY_ID to item.id, DATA.PLAN_ID to item.plan)
+                1 -> context.openActivity(CategoryEditActivity::class.java, DATA.CATEGORY_ID to item.id, DATA.PLAN_ID to item.plan)
+                2 -> context.dialogOptionDelete(DATA.CATEGORIES, item.id, item.name ?: "") {
+                    viewModel.deleteTask(DATA.CATEGORIES, item.id ?: "")
                 }
             }
         }

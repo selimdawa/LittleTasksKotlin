@@ -8,17 +8,16 @@ import android.view.View
 import android.widget.ImageView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.RecyclerView
 import com.flatcode.littletasks.R
-import com.flatcode.littletasks.core.utils.DATA
-import com.flatcode.littletasks.core.utils.openActivity
+import com.flatcode.littletasks.core.utils.*
 import com.flatcode.littletasks.data.model.Task
 import com.flatcode.littletasks.databinding.ActivityPageSwitchBinding
 import com.flatcode.littletasks.ui.task.TaskAddActivity
 import com.flatcode.littletasks.ui.task.TaskAdapter
+import com.flatcode.littletasks.ui.task.TaskEditActivity
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.MessageFormat
-
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -26,7 +25,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class CategoryTasksActivity : AppCompatActivity() {
+class CategoryTasksActivity : AppCompatActivity(), TaskAdapter.TaskListener {
 
     private var _binding: ActivityPageSwitchBinding? = null
     private val binding get() = _binding!!
@@ -70,7 +69,7 @@ class CategoryTasksActivity : AppCompatActivity() {
             override fun afterTextChanged(s: Editable?) {}
         })
 
-        adapter = TaskAdapter(context, list)
+        adapter = TaskAdapter(context, list, this)
         binding.recyclerView.adapter = adapter
         binding.recyclerViewReverse.adapter = adapter
 
@@ -96,6 +95,8 @@ class CategoryTasksActivity : AppCompatActivity() {
                     binding.toolbar.number.text = MessageFormat.format("( {0} )", list.size)
                     binding.bar.visibility = View.GONE
                     if (list.isNotEmpty()) {
+                        binding.recyclerView.visibility = View.VISIBLE
+                        binding.recyclerViewReverse.visibility = View.GONE
                         binding.emptyText.visibility = View.GONE
                     } else {
                         binding.recyclerView.visibility = View.GONE
@@ -112,6 +113,50 @@ class CategoryTasksActivity : AppCompatActivity() {
                     binding.allPoints.text = all.toString()
                     binding.av.text = av.toString()
                     binding.level.text = level.toString()
+                }
+            }
+        }
+    }
+
+    override fun onMoreClick(item: Task) {
+        val options = when {
+            item.start == 0L && item.end == 0L -> arrayOf("Edit", "Delete")
+            item.start != 0L && item.end == 0L -> arrayOf("Edit", "Delete", "Start Again")
+            item.start != 0L -> arrayOf("Edit", "Delete", "Start Again", "Not End")
+            else -> arrayOf()
+        }
+
+        MaterialAlertDialogBuilder(context)
+            .setTitle("Choose Options")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> context.openActivity(TaskEditActivity::class.java, DATA.TASK_ID to item.id, DATA.CATEGORY_ID to item.category)
+                    1 -> context.dialogOptionDelete(DATA.TASKS, item.id, item.name ?: "") {
+                        viewModel.deleteTask(DATA.TASKS, item.id ?: "")
+                    }
+                    2 -> viewModel.updateTaskStatus(item.id!!, startStatus = true, endStatus = false)
+                    3 -> viewModel.updateTaskStatus(item.id!!, startStatus = false, endStatus = true)
+                }
+            }.show()
+    }
+
+    override fun onFavoriteClick(item: Task) {
+        viewModel.toggleFavorite(item)
+    }
+
+    override fun onTaskClick(item: Task) {
+        viewModel.onTaskAction(item)
+    }
+
+    override fun isFavorite(taskId: String, userId: String, imageView: ImageView) {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.observeFavoriteStatus(taskId, userId).collectLatest { isFav ->
+                    if (isFav) {
+                        imageView.setImageResource(R.drawable.ic_remove)
+                    } else {
+                        imageView.setImageResource(R.drawable.ic___add)
+                    }
                 }
             }
         }

@@ -10,7 +10,6 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.flatcode.littletasks.core.utils.DATA
 import com.flatcode.littletasks.core.utils.loadImage
-import com.flatcode.littletasks.core.utils.moreCategory
 import com.flatcode.littletasks.core.utils.openActivity
 import com.flatcode.littletasks.core.utils.filter.CategoriesFilter
 import com.flatcode.littletasks.data.model.Category
@@ -22,8 +21,15 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import java.text.MessageFormat
 
-class CategoriesAdapter(private val context: Context, var list: ArrayList<Category?>) :
-    RecyclerView.Adapter<CategoriesAdapter.ViewHolder>(), Filterable {
+class CategoriesAdapter(
+    private val context: Context,
+    var list: ArrayList<Category?>,
+    private val listener: CategoryListener
+) : RecyclerView.Adapter<CategoriesAdapter.ViewHolder>(), Filterable {
+
+    interface CategoryListener {
+        fun onMoreClick(item: Category)
+    }
 
     var filterList: ArrayList<Category?> = list
     private var filter: CategoriesFilter? = null
@@ -49,7 +55,7 @@ class CategoriesAdapter(private val context: Context, var list: ArrayList<Catego
         }
 
         nrBooks(holder.binding.number, id)
-        holder.binding.more.setOnClickListener { context.moreCategory(item) }
+        holder.binding.more.setOnClickListener { listener.onMoreClick(item) }
 
         holder.binding.card.setOnClickListener {
             context.openActivity(CategoryTasksActivity::class.java, DATA.ID to id, DATA.NAME to name)

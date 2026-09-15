@@ -8,14 +8,20 @@ import android.widget.Filter
 import android.widget.Filterable
 import androidx.recyclerview.widget.RecyclerView
 import com.flatcode.littletasks.core.utils.DATA
-import com.flatcode.littletasks.core.utils.moreObject
 import com.flatcode.littletasks.core.utils.filter.ObjectsFilter
 import com.flatcode.littletasks.data.model.TaskItem
 import com.flatcode.littletasks.databinding.ItemObjectBinding
 import java.text.MessageFormat
 
-class ObjectAdapter(private val context: Context, var list: ArrayList<TaskItem?>) :
-    RecyclerView.Adapter<ObjectAdapter.ViewHolder>(), Filterable {
+class ObjectAdapter(
+    private val context: Context,
+    var list: ArrayList<TaskItem?>,
+    private val listener: ObjectListener
+) : RecyclerView.Adapter<ObjectAdapter.ViewHolder>(), Filterable {
+
+    interface ObjectListener {
+        fun onMoreClick(item: TaskItem)
+    }
 
     var filterList: ArrayList<TaskItem?> = list
     private var filter: ObjectsFilter? = null
@@ -43,7 +49,7 @@ class ObjectAdapter(private val context: Context, var list: ArrayList<TaskItem?>
             holder.binding.points.text = points
         }
 
-        holder.binding.more.setOnClickListener { context.moreObject(item) }
+        holder.binding.more.setOnClickListener { listener.onMoreClick(item) }
     }
 
     override fun getItemCount(): Int = list.size

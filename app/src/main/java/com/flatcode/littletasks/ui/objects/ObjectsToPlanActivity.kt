@@ -5,22 +5,23 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.widget.ImageView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.R
-import com.flatcode.littletasks.core.utils.DATA
+import com.flatcode.littletasks.core.utils.*
 import com.flatcode.littletasks.data.model.TaskItem
 import com.flatcode.littletasks.databinding.ActivityObjectsBinding
 import dagger.hilt.android.AndroidEntryPoint
-
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class ObjectsToPlanActivity : AppCompatActivity() {
+class ObjectsToPlanActivity : AppCompatActivity(), ObjectOptionAdapter.ObjectOptionListener {
 
     private var _binding: ActivityObjectsBinding? = null
     private val binding get() = _binding!!
@@ -57,7 +58,7 @@ class ObjectsToPlanActivity : AppCompatActivity() {
             override fun afterTextChanged(s: Editable?) {}
         })
 
-        adapter = ObjectOptionAdapter(context, list, id)
+        adapter = ObjectOptionAdapter(context, list, id, this)
         binding.recyclerView.adapter = adapter
 
         lifecycleScope.launch {
@@ -74,6 +75,27 @@ class ObjectsToPlanActivity : AppCompatActivity() {
                     } else {
                         binding.recyclerView.visibility = View.GONE
                         binding.emptyText.visibility = View.VISIBLE
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onOptionClick(item: TaskItem) {
+        lifecycleScope.launch {
+            val isAdded = viewModel.observePlanStatus(item.id!!, id!!).first()
+            viewModel.togglePlan(item.id!!, id!!, !isAdded)
+        }
+    }
+
+    override fun isPlan(objectId: String, planId: String, imageView: ImageView) {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.observePlanStatus(objectId, planId).collectLatest { isAdded ->
+                    if (isAdded) {
+                        imageView.setImageResource(R.drawable.ic_heart_selected)
+                    } else {
+                        imageView.setImageResource(R.drawable.ic_heart_unselected)
                     }
                 }
             }

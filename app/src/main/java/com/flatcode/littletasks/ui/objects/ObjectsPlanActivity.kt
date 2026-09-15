@@ -8,12 +8,10 @@ import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.R
-import com.flatcode.littletasks.core.utils.DATA
-import com.flatcode.littletasks.core.utils.openActivity
+import com.flatcode.littletasks.core.utils.*
 import com.flatcode.littletasks.data.model.TaskItem
 import com.flatcode.littletasks.databinding.ActivityObjectsBinding
 import dagger.hilt.android.AndroidEntryPoint
-
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -21,7 +19,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class ObjectsPlanActivity : AppCompatActivity() {
+class ObjectsPlanActivity : AppCompatActivity(), ObjectAdapter.ObjectListener {
 
     private var _binding: ActivityObjectsBinding? = null
     private val binding get() = _binding!!
@@ -62,7 +60,7 @@ class ObjectsPlanActivity : AppCompatActivity() {
             override fun afterTextChanged(s: Editable?) {}
         })
 
-        adapter = ObjectAdapter(context, list)
+        adapter = ObjectAdapter(context, list, this)
         binding.recyclerView.adapter = adapter
 
         lifecycleScope.launch {
@@ -80,6 +78,18 @@ class ObjectsPlanActivity : AppCompatActivity() {
                         binding.recyclerView.visibility = View.GONE
                         binding.emptyText.visibility = View.VISIBLE
                     }
+                }
+            }
+        }
+    }
+
+    override fun onMoreClick(item: TaskItem) {
+        val options = arrayOf("Edit", "Delete")
+        context.showMoreOptions(options) { which ->
+            when (which) {
+                0 -> context.openActivity(ObjectEditActivity::class.java, DATA.ID to item.id)
+                1 -> context.dialogOptionDelete(DATA.OBJECTS, item.id, item.name ?: "") {
+                    viewModel.deleteTask(DATA.OBJECTS, item.id ?: "")
                 }
             }
         }

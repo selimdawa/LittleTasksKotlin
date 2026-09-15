@@ -2,9 +2,11 @@ package com.flatcode.littletasks.ui.profile
 
 import android.net.Uri
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.flatcode.littletasks.core.utils.DATA
 import com.flatcode.littletasks.data.model.Task
 import com.flatcode.littletasks.data.model.User
+import com.flatcode.littletasks.data.repository.TaskRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -15,6 +17,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -22,7 +26,8 @@ import javax.inject.Inject
 class ProfileViewModel @Inject constructor(
     private val auth: FirebaseAuth,
     private val database: FirebaseDatabase,
-    private val storage: FirebaseStorage
+    private val storage: FirebaseStorage,
+    private val repository: TaskRepository
 ) : ViewModel() {
 
     private val _userInfo = MutableStateFlow<User?>(null)
@@ -152,4 +157,47 @@ class ProfileViewModel @Inject constructor(
                 }
             })
     }
+
+    fun toggleFavorite(task: Task) {
+        val uid = auth.currentUser?.uid ?: return
+        val taskId = task.id ?: return
+        viewModelScope.launch {
+            val isFav = isTaskFavorite(taskId, uid)
+            repository.toggleFavorite(taskId, uid, !isFav)
+        }
+    }
+
+    private suspend fun isTaskFavorite(taskId: String, userId: String): Boolean {
+        return try {
+            database.getReference(DATA.FAVORITES).child(userId).child(taskId)
+                .get().await().exists()
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    fun onTaskAction(task: Task) {
+        val taskId = task.id ?: return
+        viewModelScope.launch {
+            when {
+                task.end != 0L -> {}
+                task.start != 0L -> repository.setTaskEnd(taskId, task.points)
+                else -> repository.setTaskStart(taskId)
+            }
+        }
+    }
+
+    fun deleteTask(databaseName: String, id: String) {
+        viewModelScope.launch {
+            repository.deleteTask(databaseName, id)
+        }
+    }
+
+    fun updateTaskStatus(taskId: String, startStatus: Boolean, endStatus: Boolean) {
+        viewModelScope.launch {
+            repository.updateTaskStatus(taskId, startStatus, endStatus)
+        }
+    }
+
+    fun observeFavoriteStatus(taskId: String, userId: String) = repository.isFavorite(taskId, userId)
 }

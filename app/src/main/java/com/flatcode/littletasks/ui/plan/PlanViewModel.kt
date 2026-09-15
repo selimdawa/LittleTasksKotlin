@@ -2,8 +2,10 @@ package com.flatcode.littletasks.ui.plan
 
 import android.net.Uri
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.flatcode.littletasks.core.utils.DATA
 import com.flatcode.littletasks.data.model.Plan
+import com.flatcode.littletasks.data.repository.TaskRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -14,6 +16,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -21,7 +24,8 @@ import javax.inject.Inject
 class PlanViewModel @Inject constructor(
     private val auth: FirebaseAuth,
     private val database: FirebaseDatabase,
-    private val storage: FirebaseStorage
+    private val storage: FirebaseStorage,
+    private val repository: TaskRepository
 ) : ViewModel() {
 
     private val _plans = MutableStateFlow<List<Plan>>(emptyList())
@@ -128,5 +132,11 @@ class PlanViewModel @Inject constructor(
                 Timber.e(e, "Failed to update plan in database")
                 _actionResult.value = Result.failure(e)
             }
+    }
+
+    fun deletePlan(id: String) {
+        viewModelScope.launch {
+            repository.deleteTask(DATA.PLANS, id)
+        }
     }
 }

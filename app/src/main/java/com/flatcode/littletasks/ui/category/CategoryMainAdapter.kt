@@ -8,13 +8,19 @@ import androidx.recyclerview.widget.RecyclerView
 import com.flatcode.littletasks.core.utils.DATA
 import com.flatcode.littletasks.core.utils.loadBlurImage
 import com.flatcode.littletasks.core.utils.loadImage
-import com.flatcode.littletasks.core.utils.moreCategory
 import com.flatcode.littletasks.core.utils.openActivity
 import com.flatcode.littletasks.data.model.Category
 import com.flatcode.littletasks.databinding.ItemCategoryBinding
 
-class CategoryMainAdapter(private val context: Context?, var list: ArrayList<Category?>) :
-    RecyclerView.Adapter<CategoryMainAdapter.ViewHolder>() {
+class CategoryMainAdapter(
+    private val context: Context?,
+    var list: ArrayList<Category?>,
+    private val listener: CategoryMainListener
+) : RecyclerView.Adapter<CategoryMainAdapter.ViewHolder>() {
+
+    interface CategoryMainListener {
+        fun onMoreClick(item: Category)
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = ItemCategoryBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -37,7 +43,7 @@ class CategoryMainAdapter(private val context: Context?, var list: ArrayList<Cat
             holder.binding.name.text = name
         }
 
-        holder.binding.more.setOnClickListener { context?.moreCategory(item) }
+        holder.binding.more.setOnClickListener { listener.onMoreClick(item) }
         holder.binding.card.setOnClickListener {
             context?.openActivity(CategoryTasksActivity::class.java, DATA.ID to id, DATA.NAME to name)
         }

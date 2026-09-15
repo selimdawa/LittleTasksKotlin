@@ -1,24 +1,25 @@
 package com.flatcode.littletasks.ui.objects
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.flatcode.littletasks.core.utils.DATA
 import com.flatcode.littletasks.data.model.TaskItem
+import com.flatcode.littletasks.data.repository.TaskRepository
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class ObjectsViewModel @Inject constructor(
     private val auth: FirebaseAuth,
-    private val database: FirebaseDatabase
+    private val database: FirebaseDatabase,
+    private val repository: TaskRepository
 ) : ViewModel() {
 
     private val _objects = MutableStateFlow<List<TaskItem>>(emptyList())
@@ -69,16 +70,10 @@ class ObjectsViewModel @Inject constructor(
                                 }
                                 _objects.value = list
                             }
-
-                            override fun onCancelled(error: DatabaseError) {
-                                Timber.e(error.toException(), "Error loading objects for plan: $planId")
-                            }
+                            override fun onCancelled(error: DatabaseError) {}
                         })
                 }
-
-                override fun onCancelled(error: DatabaseError) {
-                    Timber.e(error.toException(), "Error loading auto tasks for plan: $planId")
-                }
+                override fun onCancelled(error: DatabaseError) {}
             })
     }
 
@@ -89,10 +84,7 @@ class ObjectsViewModel @Inject constructor(
                     val item = snapshot.getValue(TaskItem::class.java) ?: return
                     _objectInfo.value = item
                 }
-
-                override fun onCancelled(error: DatabaseError) {
-                    Timber.e(error.toException(), "Error loading object info for objectId: $objectId")
-                }
+                override fun onCancelled(error: DatabaseError) {}
             })
     }
 
@@ -103,12 +95,23 @@ class ObjectsViewModel @Inject constructor(
         }
         database.getReference(DATA.OBJECTS).child(objectId).updateChildren(hashMap)
             .addOnSuccessListener {
-                Timber.d("Object updated successfully: $objectId")
                 _actionResult.value = Result.success("Object updated")
-            }
-            .addOnFailureListener { e ->
-                Timber.e(e, "Failed to update object: $objectId")
+            }.addOnFailureListener { e ->
                 _actionResult.value = Result.failure(e)
             }
     }
+
+    fun deleteTask(databaseName: String, id: String) {
+        viewModelScope.launch {
+            repository.deleteTask(databaseName, id)
+        }
+    }
+
+    fun togglePlan(objectId: String, planId: String, isAdded: Boolean) {
+        viewModelScope.launch {
+            repository.togglePlan(objectId, planId, isAdded)
+        }
+    }
+
+    fun observePlanStatus(objectId: String, planId: String) = repository.isPlan(objectId, planId)
 }

@@ -6,11 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.flatcode.littletasks.core.utils.DATA
+import com.flatcode.littletasks.core.utils.*
 import com.flatcode.littletasks.data.model.Category
 import com.flatcode.littletasks.databinding.FragmentCategoriesBinding
+import com.flatcode.littletasks.ui.task.TaskAddActivity
 import dagger.hilt.android.AndroidEntryPoint
-
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class CategoriesFragment : Fragment() {
+class CategoriesFragment : Fragment(), CategoryMainAdapter.CategoryMainListener {
 
     private var _binding: FragmentCategoriesBinding? = null
     private val binding get() = _binding!!
@@ -32,7 +32,7 @@ class CategoriesFragment : Fragment() {
     ): View {
         _binding = FragmentCategoriesBinding.inflate(inflater, container, false)
 
-        adapter = CategoryMainAdapter(context, list)
+        adapter = CategoryMainAdapter(context, list, this)
         binding.recyclerView.adapter = adapter
 
         viewLifecycleOwner.lifecycleScope.launch {
@@ -55,6 +55,19 @@ class CategoriesFragment : Fragment() {
         }
 
         return binding.root
+    }
+
+    override fun onMoreClick(item: Category) {
+        val options = arrayOf("Add Task", "Edit", "Delete")
+        context?.showMoreOptions(options) { which ->
+            when (which) {
+                0 -> context?.openActivity(TaskAddActivity::class.java, DATA.CATEGORY_ID to item.id, DATA.PLAN_ID to item.plan)
+                1 -> context?.openActivity(CategoryEditActivity::class.java, DATA.CATEGORY_ID to item.id, DATA.PLAN_ID to item.plan)
+                2 -> context?.dialogOptionDelete(DATA.CATEGORIES, item.id, item.name ?: "") {
+                    viewModel.deleteTask(DATA.CATEGORIES, item.id ?: "")
+                }
+            }
+        }
     }
 
     override fun onResume() {

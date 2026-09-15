@@ -8,13 +8,11 @@ import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.R
-import com.flatcode.littletasks.core.utils.DATA
-import com.flatcode.littletasks.core.utils.openActivity
+import com.flatcode.littletasks.core.utils.*
 import com.flatcode.littletasks.data.model.Plan
 import com.flatcode.littletasks.databinding.ActivityPlansBinding
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.MessageFormat
-
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -22,7 +20,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class PlansActivity : AppCompatActivity() {
+class PlansActivity : AppCompatActivity(), PlanAdapter.PlanListener {
 
     private var _binding: ActivityPlansBinding? = null
     private val binding get() = _binding!!
@@ -61,7 +59,7 @@ class PlansActivity : AppCompatActivity() {
             override fun afterTextChanged(s: Editable?) {}
         })
 
-        adapter = PlanAdapter(context, list, isNew)
+        adapter = PlanAdapter(context, list, isNew, this)
         binding.recyclerView.adapter = adapter
 
         lifecycleScope.launch {
@@ -80,6 +78,18 @@ class PlansActivity : AppCompatActivity() {
                         binding.recyclerView.visibility = View.GONE
                         binding.emptyText.visibility = View.VISIBLE
                     }
+                }
+            }
+        }
+    }
+
+    override fun onMoreClick(item: Plan) {
+        val options = arrayOf("Edit", "Delete")
+        context.showMoreOptions(options) { which ->
+            when (which) {
+                0 -> context.openActivity(PlanEditActivity::class.java, DATA.ID to item.id)
+                1 -> context.dialogOptionDelete(DATA.PLANS, item.id, item.name ?: "") {
+                    viewModel.deletePlan(item.id ?: "")
                 }
             }
         }

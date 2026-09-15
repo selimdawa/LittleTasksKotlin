@@ -7,6 +7,8 @@ import com.flatcode.littletasks.data.model.Category
 import com.flatcode.littletasks.data.model.Plan
 import com.flatcode.littletasks.data.model.Task
 import com.flatcode.littletasks.data.model.TaskItem
+import androidx.lifecycle.viewModelScope
+import com.flatcode.littletasks.data.repository.TaskRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -17,6 +19,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -24,7 +28,8 @@ import javax.inject.Inject
 class CategoryViewModel @Inject constructor(
     private val auth: FirebaseAuth,
     private val database: FirebaseDatabase,
-    private val storage: FirebaseStorage
+    private val storage: FirebaseStorage,
+    private val repository: TaskRepository
 ) : ViewModel() {
 
     private val _categories = MutableStateFlow<List<Category>>(emptyList())
@@ -214,7 +219,6 @@ class CategoryViewModel @Inject constructor(
                         }
                     }
                     _categoryTasks.value = list
-                    // Level calculation logic from VOID.levelPoint
                     val level = levelPoint(avPoints, 10)
                     _pointsSummary.value = Triple(totalPoints, avPoints, level)
                 }
@@ -224,6 +228,55 @@ class CategoryViewModel @Inject constructor(
                 }
             })
     }
+
+    fun toggleFavorite(task: Task) {
+        val uid = auth.currentUser?.uid ?: return
+        val taskId = task.id ?: return
+        viewModelScope.launch {
+            val isFav = isTaskFavorite(taskId, uid)
+            repository.toggleFavorite(taskId, uid, !isFav)
+        }
+    }
+
+    private suspend fun isTaskFavorite(taskId: String, userId: String): Boolean {
+        return try {
+            database.getReference(DATA.FAVORITES).child(userId).child(taskId)
+                .get().await().exists()
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    fun onTaskAction(task: Task) {
+        val taskId = task.id ?: return
+        viewModelScope.launch {
+            when {
+                task.end != 0L -> {
+                    // Task already completed
+                }
+                task.start != 0L -> {
+                    repository.setTaskEnd(taskId, task.points)
+                }
+                else -> {
+                    repository.setTaskStart(taskId)
+                }
+            }
+        }
+    }
+
+    fun deleteTask(databaseName: String, id: String) {
+        viewModelScope.launch {
+            repository.deleteTask(databaseName, id)
+        }
+    }
+
+    fun updateTaskStatus(taskId: String, startStatus: Boolean, endStatus: Boolean) {
+        viewModelScope.launch {
+            repository.updateTaskStatus(taskId, startStatus, endStatus)
+        }
+    }
+
+    fun observeFavoriteStatus(taskId: String, userId: String) = repository.isFavorite(taskId, userId)
 
     // Copying the levelPoint logic here for MVVM compliance
     private fun levelPoint(AVPoints: Int, initialPoint: Int): Int {

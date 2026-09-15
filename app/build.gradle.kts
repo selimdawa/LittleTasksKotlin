@@ -21,35 +21,20 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-    //signingConfigs {
-    //    create("release") {
-    //        storeFile = file("D:\\MyProjects\\Kotlin\\Little Tasks\\Little Tasks\\LittleTasks.jks")
-    //        storePassword = "00000000"
-    //        keyAlias = "LittleTasks"
-    //        keyPassword = "00000000"
-    //    }
-    //}
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
-    //buildTypes {
-    //    getByName("release") {
-    //        signingConfig = signingConfigs.getByName("release")
-    //        isMinifyEnabled = true
-    //        isShrinkResources = true
-    //        proguardFiles(
-    //            getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
-    //        )
-    //    }
-    //}
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     buildFeatures {
         viewBinding = true

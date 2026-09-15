@@ -9,7 +9,6 @@ import android.widget.Filterable
 import androidx.recyclerview.widget.RecyclerView
 import com.flatcode.littletasks.core.utils.DATA
 import com.flatcode.littletasks.core.utils.loadImage
-import com.flatcode.littletasks.core.utils.morePlan
 import com.flatcode.littletasks.core.utils.openActivity
 import com.flatcode.littletasks.core.utils.filter.PlansFilter
 import com.flatcode.littletasks.data.model.Plan
@@ -17,8 +16,16 @@ import com.flatcode.littletasks.databinding.ItemPlanBinding
 import com.flatcode.littletasks.ui.category.CategoryAddActivity
 import com.flatcode.littletasks.ui.objects.ObjectsPlanActivity
 
-class PlanAdapter(private val context: Context, var list: ArrayList<Plan?>, var isNew: Boolean) :
-    RecyclerView.Adapter<PlanAdapter.ViewHolder>(), Filterable {
+class PlanAdapter(
+    private val context: Context,
+    var list: ArrayList<Plan?>,
+    var isNew: Boolean,
+    private val listener: PlanListener
+) : RecyclerView.Adapter<PlanAdapter.ViewHolder>(), Filterable {
+
+    interface PlanListener {
+        fun onMoreClick(item: Plan)
+    }
 
     var filterList: ArrayList<Plan?> = list
     private var filter: PlansFilter? = null
@@ -45,7 +52,7 @@ class PlanAdapter(private val context: Context, var list: ArrayList<Plan?>, var 
 
         holder.binding.more.visibility = if (isNew) View.GONE else View.VISIBLE
 
-        holder.binding.more.setOnClickListener { context.morePlan(item) }
+        holder.binding.more.setOnClickListener { listener.onMoreClick(item) }
         holder.binding.item.setOnClickListener {
             if (isNew) {
                 context.openActivity(CategoryAddActivity::class.java, DATA.ID to id)
