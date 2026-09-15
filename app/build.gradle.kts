@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
     alias(libs.plugins.navigation.safeargs)
+    alias(libs.plugins.kotlinParcelize)
 }
 
 android {
@@ -21,6 +22,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -47,9 +49,6 @@ dependencies {
     implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.fragment.ktx)
     implementation(libs.androidx.datastore.preferences)   //DataStore
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
     //Layout
     implementation(libs.material)
     implementation(libs.multicolors)
@@ -57,35 +56,36 @@ dependencies {
     implementation(libs.coil)                           //Coil Image
     implementation(libs.coil.network.okhttp)
     api(libs.android.image.cropper)                     //Image Crop
-    // Navigation
-    implementation(libs.navigation.fragment.ktx)
-    implementation(libs.navigation.ui.ktx)
     //Firebase
     implementation(platform(libs.firebase.bom)) //Firebase BOM
     implementation(libs.firebase.auth)
     implementation(libs.firebase.database)
     implementation(libs.firebase.storage)
     implementation(libs.firebase.analytics)
-    //implementation(libs.firebase.crashlytics)
-    //Other's
-    implementation(libs.bubblebottom)                   //Bottom Navigation
-    implementation(libs.material.ripple)                //Ripple Effect
-
-    // Hilt
+    implementation(libs.firebase.crashlytics)
+    //MVVM
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    //Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
-
-    // Room
+    // Navigation
+    implementation(libs.navigation.fragment.ktx)
+    implementation(libs.navigation.ui.ktx)
+    //Room
     implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
     ksp(libs.room.compiler)
-
-    // Coroutines
+    //Coroutines
     implementation(libs.kotlinx.coroutines.android)
-
-    // Lifecycle (MVVM)
-    implementation(libs.androidx.lifecycle.viewmodel.ktx)
-
-    // Timber
+    //Other
+    implementation(libs.bubblebottom)                   //Bottom Navigation
+    implementation(libs.material.ripple)                //Ripple Effect
     implementation(libs.timber)
+    //Test
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+}
+
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
 }

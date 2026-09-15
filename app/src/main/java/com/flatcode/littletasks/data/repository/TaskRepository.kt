@@ -1,11 +1,13 @@
 package com.flatcode.littletasks.data.repository
 
 import com.flatcode.littletasks.core.utils.DATA
+import com.flatcode.littletasks.data.local.dao.TaskDao
 import com.flatcode.littletasks.data.model.Task
 import com.google.firebase.database.*
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -20,11 +22,17 @@ interface TaskRepository {
     suspend fun deleteTask(databaseName: String, id: String): Result<Unit>
     suspend fun setTaskStart(taskId: String): Result<Unit>
     suspend fun setTaskEnd(taskId: String, points: Int): Result<Unit>
+    
+    // Room operations
+    fun getAllTasksLocal(): Flow<List<Task>>
+    suspend fun insertTaskLocal(task: Task)
+    suspend fun deleteTaskLocal(task: Task)
 }
 
 @Singleton
 class TaskRepositoryImpl @Inject constructor(
-    private val database: FirebaseDatabase
+    private val database: FirebaseDatabase,
+    private val taskDao: TaskDao
 ) : TaskRepository {
 
     override fun isFavorite(taskId: String, userId: String): Flow<Boolean> = callbackFlow {
@@ -102,7 +110,8 @@ class TaskRepositoryImpl @Inject constructor(
         val ref = database.getReference(DATA.TASKS).child(taskId)
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                trySend(snapshot.getValue(Task::class.java))
+                val task = snapshot.getValue(Task::class.java)
+                trySend(task)
             }
             override fun onCancelled(error: DatabaseError) {
                 close(error.toException())
@@ -110,11 +119,17 @@ class TaskRepositoryImpl @Inject constructor(
         }
         ref.addValueEventListener(listener)
         awaitClose { ref.removeEventListener(listener) }
+    }.onEach { task ->
+        task?.let { insertTaskLocal(it) }
     }
 
     override suspend fun deleteTask(databaseName: String, id: String): Result<Unit> {
         return try {
             database.getReference(databaseName).child(id).removeValue().await()
+            // Also delete locally if it's a task
+            if (databaseName == DATA.TASKS) {
+                taskDao.deleteTaskById(id)
+            }
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -140,5 +155,15 @@ class TaskRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    override fun getAllTasksLocal(): Flow<List<Task>> = taskDao.getAllTasks()
+
+    override suspend fun insertTaskLocal(task: Task) {
+        taskDao.insertTask(task)
+    }
+
+    override suspend fun deleteTaskLocal(task: Task) {
+        taskDao.deleteTask(task)
     }
 }
