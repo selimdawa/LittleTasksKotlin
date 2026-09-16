@@ -41,6 +41,7 @@
                     <ImageView
                         android:layout_width="20sp"
                         android:layout_height="20sp"
+                        android:contentDescription="@null"
                         android:src="@drawable/ic_note"
                         app:tint="@color/white" />
 
@@ -89,6 +90,7 @@
                     <ImageView
                         android:layout_width="20sp"
                         android:layout_height="20sp"
+                        android:contentDescription="@null"
                         android:src="@drawable/ic_info"
                         app:tint="@color/white" />
 
@@ -134,6 +136,7 @@
                     android:backgroundTint="@color/white"
                     android:rotation="180"
                     android:src="@drawable/ic_back_white"
+                    android:contentDescription="@null"
                     app:tint="@color/dark" />
 
             </LinearLayout>

@@ -58,6 +58,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:background="@color/image_profile"
+                            android:contentDescription="@null"
                             android:scaleType="centerCrop" />
 
                     </com.google.android.material.card.MaterialCardView>
@@ -75,6 +76,7 @@
                     <ImageView
                         android:layout_width="20sp"
                         android:layout_height="20sp"
+                        android:contentDescription="@null"
                         android:src="@drawable/ic_person_white"
                         app:tint="@color/white" />
 
@@ -119,6 +121,7 @@
                     android:backgroundTint="@color/white"
                     android:rotation="180"
                     android:src="@drawable/ic_back_white"
+                    android:contentDescription="@null"
                     app:tint="@color/dark" />
 
             </LinearLayout>

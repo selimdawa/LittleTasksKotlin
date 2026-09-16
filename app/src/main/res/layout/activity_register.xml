@@ -13,6 +13,7 @@
             android:id="@+id/background"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:contentDescription="@null"
             android:scaleType="centerCrop"
             android:src="@drawable/background" />
 
@@ -21,6 +22,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:alpha="0.5"
+            android:contentDescription="@null"
             android:src="@color/white"
             android:visibility="gone" />
 
@@ -29,6 +31,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:alpha="0.5"
+            android:contentDescription="@null"
             android:src="@color/black"
             android:visibility="gone" />
 
@@ -50,6 +53,7 @@
                     android:layout_width="150sp"
                     android:layout_height="150sp"
                     android:layout_centerHorizontal="true"
+                    android:contentDescription="@null"
                     android:src="@drawable/logo" />
 
                 <TextView
@@ -86,6 +90,7 @@
                         <ImageView
                             android:layout_width="20sp"
                             android:layout_height="20sp"
+                            android:contentDescription="@null"
                             android:src="@drawable/ic_person_white"
                             android:tint="?colorError" />
 
@@ -131,6 +136,7 @@
                         <ImageView
                             android:layout_width="20sp"
                             android:layout_height="20sp"
+                            android:contentDescription="@null"
                             android:src="@drawable/ic_email_gray"
                             android:tint="?colorError" />
 
@@ -177,6 +183,7 @@
                         <ImageView
                             android:layout_width="20sp"
                             android:layout_height="20sp"
+                            android:contentDescription="@null"
                             android:src="@drawable/ic_lock_gray"
                             android:tint="?colorError" />
 
@@ -292,6 +299,7 @@
                     android:background="@drawable/button2"
                     android:rotation="180"
                     android:src="@drawable/ic_back_white"
+                    android:contentDescription="@null"
                     android:textColor="@color/white" />
 
             </LinearLayout>

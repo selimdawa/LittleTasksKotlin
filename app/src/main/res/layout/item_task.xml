@@ -57,6 +57,7 @@
                     android:layout_width="25sp"
                     android:layout_height="25sp"
                     android:layout_gravity="top"
+                    android:contentDescription="@null"
                     android:src="@drawable/ic___add"
                     app:tint="?mc_tick" />
 
@@ -66,6 +67,7 @@
                     android:layout_height="25sp"
                     android:layout_gravity="top"
                     android:layout_marginHorizontal="10sp"
+                    android:contentDescription="@null"
                     android:src="@drawable/ic_star_unselected"
                     app:tint="?mc_tick" />
 
@@ -74,6 +76,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="25sp"
                     android:layout_gravity="top"
+                    android:contentDescription="@null"
                     android:src="@drawable/ic_more"
                     app:tint="?mc_tick" />
 
@@ -97,6 +100,7 @@
                     android:layout_width="20sp"
                     android:layout_height="20sp"
                     android:layout_gravity="center"
+                    android:contentDescription="@null"
                     android:gravity="center"
                     android:src="@drawable/ic_category"
                     app:tint="@color/white" />
@@ -124,6 +128,7 @@
                     android:layout_width="20sp"
                     android:layout_height="20sp"
                     android:layout_gravity="center"
+                    android:contentDescription="@null"
                     android:gravity="center"
                     android:src="@drawable/ic_info"
                     app:tint="@color/white" />
@@ -151,6 +156,7 @@
                     android:layout_width="20sp"
                     android:layout_height="20sp"
                     android:layout_gravity="center"
+                    android:contentDescription="@null"
                     android:gravity="center"
                     android:src="@drawable/ic_complete"
                     app:tint="@color/white" />
@@ -191,6 +197,7 @@
                     android:layout_width="20sp"
                     android:layout_height="20sp"
                     android:layout_gravity="center"
+                    android:contentDescription="@null"
                     android:gravity="center"
                     android:src="@drawable/ic_add"
                     app:tint="@color/white" />
@@ -218,6 +225,7 @@
                     android:layout_width="20sp"
                     android:layout_height="20sp"
                     android:layout_gravity="center"
+                    android:contentDescription="@null"
                     android:gravity="center"
                     android:src="@drawable/ic_start"
                     app:tint="@color/white" />
@@ -245,6 +253,7 @@
                     android:layout_width="20sp"
                     android:layout_height="20sp"
                     android:layout_gravity="center"
+                    android:contentDescription="@null"
                     android:gravity="center"
                     android:src="@drawable/ic_end"
                     app:tint="@color/white" />

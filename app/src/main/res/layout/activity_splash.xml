@@ -12,6 +12,7 @@
             android:id="@+id/background"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:contentDescription="@null"
             android:scaleType="centerCrop"
             android:src="@drawable/background" />
 
@@ -20,6 +21,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:alpha="0.5"
+            android:contentDescription="@null"
             android:src="@color/white"
             android:visibility="gone" />
 
@@ -28,6 +30,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:alpha="0.5"
+            android:contentDescription="@null"
             android:src="@color/black"
             android:visibility="gone" />
 
@@ -42,6 +45,7 @@
                 android:id="@+id/logo"
                 android:layout_width="200sp"
                 android:layout_height="200sp"
+                android:contentDescription="@null"
                 android:src="@drawable/logo" />
 
             <TextView

@@ -114,6 +114,7 @@
                         android:layout_width="30dp"
                         android:layout_height="30dp"
                         android:layout_gravity="center"
+                        android:contentDescription="@null"
                         android:src="@drawable/ic_web"
                         app:tint="@color/black" />
 
@@ -170,6 +171,7 @@
                         android:layout_width="30dp"
                         android:layout_height="30dp"
                         android:layout_gravity="center"
+                        android:contentDescription="@null"
                         android:src="@drawable/facebook_icon"
                         app:tint="@color/black" />
 
