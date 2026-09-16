@@ -30,7 +30,7 @@
                     android:id="@+id/image"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:contentDescription="@null"
+                    android:importantForAccessibility="no"
                     android:src="@color/image_profile"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintDimensionRatio="1:1"
@@ -70,7 +70,7 @@
                         android:id="@+id/more"
                         android:layout_width="20sp"
                         android:layout_height="20sp"
-                        android:contentDescription="@null"
+                        android:importantForAccessibility="no"
                         android:src="@drawable/ic_more"
                         app:tint="@color/white" />
 
@@ -92,7 +92,7 @@
                         android:layout_width="20sp"
                         android:layout_height="20sp"
                         android:layout_gravity="center"
-                        android:contentDescription="@null"
+                        android:importantForAccessibility="no"
                         android:src="@drawable/ic_note" />
 
                     <TextView

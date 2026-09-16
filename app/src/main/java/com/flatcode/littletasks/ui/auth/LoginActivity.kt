@@ -1,6 +1,5 @@
 package com.flatcode.littletasks.ui.auth
 
-import android.app.ProgressDialog
 import android.content.Context
 import android.os.Bundle
 import android.text.TextUtils
@@ -8,7 +7,9 @@ import android.util.Patterns
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.flatcode.littletasks.R
 import com.flatcode.littletasks.core.utils.openActivity
 import com.flatcode.littletasks.core.utils.openActivityAndClear
 import com.flatcode.littletasks.databinding.ActivityLoginBinding
@@ -20,7 +21,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 @AndroidEntryPoint
 class LoginActivity : AppCompatActivity() {
@@ -30,7 +30,7 @@ class LoginActivity : AppCompatActivity() {
 
     private val context: Context = this@LoginActivity
     private val viewModel: AuthViewModel by viewModels()
-    private var dialog: ProgressDialog? = null
+    private var dialog: AlertDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -38,14 +38,14 @@ class LoginActivity : AppCompatActivity() {
         _binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        dialog = ProgressDialog(this).apply {
-            setTitle("Please wait...")
-            setCanceledOnTouchOutside(false)
-        }
+        dialog = AlertDialog.Builder(this)
+            .setView(R.layout.layout_loading_dialog)
+            .setCancelable(false)
+            .create()
 
         binding.forget.setOnClickListener { context.openActivity(ForgetPasswordActivity::class.java) }
         binding.noAccount.setOnClickListener { context.openActivity(RegisterActivity::class.java) }
-        binding.loginBtn.setOnClickListener { validateDate() }
+        binding.loginBtn.setOnClickListener { validateData() }
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -63,7 +63,7 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun validateDate() {
+    private fun validateData() {
         val email = binding.emailEt.text.toString().trim()
         val password = binding.passwordEt.text.toString().trim()
 

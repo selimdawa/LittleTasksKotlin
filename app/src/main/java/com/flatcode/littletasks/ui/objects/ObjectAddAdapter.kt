@@ -64,7 +64,7 @@ class ObjectAddAdapter(private val context: Context, var list: List<TaskItem>) :
         val point = points.toIntOrNull() ?: 0
 
         val hashMap = HashMap<String?, Any?>().apply {
-            put(DATA.PUBLISHER, DATA.EMPTY + DATA.FirebaseUserUid)
+            put(DATA.PUBLISHER, DATA.EMPTY + DATA.firebaseUserUid)
             put(DATA.ID, id)
             put(DATA.NAME, DATA.EMPTY + name)
             put(DATA.POINTS, point)

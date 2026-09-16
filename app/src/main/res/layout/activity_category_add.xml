@@ -48,7 +48,7 @@
                             <ImageView
                                 android:layout_width="match_parent"
                                 android:layout_height="0dp"
-                                android:contentDescription="@null"
+                                android:importantForAccessibility="no"
                                 android:src="@color/white"
                                 app:layout_constraintDimensionRatio="1:1"
                                 tools:ignore="MissingConstraints" />
@@ -79,7 +79,7 @@
                                     android:id="@+id/image"
                                     android:layout_width="match_parent"
                                     android:layout_height="0dp"
-                                    android:contentDescription="@null"
+                                    android:importantForAccessibility="no"
                                     android:src="@drawable/basic_book"
                                     app:layout_constraintBottom_toBottomOf="parent"
                                     app:layout_constraintDimensionRatio="1:1"
@@ -93,7 +93,7 @@
                                 android:layout_height="40sp"
                                 android:layout_gravity="bottom|right"
                                 android:background="@drawable/button_image_add"
-                                android:contentDescription="@null"
+                                android:importantForAccessibility="no"
                                 android:padding="5sp"
                                 android:src="@drawable/ic_adds"
                                 app:layout_constraintDimensionRatio="1:1"
@@ -132,16 +132,16 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:autofillHints="name"
                     android:background="@drawable/button4"
                     android:gravity="center"
+                    android:hint="@string/category"
                     android:inputType="textPersonName|textCapWords"
                     android:maxLength="200"
                     android:padding="15sp"
                     android:textColor="@color/white"
                     android:textColorHint="@color/white"
-                    android:textSize="16sp"
-                    android:autofillHints="none"
-                    android:hint="@string/category" />
+                    android:textSize="16sp" />
 
             </com.google.android.material.textfield.TextInputLayout>
 

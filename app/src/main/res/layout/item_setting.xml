@@ -38,7 +38,7 @@
                     android:layout_width="20sp"
                     android:layout_height="20sp"
                     android:layout_gravity="center"
-                    android:contentDescription="@null"
+                    android:importantForAccessibility="no"
                     android:scaleType="centerCrop"
                     app:tint="@color/dark" />
 
@@ -49,7 +49,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="30sp"
                 android:layout_alignParentEnd="true"
-                android:text="0"
+                android:text="@string/zero"
                 android:textColor="@color/white"
                 android:textSize="12sp"
                 android:textStyle="bold"

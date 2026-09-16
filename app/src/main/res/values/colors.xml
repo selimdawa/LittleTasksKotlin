@@ -4,7 +4,7 @@
     <color name="colorPrimaryDark">#000</color>
     <color name="colorAccent">#000</color>
 
-    //Needed
+    <!-- Needed -->
     <color name="image_profile">#e0e0e0</color>
     <color name="basic_night">#434343</color>
     <color name="dark">#000000</color>

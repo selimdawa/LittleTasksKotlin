@@ -40,7 +40,7 @@
                     android:textStyle="bold" />
 
                 <View
-                    android:layout_width="1sp"
+                    android:layout_width="1dp"
                     android:layout_height="match_parent"
                     android:background="@color/white" />
 
@@ -60,7 +60,7 @@
                     android:layout_width="25sp"
                     android:layout_height="25sp"
                     android:layout_marginHorizontal="10dp"
-                    android:contentDescription="@null"
+                    android:importantForAccessibility="no"
                     android:gravity="start"
                     android:src="@drawable/ic_more"
                     android:visibility="visible"
@@ -71,7 +71,7 @@
                     android:layout_width="25sp"
                     android:layout_height="25sp"
                     android:layout_marginHorizontal="10dp"
-                    android:contentDescription="@null"
+                    android:importantForAccessibility="no"
                     android:gravity="start"
                     android:src="@drawable/ic___add"
                     android:visibility="gone"

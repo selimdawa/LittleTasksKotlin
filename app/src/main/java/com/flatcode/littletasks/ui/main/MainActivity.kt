@@ -70,7 +70,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.toolbar.image.setOnClickListener {
-            context.openActivity(ProfileActivity::class.java, DATA.PROFILE_ID to DATA.FirebaseUserUid)
+            context.openActivity(ProfileActivity::class.java, DATA.PROFILE_ID to DATA.firebaseUserUid)
         }
 
         lifecycleScope.launch {

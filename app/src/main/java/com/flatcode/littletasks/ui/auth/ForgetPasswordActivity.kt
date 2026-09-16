@@ -1,13 +1,14 @@
 package com.flatcode.littletasks.ui.auth
 
-import android.app.ProgressDialog
 import android.content.Context
 import android.os.Bundle
 import android.util.Patterns
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.flatcode.littletasks.R
 import com.flatcode.littletasks.core.utils.openActivity
 import com.flatcode.littletasks.databinding.ActivityForgetPasswordBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -26,7 +27,7 @@ class ForgetPasswordActivity : AppCompatActivity() {
 
     private val context: Context = this@ForgetPasswordActivity
     private val viewModel: AuthViewModel by viewModels()
-    private var dialog: ProgressDialog? = null
+    private var dialog: AlertDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -34,10 +35,10 @@ class ForgetPasswordActivity : AppCompatActivity() {
         _binding = ActivityForgetPasswordBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        dialog = ProgressDialog(this).apply {
-            setTitle("Please wait...")
-            setCanceledOnTouchOutside(false)
-        }
+        dialog = AlertDialog.Builder(this)
+            .setView(R.layout.layout_loading_dialog)
+            .setCancelable(false)
+            .create()
 
         binding.noAccount.setOnClickListener {
             context.openActivity(RegisterActivity::class.java)
@@ -47,7 +48,7 @@ class ForgetPasswordActivity : AppCompatActivity() {
             context.openActivity(LoginActivity::class.java)
             finish()
         }
-        binding.go.setOnClickListener { validateDate() }
+        binding.go.setOnClickListener { validateData() }
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -67,7 +68,7 @@ class ForgetPasswordActivity : AppCompatActivity() {
         }
     }
 
-    private fun validateDate() {
+    private fun validateData() {
         val email = binding.emailEt.text.toString().trim()
         if (email.isEmpty()) {
             Toast.makeText(context, "Enter email...!", Toast.LENGTH_SHORT).show()

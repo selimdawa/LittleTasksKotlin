@@ -123,7 +123,7 @@ class ProfileEditActivity : AppCompatActivity() {
             }
         }
 
-        viewModel.loadUserInfo(DATA.FirebaseUserUid)
+        viewModel.loadUserInfo(DATA.firebaseUserUid)
     }
 
     private fun showLoading() {

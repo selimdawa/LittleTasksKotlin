@@ -45,6 +45,7 @@
             android:layout_gravity="right"
             android:layout_marginRight="15sp"
             android:src="@color/image_profile"
+            android:importantForAccessibility="no"
             app:shapeAppearanceOverlay="@style/ShapeAppearance.App.Circle"
             app:tint="@color/white" />
 

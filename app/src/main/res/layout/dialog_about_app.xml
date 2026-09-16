@@ -92,55 +92,20 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <LinearLayout
+            <TextView
                 android:id="@+id/website"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
                 android:background="@color/white"
+                android:drawablePadding="10sp"
                 android:gravity="center"
-                android:orientation="horizontal"
-                android:paddingVertical="5sp">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="center"
-                    android:layout_marginHorizontal="5sp"
-                    android:layout_weight="1"
-                    android:gravity="center">
-
-                    <ImageView
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:layout_gravity="center"
-                        android:contentDescription="@null"
-                        android:src="@drawable/ic_web"
-                        app:tint="@color/black" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="center"
-                    android:layout_marginHorizontal="5sp"
-                    android:layout_weight="2"
-                    android:gravity="center">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:text="Website"
-                        android:textAlignment="center"
-                        android:textColor="?mc_track"
-                        android:textSize="21sp"
-                        android:textStyle="bold" />
-
-                </LinearLayout>
-
-            </LinearLayout>
+                android:paddingVertical="5sp"
+                android:text="@string/website"
+                android:textColor="?mc_track"
+                android:textSize="21sp"
+                android:textStyle="bold"
+                app:drawableStartCompat="@drawable/ic_web"
+                app:drawableTint="@color/black" />
 
         </com.balysv.materialripple.MaterialRippleLayout>
 
@@ -149,55 +114,20 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <LinearLayout
+            <TextView
                 android:id="@+id/facebook"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
                 android:background="@color/white"
+                android:drawablePadding="10sp"
                 android:gravity="center"
-                android:orientation="horizontal"
-                android:paddingVertical="5sp">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="center"
-                    android:layout_marginHorizontal="5sp"
-                    android:layout_weight="1"
-                    android:gravity="center">
-
-                    <ImageView
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:layout_gravity="center"
-                        android:contentDescription="@null"
-                        android:src="@drawable/facebook_icon"
-                        app:tint="@color/black" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="center"
-                    android:layout_marginHorizontal="5sp"
-                    android:layout_weight="2"
-                    android:gravity="center">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:text="Facebook"
-                        android:textAlignment="center"
-                        android:textColor="?mc_track"
-                        android:textSize="21sp"
-                        android:textStyle="bold" />
-
-                </LinearLayout>
-
-            </LinearLayout>
+                android:paddingVertical="5sp"
+                android:text="@string/facebook"
+                android:textColor="?mc_track"
+                android:textSize="21sp"
+                android:textStyle="bold"
+                app:drawableStartCompat="@drawable/facebook_icon"
+                app:drawableTint="@color/black" />
 
         </com.balysv.materialripple.MaterialRippleLayout>
 

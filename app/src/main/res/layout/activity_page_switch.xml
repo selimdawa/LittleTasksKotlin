@@ -77,7 +77,7 @@
     <View
         android:id="@+id/view"
         android:layout_width="match_parent"
-        android:layout_height="1sp"
+        android:layout_height="1dp"
         android:layout_above="@+id/linearPoints"
         android:background="@color/white" />
 
@@ -117,7 +117,7 @@
                 android:layout_marginHorizontal="10sp"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:text="0"
+                android:text="@string/zero"
                 android:textColor="@color/white"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -151,7 +151,7 @@
                 android:layout_marginHorizontal="10sp"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:text="0"
+                android:text="@string/zero"
                 android:textColor="@color/white"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -185,7 +185,7 @@
                 android:layout_marginHorizontal="10sp"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:text="0"
+                android:text="@string/zero"
                 android:textColor="@color/white"
                 android:textSize="18sp"
                 android:textStyle="bold" />

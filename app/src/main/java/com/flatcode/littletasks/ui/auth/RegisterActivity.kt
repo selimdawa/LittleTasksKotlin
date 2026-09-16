@@ -1,15 +1,15 @@
 package com.flatcode.littletasks.ui.auth
 
-import android.app.ProgressDialog
 import android.content.Context
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Patterns
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.flatcode.littletasks.R
 import com.flatcode.littletasks.core.utils.openActivity
 import com.flatcode.littletasks.core.utils.openActivityAndClear
 import com.flatcode.littletasks.databinding.ActivityRegisterBinding
@@ -30,7 +30,7 @@ class RegisterActivity : AppCompatActivity() {
 
     private val context: Context = this@RegisterActivity
     private val viewModel: AuthViewModel by viewModels()
-    private var dialog: ProgressDialog? = null
+    private var dialog: AlertDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -38,10 +38,10 @@ class RegisterActivity : AppCompatActivity() {
         _binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        dialog = ProgressDialog(this).apply {
-            setTitle("Please wait...")
-            setCanceledOnTouchOutside(false)
-        }
+        dialog = AlertDialog.Builder(this)
+            .setView(R.layout.layout_loading_dialog)
+            .setCancelable(false)
+            .create()
 
         binding.login.setOnClickListener {
             context.openActivity(LoginActivity::class.java)

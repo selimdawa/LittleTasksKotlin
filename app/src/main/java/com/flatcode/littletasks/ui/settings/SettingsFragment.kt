@@ -47,7 +47,7 @@ class SettingsFragment : Fragment() {
         binding.recyclerView.adapter = adapter
 
         binding.toolbar.item.setOnClickListener {
-            context?.openActivity(ProfileActivity::class.java, DATA.PROFILE_ID to DATA.FirebaseUserUid)
+            context?.openActivity(ProfileActivity::class.java, DATA.PROFILE_ID to DATA.firebaseUserUid)
         }
 
         viewLifecycleOwner.lifecycleScope.launch {

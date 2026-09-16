@@ -68,7 +68,7 @@
                 android:layout_height="30sp"
                 android:layout_marginHorizontal="10sp"
                 android:background="@drawable/round"
-                android:contentDescription="@null"
+                android:importantForAccessibility="no"
                 android:padding="5sp"
                 android:src="@drawable/ic_note"
                 app:tint="@color/black" />
@@ -79,7 +79,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:gravity="center"
-                android:text="0"
+                android:text="@string/zero"
                 android:textColor="@color/white"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -99,7 +99,7 @@
                 android:layout_height="30sp"
                 android:layout_marginHorizontal="10sp"
                 android:background="@drawable/round"
-                android:contentDescription="@null"
+                android:importantForAccessibility="no"
                 android:padding="5sp"
                 android:src="@drawable/ic_list"
                 app:tint="@color/black" />
@@ -110,7 +110,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:gravity="center"
-                android:text="0"
+                android:text="@string/zero"
                 android:textColor="@color/white"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -130,7 +130,7 @@
                 android:layout_height="30sp"
                 android:layout_marginHorizontal="10sp"
                 android:background="@drawable/round"
-                android:contentDescription="@null"
+                android:importantForAccessibility="no"
                 android:padding="5sp"
                 android:src="@drawable/ic_object"
                 app:tint="@color/black" />
@@ -141,7 +141,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:gravity="center"
-                android:text="0"
+                android:text="@string/zero"
                 android:textColor="@color/white"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -161,7 +161,7 @@
                 android:layout_height="30sp"
                 android:layout_marginHorizontal="10sp"
                 android:background="@drawable/round"
-                android:contentDescription="@null"
+                android:importantForAccessibility="no"
                 android:padding="5sp"
                 android:src="@drawable/ic_category"
                 app:tint="@color/black" />
@@ -172,7 +172,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:gravity="center"
-                android:text="0"
+                android:text="@string/zero"
                 android:textColor="@color/white"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -199,7 +199,7 @@
                 android:layout_height="40sp"
                 android:background="@drawable/round"
                 android:backgroundTint="@color/white"
-                android:contentDescription="@null"
+                android:importantForAccessibility="no"
                 android:padding="10sp"
                 android:src="@drawable/ic_edit_white"
                 app:tint="@color/black" />
