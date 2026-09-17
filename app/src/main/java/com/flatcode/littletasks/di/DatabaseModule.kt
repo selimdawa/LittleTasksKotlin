@@ -2,8 +2,8 @@ package com.flatcode.littletasks.di
 
 import android.content.Context
 import androidx.room.Room
-import com.flatcode.littletasks.data.local.AppDatabase
-import com.flatcode.littletasks.data.local.dao.*
+import com.flatcode.littletasks.db.AppDatabase
+import com.flatcode.littletasks.db.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

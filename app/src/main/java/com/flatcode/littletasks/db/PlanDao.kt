@@ -1,7 +1,7 @@
-package com.flatcode.littletasks.data.local.dao
+package com.flatcode.littletasks.db
 
 import androidx.room.*
-import com.flatcode.littletasks.data.model.Plan
+import com.flatcode.littletasks.model.Plan
 import kotlinx.coroutines.flow.Flow
 
 @Dao

@@ -5,9 +5,9 @@ import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.flatcode.littletasks.core.utils.DATA
-import com.flatcode.littletasks.core.utils.loadImage
-import com.flatcode.littletasks.core.utils.openActivity
+import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.utils.loadImage
+import com.flatcode.littletasks.utils.openActivity
 import com.flatcode.littletasks.databinding.ActivityProfileBinding
 import dagger.hilt.android.AndroidEntryPoint
 

@@ -2,11 +2,11 @@ package com.flatcode.littletasks.ui.category
 
 import android.net.Uri
 import androidx.lifecycle.ViewModel
-import com.flatcode.littletasks.core.utils.DATA
-import com.flatcode.littletasks.data.model.Category
-import com.flatcode.littletasks.data.model.Plan
-import com.flatcode.littletasks.data.model.Task
-import com.flatcode.littletasks.data.model.TaskItem
+import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.model.Category
+import com.flatcode.littletasks.model.Plan
+import com.flatcode.littletasks.model.Task
+import com.flatcode.littletasks.model.TaskItem
 import androidx.lifecycle.viewModelScope
 import com.flatcode.littletasks.data.repository.TaskRepository
 import com.google.firebase.auth.FirebaseAuth

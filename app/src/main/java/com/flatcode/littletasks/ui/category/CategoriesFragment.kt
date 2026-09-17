@@ -6,14 +6,17 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.flatcode.littletasks.core.utils.*
-import com.flatcode.littletasks.data.model.Category
+import com.flatcode.littletasks.model.Category
 import com.flatcode.littletasks.databinding.FragmentCategoriesBinding
 import com.flatcode.littletasks.ui.task.TaskAddActivity
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.utils.dialogOptionDelete
+import com.flatcode.littletasks.utils.openActivity
+import com.flatcode.littletasks.utils.showMoreOptions
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 

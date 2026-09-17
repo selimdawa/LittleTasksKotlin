@@ -2,8 +2,8 @@ package com.flatcode.littletasks.ui.objects
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.flatcode.littletasks.core.utils.DATA
-import com.flatcode.littletasks.data.model.TaskItem
+import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.model.TaskItem
 import com.flatcode.littletasks.data.repository.TaskRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*

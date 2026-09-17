@@ -7,12 +7,11 @@ import android.text.TextWatcher
 import android.view.View
 import android.widget.ImageView
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.R
 import com.flatcode.littletasks.core.utils.*
-import com.flatcode.littletasks.data.model.Task
+import com.flatcode.littletasks.model.Task
 import com.flatcode.littletasks.databinding.ActivityPageSwitchBinding
 import com.flatcode.littletasks.ui.task.TaskAddActivity
 import com.flatcode.littletasks.ui.task.TaskAdapter
@@ -23,6 +22,9 @@ import java.text.MessageFormat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.utils.dialogOptionDelete
+import com.flatcode.littletasks.utils.openActivity
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 

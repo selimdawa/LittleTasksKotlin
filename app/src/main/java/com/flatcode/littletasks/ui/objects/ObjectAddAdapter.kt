@@ -8,8 +8,8 @@ import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
-import com.flatcode.littletasks.core.utils.DATA
-import com.flatcode.littletasks.data.model.TaskItem
+import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.model.TaskItem
 import com.flatcode.littletasks.databinding.ItemNewPlanBinding
 import com.google.firebase.database.FirebaseDatabase
 import java.text.MessageFormat

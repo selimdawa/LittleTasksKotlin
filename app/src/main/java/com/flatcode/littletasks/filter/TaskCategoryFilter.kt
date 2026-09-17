@@ -1,17 +1,17 @@
-package com.flatcode.littletasks.core.utils.filter
+package com.flatcode.littletasks.filter
 
 import android.widget.Filter
-import com.flatcode.littletasks.ui.category.CategoriesAdapter
-import com.flatcode.littletasks.data.model.Category
+import com.flatcode.littletasks.ui.task.TaskAdapter
+import com.flatcode.littletasks.model.Task
 import java.util.*
 
-class CategoriesFilter(var list: ArrayList<Category?>, var adapter: CategoriesAdapter) : Filter() {
+class TaskCategoryFilter(var list: ArrayList<Task?>, var adapter: TaskAdapter) : Filter() {
 
     override fun performFiltering(constraint: CharSequence?): FilterResults {
         val results = FilterResults()
         if (!constraint.isNullOrEmpty()) {
             val query = constraint.toString().uppercase(Locale.getDefault())
-            val filteredList = ArrayList<Category?>()
+            val filteredList = ArrayList<Task?>()
             for (item in list) {
                 if (item?.name?.uppercase(Locale.getDefault())?.contains(query) == true) {
                     filteredList.add(item)
@@ -29,7 +29,7 @@ class CategoriesFilter(var list: ArrayList<Category?>, var adapter: CategoriesAd
     @Suppress("UNCHECKED_CAST")
     override fun publishResults(constraint: CharSequence?, results: FilterResults) {
         val oldList = adapter.list
-        val newList = results.values as ArrayList<Category?>
+        val newList = results.values as ArrayList<Task?>
 
         adapter.list = newList
 

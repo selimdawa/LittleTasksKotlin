@@ -7,9 +7,9 @@ import android.view.ViewGroup
 import android.widget.Filter
 import android.widget.Filterable
 import androidx.recyclerview.widget.RecyclerView
-import com.flatcode.littletasks.core.utils.DATA
-import com.flatcode.littletasks.core.utils.filter.ObjectsFilter
-import com.flatcode.littletasks.data.model.TaskItem
+import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.filter.ObjectsFilter
+import com.flatcode.littletasks.model.TaskItem
 import com.flatcode.littletasks.databinding.ItemObjectBinding
 import java.text.MessageFormat
 

@@ -1,7 +1,7 @@
 package com.flatcode.littletasks.ui.auth
 
 import androidx.lifecycle.ViewModel
-import com.flatcode.littletasks.core.utils.DATA
+import com.flatcode.littletasks.utils.DATA
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import dagger.hilt.android.lifecycle.HiltViewModel

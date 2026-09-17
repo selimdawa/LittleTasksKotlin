@@ -1,4 +1,4 @@
-package com.flatcode.littletasks.data.model
+package com.flatcode.littletasks.model
 
 import android.os.Parcelable
 import androidx.room.Entity

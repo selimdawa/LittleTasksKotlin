@@ -7,11 +7,11 @@ import android.view.ViewGroup
 import android.widget.Filter
 import android.widget.Filterable
 import androidx.recyclerview.widget.RecyclerView
-import com.flatcode.littletasks.core.utils.DATA
-import com.flatcode.littletasks.core.utils.loadImage
-import com.flatcode.littletasks.core.utils.openActivity
-import com.flatcode.littletasks.core.utils.filter.PlansFilter
-import com.flatcode.littletasks.data.model.Plan
+import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.utils.loadImage
+import com.flatcode.littletasks.utils.openActivity
+import com.flatcode.littletasks.filter.PlansFilter
+import com.flatcode.littletasks.model.Plan
 import com.flatcode.littletasks.databinding.ItemPlanBinding
 import com.flatcode.littletasks.ui.category.CategoryAddActivity
 import com.flatcode.littletasks.ui.objects.ObjectsPlanActivity

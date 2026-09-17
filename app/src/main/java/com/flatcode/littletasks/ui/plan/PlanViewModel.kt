@@ -3,8 +3,8 @@ package com.flatcode.littletasks.ui.plan
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.flatcode.littletasks.core.utils.DATA
-import com.flatcode.littletasks.data.model.Plan
+import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.model.Plan
 import com.flatcode.littletasks.data.repository.TaskRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot

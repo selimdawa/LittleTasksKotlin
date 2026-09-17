@@ -6,7 +6,7 @@ import android.os.Handler
 import android.os.Looper
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import com.flatcode.littletasks.core.utils.openActivity
+import com.flatcode.littletasks.utils.openActivity
 import com.flatcode.littletasks.databinding.ActivitySplashBinding
 import com.flatcode.littletasks.ui.auth.AuthActivity
 import com.google.firebase.auth.FirebaseAuth

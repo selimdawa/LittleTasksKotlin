@@ -1,8 +1,8 @@
-package com.flatcode.littletasks.core.utils.filter
+package com.flatcode.littletasks.filter
 
 import android.widget.Filter
 import com.flatcode.littletasks.ui.plan.PlanAdapter
-import com.flatcode.littletasks.data.model.Plan
+import com.flatcode.littletasks.model.Plan
 import java.util.*
 
 class PlansFilter(var list: ArrayList<Plan?>, var adapter: PlanAdapter) : Filter() {

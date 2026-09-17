@@ -1,8 +1,8 @@
-package com.flatcode.littletasks.core.utils.filter
+package com.flatcode.littletasks.filter
 
 import android.widget.Filter
 import com.flatcode.littletasks.ui.objects.ObjectAdapter
-import com.flatcode.littletasks.data.model.TaskItem
+import com.flatcode.littletasks.model.TaskItem
 import java.util.*
 
 class ObjectsFilter(var list: ArrayList<TaskItem?>, var adapter: ObjectAdapter) : Filter() {

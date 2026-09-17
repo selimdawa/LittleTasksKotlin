@@ -11,10 +11,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.flatcode.littletasks.R
-import com.flatcode.littletasks.core.utils.DATA
-import com.flatcode.littletasks.core.utils.closeApp
-import com.flatcode.littletasks.core.utils.loadImage
-import com.flatcode.littletasks.core.utils.openActivity
+import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.utils.closeApp
+import com.flatcode.littletasks.utils.loadImage
+import com.flatcode.littletasks.utils.openActivity
 import com.flatcode.littletasks.databinding.ActivityMainBinding
 import com.flatcode.littletasks.ui.profile.ProfileActivity
 import dagger.hilt.android.AndroidEntryPoint

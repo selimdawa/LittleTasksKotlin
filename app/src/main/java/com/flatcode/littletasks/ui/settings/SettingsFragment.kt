@@ -7,19 +7,17 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.flatcode.littletasks.R
-import com.flatcode.littletasks.core.utils.DATA
-import com.flatcode.littletasks.core.utils.loadImage
-import com.flatcode.littletasks.core.utils.openActivity
-import com.flatcode.littletasks.data.model.Setting
+import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.utils.loadImage
+import com.flatcode.littletasks.utils.openActivity
+import com.flatcode.littletasks.model.Setting
 import com.flatcode.littletasks.databinding.FragmentSettingsBinding
 import com.flatcode.littletasks.ui.category.CategoriesActivity
 import com.flatcode.littletasks.ui.objects.ObjectsActivity
 import com.flatcode.littletasks.ui.profile.FavoritesActivity
 import com.flatcode.littletasks.ui.profile.ProfileActivity
 import com.flatcode.littletasks.ui.profile.ProfileEditActivity
-import com.flatcode.littletasks.ui.settings.PrivacyPolicyActivity
 import dagger.hilt.android.AndroidEntryPoint
-import java.text.MessageFormat
 
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope

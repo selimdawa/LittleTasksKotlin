@@ -10,12 +10,12 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.flatcode.littletasks.R
-import com.flatcode.littletasks.core.utils.DATA
-import com.flatcode.littletasks.core.utils.GetTimeAgo
-import com.flatcode.littletasks.core.utils.loadImage
-import com.flatcode.littletasks.core.utils.filter.TaskCategoryFilter
-import com.flatcode.littletasks.data.model.Category
-import com.flatcode.littletasks.data.model.Task
+import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.utils.GetTimeAgo
+import com.flatcode.littletasks.utils.loadImage
+import com.flatcode.littletasks.filter.TaskCategoryFilter
+import com.flatcode.littletasks.model.Category
+import com.flatcode.littletasks.model.Task
 import com.flatcode.littletasks.databinding.ItemTaskBinding
 import com.google.firebase.database.*
 

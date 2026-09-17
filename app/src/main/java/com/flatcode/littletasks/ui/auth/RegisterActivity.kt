@@ -10,9 +10,10 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.R
-import com.flatcode.littletasks.core.utils.openActivity
-import com.flatcode.littletasks.core.utils.openActivityAndClear
+import com.flatcode.littletasks.utils.openActivity
+import com.flatcode.littletasks.utils.openActivityAndClear
 import com.flatcode.littletasks.databinding.ActivityRegisterBinding
+import com.flatcode.littletasks.databinding.LayoutLoadingDialogBinding
 import com.flatcode.littletasks.ui.main.MainActivity
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -38,8 +39,9 @@ class RegisterActivity : AppCompatActivity() {
         _binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val loadingBinding = LayoutLoadingDialogBinding.inflate(layoutInflater)
         dialog = AlertDialog.Builder(this)
-            .setView(R.layout.layout_loading_dialog)
+            .setView(loadingBinding.root)
             .setCancelable(false)
             .create()
 

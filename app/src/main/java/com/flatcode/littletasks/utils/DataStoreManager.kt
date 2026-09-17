@@ -1,4 +1,4 @@
-package com.flatcode.littletasks.core.utils
+package com.flatcode.littletasks.utils
 
 import android.content.Context
 import androidx.datastore.core.DataStore

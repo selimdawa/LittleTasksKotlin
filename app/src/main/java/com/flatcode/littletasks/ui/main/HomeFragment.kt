@@ -5,8 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.flatcode.littletasks.core.utils.DATA
-import com.flatcode.littletasks.core.utils.openActivity
+import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.utils.openActivity
 import com.flatcode.littletasks.databinding.FragmentHomeBinding
 import com.flatcode.littletasks.ui.profile.FavoritesActivity
 import dagger.hilt.android.AndroidEntryPoint

@@ -5,7 +5,7 @@ import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.R
-import com.flatcode.littletasks.data.model.TaskItem
+import com.flatcode.littletasks.model.TaskItem
 import com.flatcode.littletasks.databinding.ActivityObjectAddBinding
 import dagger.hilt.android.AndroidEntryPoint
 

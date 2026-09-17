@@ -1,8 +1,8 @@
 package com.flatcode.littletasks.data.repository
 
-import com.flatcode.littletasks.core.utils.DATA
-import com.flatcode.littletasks.data.local.dao.TaskDao
-import com.flatcode.littletasks.data.model.Task
+import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.db.TaskDao
+import com.flatcode.littletasks.model.Task
 import com.google.firebase.database.*
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow

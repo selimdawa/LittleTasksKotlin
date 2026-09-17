@@ -9,16 +9,16 @@ import android.text.TextUtils
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContract
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.R
-import com.flatcode.littletasks.core.utils.DATA
-import com.flatcode.littletasks.core.utils.getFileExtension
-import com.flatcode.littletasks.core.utils.loadImage
+import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.utils.getFileExtension
+import com.flatcode.littletasks.utils.loadImage
 import com.flatcode.littletasks.databinding.ActivityProfileEditBinding
+import com.flatcode.littletasks.databinding.LayoutLoadingDialogBinding
 import com.theartofdev.edmodo.cropper.CropImage
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -128,8 +128,9 @@ class ProfileEditActivity : AppCompatActivity() {
 
     private fun showLoading() {
         if (progressDialog == null) {
+            val loadingBinding = LayoutLoadingDialogBinding.inflate(layoutInflater)
             progressDialog = AlertDialog.Builder(context)
-                .setView(R.layout.layout_loading_dialog)
+                .setView(loadingBinding.root)
                 .setCancelable(false)
                 .create()
         }

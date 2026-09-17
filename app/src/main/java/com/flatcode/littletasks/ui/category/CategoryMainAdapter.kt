@@ -5,11 +5,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.flatcode.littletasks.core.utils.DATA
-import com.flatcode.littletasks.core.utils.loadBlurImage
-import com.flatcode.littletasks.core.utils.loadImage
-import com.flatcode.littletasks.core.utils.openActivity
-import com.flatcode.littletasks.data.model.Category
+import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.utils.loadBlurImage
+import com.flatcode.littletasks.utils.loadImage
+import com.flatcode.littletasks.utils.openActivity
+import com.flatcode.littletasks.model.Category
 import com.flatcode.littletasks.databinding.ItemCategoryBinding
 
 class CategoryMainAdapter(

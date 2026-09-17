@@ -1,9 +1,13 @@
-package com.flatcode.littletasks.data.local
+package com.flatcode.littletasks.db
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import com.flatcode.littletasks.data.local.dao.*
-import com.flatcode.littletasks.data.model.*
+import com.flatcode.littletasks.model.Category
+import com.flatcode.littletasks.model.Plan
+import com.flatcode.littletasks.model.Setting
+import com.flatcode.littletasks.model.Task
+import com.flatcode.littletasks.model.TaskItem
+import com.flatcode.littletasks.model.User
 
 @Database(
     entities = [

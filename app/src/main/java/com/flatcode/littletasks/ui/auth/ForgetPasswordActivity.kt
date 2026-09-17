@@ -9,8 +9,9 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.littletasks.R
-import com.flatcode.littletasks.core.utils.openActivity
+import com.flatcode.littletasks.utils.openActivity
 import com.flatcode.littletasks.databinding.ActivityForgetPasswordBinding
+import com.flatcode.littletasks.databinding.LayoutLoadingDialogBinding
 import dagger.hilt.android.AndroidEntryPoint
 
 import androidx.lifecycle.Lifecycle
@@ -35,8 +36,9 @@ class ForgetPasswordActivity : AppCompatActivity() {
         _binding = ActivityForgetPasswordBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val loadingBinding = LayoutLoadingDialogBinding.inflate(layoutInflater)
         dialog = AlertDialog.Builder(this)
-            .setView(R.layout.layout_loading_dialog)
+            .setView(loadingBinding.root)
             .setCancelable(false)
             .create()
 
