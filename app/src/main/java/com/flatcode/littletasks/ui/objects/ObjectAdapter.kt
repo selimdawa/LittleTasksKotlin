@@ -1,30 +1,33 @@
 package com.flatcode.littletasks.ui.objects
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Filter
 import android.widget.Filterable
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.flatcode.littletasks.utils.DATA
 import com.flatcode.littletasks.filter.ObjectsFilter
 import com.flatcode.littletasks.model.TaskItem
 import com.flatcode.littletasks.databinding.ItemObjectBinding
-import java.text.MessageFormat
 
 class ObjectAdapter(
-    private val context: Context,
-    var list: ArrayList<TaskItem?>,
     private val listener: ObjectListener
-) : RecyclerView.Adapter<ObjectAdapter.ViewHolder>(), Filterable {
+) : ListAdapter<TaskItem, ObjectAdapter.ViewHolder>(ObjectDiffCallback()), Filterable {
 
     interface ObjectListener {
         fun onMoreClick(item: TaskItem)
     }
 
-    var filterList: ArrayList<TaskItem?> = list
+    var fullList = ArrayList<TaskItem?>()
     private var filter: ObjectsFilter? = null
+
+    fun setFullList(newList: List<TaskItem?>) {
+        fullList = ArrayList(newList)
+        submitList(newList.filterNotNull())
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = ItemObjectBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -32,7 +35,7 @@ class ObjectAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = list[position] ?: return
+        val item = getItem(position) ?: return
         val name = DATA.EMPTY + item.name
         val points = DATA.EMPTY + item.points
 
@@ -43,23 +46,27 @@ class ObjectAdapter(
             holder.binding.name.text = name
         }
 
-        if (points == DATA.EMPTY) {
-            holder.binding.points.text = MessageFormat.format("{0}{1}", DATA.EMPTY, DATA.ZERO)
-        } else {
-            holder.binding.points.text = points
-        }
+        holder.binding.points.text = points
 
         holder.binding.more.setOnClickListener { listener.onMoreClick(item) }
     }
 
-    override fun getItemCount(): Int = list.size
-
     override fun getFilter(): Filter {
         if (filter == null) {
-            filter = ObjectsFilter(filterList, this)
+            filter = ObjectsFilter(fullList, this)
         }
         return filter!!
     }
 
     class ViewHolder(val binding: ItemObjectBinding) : RecyclerView.ViewHolder(binding.root)
+
+    class ObjectDiffCallback : DiffUtil.ItemCallback<TaskItem>() {
+        override fun areItemsTheSame(oldItem: TaskItem, newItem: TaskItem): Boolean {
+            return oldItem.id == newItem.id
+        }
+
+        override fun areContentsTheSame(oldItem: TaskItem, newItem: TaskItem): Boolean {
+            return oldItem == newItem
+        }
+    }
 }

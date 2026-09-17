@@ -22,14 +22,14 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
+import com.flatcode.littletasks.utils.viewBinding
+
 @AndroidEntryPoint
 class ObjectsPlanActivity : AppCompatActivity(), ObjectAdapter.ObjectListener {
 
-    private var _binding: ActivityObjectsBinding? = null
-    private val binding get() = _binding!!
+    private val binding by viewBinding(ActivityObjectsBinding::inflate)
 
     private val context: Context = this@ObjectsPlanActivity
-    private val list = ArrayList<TaskItem?>()
     private var adapter: ObjectAdapter? = null
     private var id: String? = null
     private var name: String? = null
@@ -38,8 +38,6 @@ class ObjectsPlanActivity : AppCompatActivity(), ObjectAdapter.ObjectListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        _binding = ActivityObjectsBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
         id = intent.getStringExtra(DATA.ID)
         name = intent.getStringExtra(DATA.NAME)
@@ -66,18 +64,16 @@ class ObjectsPlanActivity : AppCompatActivity(), ObjectAdapter.ObjectListener {
             override fun afterTextChanged(s: Editable?) {}
         })
 
-        adapter = ObjectAdapter(context, list, this)
+        adapter = ObjectAdapter(this)
         binding.recyclerView.adapter = adapter
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.objects.collectLatest { newList ->
-                    list.clear()
-                    list.addAll(newList)
-                    adapter?.notifyDataSetChanged()
+                    adapter?.setFullList(newList)
 
                     binding.bar.visibility = View.GONE
-                    if (list.isNotEmpty()) {
+                    if (newList.isNotEmpty()) {
                         binding.recyclerView.visibility = View.VISIBLE
                         binding.emptyText.visibility = View.GONE
                     } else {
@@ -115,10 +111,5 @@ class ObjectsPlanActivity : AppCompatActivity(), ObjectAdapter.ObjectListener {
     override fun onResume() {
         super.onResume()
         id?.let { viewModel.loadPlanObjects(it) }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        _binding = null
     }
 }

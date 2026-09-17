@@ -26,25 +26,22 @@ class CategoriesFragment : Fragment(R.layout.fragment_categories),
 
     private val binding by viewBinding(FragmentCategoriesBinding::bind)
 
-    private val list = ArrayList<Category?>()
     private var adapter: CategoryMainAdapter? = null
     private val viewModel: CategoryViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter = CategoryMainAdapter(context, list, this)
+        adapter = CategoryMainAdapter(context, this)
         binding.recyclerView.adapter = adapter
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.categories.collectLatest { newList ->
-                    list.clear()
-                    list.addAll(newList)
-                    adapter?.notifyDataSetChanged()
+                    adapter?.submitList(newList)
 
                     binding.bar.visibility = View.GONE
-                    if (list.isNotEmpty()) {
+                    if (newList.isNotEmpty()) {
                         binding.recyclerView.visibility = View.VISIBLE
                         binding.emptyText.visibility = View.GONE
                     } else {

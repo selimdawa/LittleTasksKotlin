@@ -8,6 +8,8 @@ import android.widget.Filter
 import android.widget.Filterable
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.flatcode.littletasks.R
 import com.flatcode.littletasks.utils.DATA
@@ -21,9 +23,8 @@ import com.google.firebase.database.*
 
 class TaskAdapter(
     private val context: Context,
-    var list: ArrayList<Task?>,
     private val listener: TaskListener
-) : RecyclerView.Adapter<TaskAdapter.ViewHolder>(), Filterable {
+) : ListAdapter<Task, TaskAdapter.ViewHolder>(TaskDiffCallback()), Filterable {
 
     interface TaskListener {
         fun onMoreClick(item: Task)
@@ -32,8 +33,13 @@ class TaskAdapter(
         fun isFavorite(taskId: String, userId: String, imageView: ImageView)
     }
 
-    var filterList: ArrayList<Task?> = list
+    var fullList = ArrayList<Task?>()
     private var filter: TaskCategoryFilter? = null
+
+    fun setFullList(newList: List<Task?>) {
+        fullList = ArrayList(newList)
+        submitList(newList.filterNotNull())
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = ItemTaskBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -41,7 +47,7 @@ class TaskAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = list[position] ?: return
+        val item = getItem(position) ?: return
         val id = DATA.EMPTY + item.id
         val name = DATA.EMPTY + item.name
         val publisher = DATA.EMPTY + item.publisher
@@ -80,16 +86,24 @@ class TaskAdapter(
         holder.binding.more.setOnClickListener { listener.onMoreClick(item) }
     }
 
-    override fun getItemCount(): Int = list.size
-
     override fun getFilter(): Filter {
         if (filter == null) {
-            filter = TaskCategoryFilter(filterList, this)
+            filter = TaskCategoryFilter(fullList, this)
         }
         return filter!!
     }
 
     class ViewHolder(val binding: ItemTaskBinding) : RecyclerView.ViewHolder(binding.root)
+
+    class TaskDiffCallback : DiffUtil.ItemCallback<Task>() {
+        override fun areItemsTheSame(oldItem: Task, newItem: Task): Boolean {
+            return oldItem.id == newItem.id
+        }
+
+        override fun areContentsTheSame(oldItem: Task, newItem: Task): Boolean {
+            return oldItem == newItem
+        }
+    }
 
     private fun getData(categoryId: String, name: TextView, image: ImageView) {
         FirebaseDatabase.getInstance().getReference(DATA.CATEGORIES).child(categoryId)

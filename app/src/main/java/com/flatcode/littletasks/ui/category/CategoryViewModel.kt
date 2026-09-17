@@ -141,7 +141,7 @@ class CategoryViewModel @Inject constructor(
         database.getReference(DATA.PLANS).child(planId).child(DATA.AUTO_TASKS)
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    if (snapshot.child(taskItem.id!!).exists()) {
+                    if (snapshot.child(taskItem.id).exists()) {
                         val ref = database.getReference(DATA.TASKS)
                         val id = ref.push().key ?: return
                         val hashMap = HashMap<String, Any?>().apply {
@@ -279,7 +279,7 @@ class CategoryViewModel @Inject constructor(
     fun observeFavoriteStatus(taskId: String, userId: String) = repository.isFavorite(taskId, userId)
 
     // Copying the levelPoint logic here for MVVM compliance
-    private fun levelPoint(AVPoints: Int, initialPoint: Int): Int {
+    private fun levelPoint(AVPoints: Int, initialPoint: Int = 10): Int {
         var mutablePoint = initialPoint
         val half = mutablePoint / 2
         val thresholds = IntArray(21)

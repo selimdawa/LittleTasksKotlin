@@ -4,6 +4,8 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.flatcode.littletasks.utils.DATA
 import com.flatcode.littletasks.utils.loadBlurImage
@@ -14,9 +16,8 @@ import com.flatcode.littletasks.databinding.ItemCategoryBinding
 
 class CategoryMainAdapter(
     private val context: Context?,
-    var list: ArrayList<Category?>,
     private val listener: CategoryMainListener
-) : RecyclerView.Adapter<CategoryMainAdapter.ViewHolder>() {
+) : ListAdapter<Category, CategoryMainAdapter.ViewHolder>(CategoryDiffCallback()) {
 
     interface CategoryMainListener {
         fun onMoreClick(item: Category)
@@ -28,7 +29,7 @@ class CategoryMainAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = list[position] ?: return
+        val item = getItem(position) ?: return
         val id = DATA.EMPTY + item.id
         val name = DATA.EMPTY + item.name
         val image = DATA.EMPTY + item.image
@@ -49,7 +50,15 @@ class CategoryMainAdapter(
         }
     }
 
-    override fun getItemCount(): Int = list.size
-
     class ViewHolder(val binding: ItemCategoryBinding) : RecyclerView.ViewHolder(binding.root)
+
+    class CategoryDiffCallback : DiffUtil.ItemCallback<Category>() {
+        override fun areItemsTheSame(oldItem: Category, newItem: Category): Boolean {
+            return oldItem.id == newItem.id
+        }
+
+        override fun areContentsTheSame(oldItem: Category, newItem: Category): Boolean {
+            return oldItem == newItem
+        }
+    }
 }

@@ -1,33 +1,36 @@
 package com.flatcode.littletasks.ui.objects
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Filter
 import android.widget.Filterable
 import android.widget.ImageView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.flatcode.littletasks.utils.DATA
 import com.flatcode.littletasks.filter.ObjectOptionFilter
 import com.flatcode.littletasks.model.TaskItem
 import com.flatcode.littletasks.databinding.ItemObjectBinding
-import java.text.MessageFormat
 
 class ObjectOptionAdapter(
-    private val context: Context,
-    var list: ArrayList<TaskItem?>,
     var planId: String?,
     private val listener: ObjectOptionListener
-) : RecyclerView.Adapter<ObjectOptionAdapter.ViewHolder>(), Filterable {
+) : ListAdapter<TaskItem, ObjectOptionAdapter.ViewHolder>(ObjectDiffCallback()), Filterable {
 
     interface ObjectOptionListener {
         fun onOptionClick(item: TaskItem)
         fun isPlan(objectId: String, planId: String, imageView: ImageView)
     }
 
-    var filterList: ArrayList<TaskItem?> = list
+    var fullList = ArrayList<TaskItem?>()
     private var filter: ObjectOptionFilter? = null
+
+    fun setFullList(newList: List<TaskItem?>) {
+        fullList = ArrayList(newList)
+        submitList(newList.filterNotNull())
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = ItemObjectBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -35,7 +38,7 @@ class ObjectOptionAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = list[position] ?: return
+        val item = getItem(position) ?: return
         val id = DATA.EMPTY + item.id
         val name = DATA.EMPTY + item.name
         val points = DATA.EMPTY + item.points
@@ -50,24 +53,28 @@ class ObjectOptionAdapter(
             holder.binding.name.text = name
         }
 
-        if (points == DATA.EMPTY) {
-            holder.binding.points.text = MessageFormat.format("{0}{1}", DATA.EMPTY, DATA.ZERO)
-        } else {
-            holder.binding.points.text = points
-        }
+        holder.binding.points.text = points
 
         listener.isPlan(id, planId ?: "", holder.binding.option)
         holder.binding.option.setOnClickListener { listener.onOptionClick(item) }
     }
 
-    override fun getItemCount(): Int = list.size
-
     override fun getFilter(): Filter {
         if (filter == null) {
-            filter = ObjectOptionFilter(filterList, this)
+            filter = ObjectOptionFilter(fullList, this)
         }
         return filter!!
     }
 
     class ViewHolder(val binding: ItemObjectBinding) : RecyclerView.ViewHolder(binding.root)
+
+    class ObjectDiffCallback : DiffUtil.ItemCallback<TaskItem>() {
+        override fun areItemsTheSame(oldItem: TaskItem, newItem: TaskItem): Boolean {
+            return oldItem.id == newItem.id
+        }
+
+        override fun areContentsTheSame(oldItem: TaskItem, newItem: TaskItem): Boolean {
+            return oldItem == newItem
+        }
+    }
 }

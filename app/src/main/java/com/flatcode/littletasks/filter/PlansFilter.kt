@@ -28,17 +28,7 @@ class PlansFilter(var list: ArrayList<Plan?>, var adapter: PlanAdapter) : Filter
 
     @Suppress("UNCHECKED_CAST")
     override fun publishResults(constraint: CharSequence?, results: FilterResults) {
-        val oldList = ArrayList(adapter.list)
         val newList = results.values as ArrayList<Plan?>
-
-        adapter.list = newList
-
-        val oldSize = oldList.size
-        val newSize = newList.size
-
-        if (oldList != newList) {
-            adapter.notifyItemRangeRemoved(0, oldSize)
-            adapter.notifyItemRangeInserted(0, newSize)
-        }
+        adapter.submitList(newList.filterNotNull())
     }
 }

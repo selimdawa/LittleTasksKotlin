@@ -33,7 +33,6 @@ class FavoritesActivity : AppCompatActivity(), TaskAdapter.TaskListener {
     private val binding get() = _binding!!
 
     private val context: Context = this@FavoritesActivity
-    private val list = ArrayList<Task?>()
     private var adapter: TaskAdapter? = null
     private var currentSortType = DATA.TIMESTAMP
     private var tasksType: String? = null
@@ -66,7 +65,7 @@ class FavoritesActivity : AppCompatActivity(), TaskAdapter.TaskListener {
             override fun afterTextChanged(s: Editable?) {}
         })
 
-        adapter = TaskAdapter(context, list, this)
+        adapter = TaskAdapter(context, this)
         binding.recyclerView.adapter = adapter
         binding.recyclerViewReverse.adapter = adapter
 
@@ -85,13 +84,11 @@ class FavoritesActivity : AppCompatActivity(), TaskAdapter.TaskListener {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.favoriteTasks.collectLatest { newList ->
-                    list.clear()
-                    list.addAll(newList)
-                    adapter?.notifyDataSetChanged()
+                    adapter?.setFullList(newList)
 
-                    binding.toolbar.number.text = MessageFormat.format("( {0} )", list.size)
+                    binding.toolbar.number.text = MessageFormat.format("( {0} )", newList.size)
                     binding.bar.visibility = View.GONE
-                    if (list.isNotEmpty()) {
+                    if (newList.isNotEmpty()) {
                         binding.recyclerView.visibility = View.VISIBLE
                         binding.recyclerViewReverse.visibility = View.GONE
                         binding.emptyText.visibility = View.GONE
@@ -121,8 +118,8 @@ class FavoritesActivity : AppCompatActivity(), TaskAdapter.TaskListener {
                     1 -> context.dialogOptionDelete(DATA.TASKS, item.id, item.name ?: "") {
                         viewModel.deleteTask(DATA.TASKS, item.id ?: "")
                     }
-                    2 -> viewModel.updateTaskStatus(item.id!!, startStatus = true, endStatus = false)
-                    3 -> viewModel.updateTaskStatus(item.id!!, startStatus = false, endStatus = true)
+                    2 -> viewModel.updateTaskStatus(item.id, startStatus = true, endStatus = false)
+                    3 -> viewModel.updateTaskStatus(item.id, startStatus = false, endStatus = true)
                 }
             }.show()
     }

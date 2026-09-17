@@ -21,14 +21,14 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
+import com.flatcode.littletasks.utils.viewBinding
+
 @AndroidEntryPoint
 class ObjectsToPlanActivity : AppCompatActivity(), ObjectOptionAdapter.ObjectOptionListener {
 
-    private var _binding: ActivityObjectsBinding? = null
-    private val binding get() = _binding!!
+    private val binding by viewBinding(ActivityObjectsBinding::inflate)
 
     private val context: Context = this@ObjectsToPlanActivity
-    private val list = ArrayList<TaskItem?>()
     private var adapter: ObjectOptionAdapter? = null
     private var id: String? = null
     private val viewModel: ObjectsViewModel by viewModels()
@@ -36,8 +36,6 @@ class ObjectsToPlanActivity : AppCompatActivity(), ObjectOptionAdapter.ObjectOpt
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        _binding = ActivityObjectsBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
         id = intent.getStringExtra(DATA.ID)
 
@@ -61,18 +59,16 @@ class ObjectsToPlanActivity : AppCompatActivity(), ObjectOptionAdapter.ObjectOpt
             override fun afterTextChanged(s: Editable?) {}
         })
 
-        adapter = ObjectOptionAdapter(context, list, id, this)
+        adapter = ObjectOptionAdapter(id, this)
         binding.recyclerView.adapter = adapter
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.objects.collectLatest { newList ->
-                    list.clear()
-                    list.addAll(newList)
-                    adapter?.notifyDataSetChanged()
+                    adapter?.setFullList(newList)
 
                     binding.bar.visibility = View.GONE
-                    if (list.isNotEmpty()) {
+                    if (newList.isNotEmpty()) {
                         binding.recyclerView.visibility = View.VISIBLE
                         binding.emptyText.visibility = View.GONE
                     } else {
@@ -86,8 +82,8 @@ class ObjectsToPlanActivity : AppCompatActivity(), ObjectOptionAdapter.ObjectOpt
 
     override fun onOptionClick(item: TaskItem) {
         lifecycleScope.launch {
-            val isAdded = viewModel.observePlanStatus(item.id!!, id!!).first()
-            viewModel.togglePlan(item.id!!, id!!, !isAdded)
+            val isAdded = viewModel.observePlanStatus(item.id, id!!).first()
+            viewModel.togglePlan(item.id, id!!, !isAdded)
         }
     }
 
@@ -119,10 +115,5 @@ class ObjectsToPlanActivity : AppCompatActivity(), ObjectOptionAdapter.ObjectOpt
     override fun onResume() {
         super.onResume()
         viewModel.loadAllObjects()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        _binding = null
     }
 }

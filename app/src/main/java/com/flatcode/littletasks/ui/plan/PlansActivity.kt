@@ -23,14 +23,14 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.text.MessageFormat
 
+import com.flatcode.littletasks.utils.viewBinding
+
 @AndroidEntryPoint
 class PlansActivity : AppCompatActivity(), PlanAdapter.PlanListener {
 
-    private var _binding: ActivityPlansBinding? = null
-    private val binding get() = _binding!!
+    private val binding by viewBinding(ActivityPlansBinding::inflate)
 
     private val context: Context = this@PlansActivity
-    private val list = ArrayList<Plan?>()
     private var adapter: PlanAdapter? = null
     private var isNew = true
     private val viewModel: PlanViewModel by viewModels()
@@ -38,8 +38,6 @@ class PlansActivity : AppCompatActivity(), PlanAdapter.PlanListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        _binding = ActivityPlansBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
         val newPlan = intent.getStringExtra(DATA.NEW_PLAN)
         isNew = newPlan == "true"
@@ -65,19 +63,17 @@ class PlansActivity : AppCompatActivity(), PlanAdapter.PlanListener {
             override fun afterTextChanged(s: Editable?) {}
         })
 
-        adapter = PlanAdapter(context, list, isNew, this)
+        adapter = PlanAdapter(context, isNew, this)
         binding.recyclerView.adapter = adapter
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.plans.collectLatest { newList ->
-                    list.clear()
-                    list.addAll(newList)
-                    adapter?.notifyDataSetChanged()
+                    adapter?.setFullList(newList)
 
-                    binding.toolbar.number.text = MessageFormat.format("( {0} )", list.size)
+                    binding.toolbar.number.text = MessageFormat.format("( {0} )", newList.size)
                     binding.bar.visibility = View.GONE
-                    if (list.isNotEmpty()) {
+                    if (newList.isNotEmpty()) {
                         binding.recyclerView.visibility = View.VISIBLE
                         binding.emptyText.visibility = View.GONE
                     } else {
@@ -115,10 +111,5 @@ class PlansActivity : AppCompatActivity(), PlanAdapter.PlanListener {
     override fun onResume() {
         super.onResume()
         viewModel.loadPlans()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        _binding = null
     }
 }

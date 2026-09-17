@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Filter
 import android.widget.Filterable
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.flatcode.littletasks.utils.DATA
 import com.flatcode.littletasks.utils.loadImage
@@ -18,17 +20,21 @@ import com.flatcode.littletasks.ui.objects.ObjectsPlanActivity
 
 class PlanAdapter(
     private val context: Context,
-    var list: ArrayList<Plan?>,
     var isNew: Boolean,
     private val listener: PlanListener
-) : RecyclerView.Adapter<PlanAdapter.ViewHolder>(), Filterable {
+) : ListAdapter<Plan, PlanAdapter.ViewHolder>(PlanDiffCallback()), Filterable {
 
     interface PlanListener {
         fun onMoreClick(item: Plan)
     }
 
-    var filterList: ArrayList<Plan?> = list
+    var fullList = ArrayList<Plan?>()
     private var filter: PlansFilter? = null
+
+    fun setFullList(newList: List<Plan?>) {
+        fullList = ArrayList(newList)
+        submitList(newList.filterNotNull())
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = ItemPlanBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -36,7 +42,7 @@ class PlanAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = list[position] ?: return
+        val item = getItem(position) ?: return
         val id = DATA.EMPTY + item.id
         val name = DATA.EMPTY + item.name
         val image = DATA.EMPTY + item.image
@@ -62,14 +68,22 @@ class PlanAdapter(
         }
     }
 
-    override fun getItemCount(): Int = list.size
-
     override fun getFilter(): Filter {
         if (filter == null) {
-            filter = PlansFilter(filterList, this)
+            filter = PlansFilter(fullList, this)
         }
         return filter!!
     }
 
     class ViewHolder(val binding: ItemPlanBinding) : RecyclerView.ViewHolder(binding.root)
+
+    class PlanDiffCallback : DiffUtil.ItemCallback<Plan>() {
+        override fun areItemsTheSame(oldItem: Plan, newItem: Plan): Boolean {
+            return oldItem.id == newItem.id
+        }
+
+        override fun areContentsTheSame(oldItem: Plan, newItem: Plan): Boolean {
+            return oldItem == newItem
+        }
+    }
 }

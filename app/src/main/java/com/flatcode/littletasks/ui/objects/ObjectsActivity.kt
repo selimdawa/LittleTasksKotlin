@@ -22,22 +22,20 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
+import com.flatcode.littletasks.utils.viewBinding
+
 @AndroidEntryPoint
 class ObjectsActivity : AppCompatActivity(), ObjectAdapter.ObjectListener {
 
-    private var _binding: ActivityObjectsBinding? = null
-    private val binding get() = _binding!!
+    private val binding by viewBinding(ActivityObjectsBinding::inflate)
 
     private val context: Context = this@ObjectsActivity
-    private val list = ArrayList<TaskItem?>()
     private var adapter: ObjectAdapter? = null
     private val viewModel: ObjectsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        _binding = ActivityObjectsBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
         binding.toolbar.nameSpace.setText(R.string.objects)
         binding.toolbar.back.setOnClickListener { handleBackPressed() }
@@ -60,18 +58,16 @@ class ObjectsActivity : AppCompatActivity(), ObjectAdapter.ObjectListener {
             override fun afterTextChanged(s: Editable?) {}
         })
 
-        adapter = ObjectAdapter(context, list, this)
+        adapter = ObjectAdapter(this)
         binding.recyclerView.adapter = adapter
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.objects.collectLatest { newList ->
-                    list.clear()
-                    list.addAll(newList)
-                    adapter?.notifyDataSetChanged()
+                    adapter?.setFullList(newList)
 
                     binding.bar.visibility = View.GONE
-                    if (list.isNotEmpty()) {
+                    if (newList.isNotEmpty()) {
                         binding.recyclerView.visibility = View.VISIBLE
                         binding.emptyText.visibility = View.GONE
                     } else {
@@ -109,10 +105,5 @@ class ObjectsActivity : AppCompatActivity(), ObjectAdapter.ObjectListener {
     override fun onResume() {
         super.onResume()
         viewModel.loadAllObjects()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        _binding = null
     }
 }

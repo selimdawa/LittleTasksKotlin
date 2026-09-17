@@ -116,7 +116,7 @@ class SettingsViewModel @Inject constructor(
             })
     }
 
-    private fun levelPoint(AVPoints: Int, initialPoint: Int): Int {
+    private fun levelPoint(AVPoints: Int, initialPoint: Int = 10): Int {
         var mutablePoint = initialPoint
         val half = mutablePoint / 2
         val thresholds = IntArray(21)

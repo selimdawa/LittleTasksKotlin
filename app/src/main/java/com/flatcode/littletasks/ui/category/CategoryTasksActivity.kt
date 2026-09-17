@@ -27,14 +27,14 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.text.MessageFormat
 
+import com.flatcode.littletasks.utils.viewBinding
+
 @AndroidEntryPoint
 class CategoryTasksActivity : AppCompatActivity(), TaskAdapter.TaskListener {
 
-    private var _binding: ActivityPageSwitchBinding? = null
-    private val binding get() = _binding!!
+    private val binding by viewBinding(ActivityPageSwitchBinding::inflate)
 
     private val context: Context = this@CategoryTasksActivity
-    private val list = ArrayList<Task?>()
     private var adapter: TaskAdapter? = null
     private var id: String? = null
     private var name: String? = null
@@ -44,8 +44,6 @@ class CategoryTasksActivity : AppCompatActivity(), TaskAdapter.TaskListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        _binding = ActivityPageSwitchBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
         id = intent.getStringExtra(DATA.ID)
         name = intent.getStringExtra(DATA.NAME)
@@ -74,7 +72,7 @@ class CategoryTasksActivity : AppCompatActivity(), TaskAdapter.TaskListener {
             override fun afterTextChanged(s: Editable?) {}
         })
 
-        adapter = TaskAdapter(context, list, this)
+        adapter = TaskAdapter(context, this)
         binding.recyclerView.adapter = adapter
         binding.recyclerViewReverse.adapter = adapter
 
@@ -109,13 +107,11 @@ class CategoryTasksActivity : AppCompatActivity(), TaskAdapter.TaskListener {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.categoryTasks.collectLatest { newList ->
-                    list.clear()
-                    list.addAll(newList)
-                    adapter?.notifyDataSetChanged()
+                    adapter?.setFullList(newList)
 
-                    binding.toolbar.number.text = MessageFormat.format("( {0} )", list.size)
+                    binding.toolbar.number.text = MessageFormat.format("( {0} )", newList.size)
                     binding.bar.visibility = View.GONE
-                    if (list.isNotEmpty()) {
+                    if (newList.isNotEmpty()) {
                         binding.recyclerView.visibility = View.VISIBLE
                         binding.recyclerViewReverse.visibility = View.GONE
                         binding.emptyText.visibility = View.GONE
@@ -161,11 +157,11 @@ class CategoryTasksActivity : AppCompatActivity(), TaskAdapter.TaskListener {
                     }
 
                     2 -> viewModel.updateTaskStatus(
-                        item.id!!, startStatus = true, endStatus = false
+                        item.id, startStatus = true, endStatus = false
                     )
 
                     3 -> viewModel.updateTaskStatus(
-                        item.id!!, startStatus = false, endStatus = true
+                        item.id, startStatus = false, endStatus = true
                     )
                 }
             }.show()
@@ -224,11 +220,6 @@ class CategoryTasksActivity : AppCompatActivity(), TaskAdapter.TaskListener {
     override fun onResume() {
         super.onResume()
         viewModel.getCategoryTasks(id ?: "", currentSortType)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        _binding = null
     }
 
     companion object {
