@@ -8,18 +8,17 @@ import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.flatcode.littletasks.R
-import com.flatcode.littletasks.core.utils.*
-import com.flatcode.littletasks.model.TaskItem
-import com.flatcode.littletasks.databinding.ActivityObjectsBinding
-import dagger.hilt.android.AndroidEntryPoint
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.flatcode.littletasks.R
+import com.flatcode.littletasks.databinding.ActivityObjectsBinding
+import com.flatcode.littletasks.model.TaskItem
 import com.flatcode.littletasks.utils.DATA
 import com.flatcode.littletasks.utils.dialogOptionDelete
 import com.flatcode.littletasks.utils.openActivity
 import com.flatcode.littletasks.utils.showMoreOptions
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -44,7 +43,7 @@ class ObjectsActivity : AppCompatActivity(), ObjectAdapter.ObjectListener {
         binding.toolbar.back.setOnClickListener { handleBackPressed() }
         binding.toolbar.close.setOnClickListener { handleBackPressed() }
         binding.add.add.setText(R.string.add_object)
-        binding.add.item.setOnClickListener { context.openActivity(ObjectAddActivity::class.java) }
+        binding.add.add.setOnClickListener { context.openActivity(ObjectAddActivity::class.java) }
 
         binding.toolbar.search.setOnClickListener {
             binding.toolbar.toolbar.visibility = View.GONE
@@ -57,6 +56,7 @@ class ObjectsActivity : AppCompatActivity(), ObjectAdapter.ObjectListener {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 adapter?.filter?.filter(s)
             }
+
             override fun afterTextChanged(s: Editable?) {}
         })
 

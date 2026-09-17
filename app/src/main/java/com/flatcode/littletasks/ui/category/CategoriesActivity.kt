@@ -8,29 +8,28 @@ import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.flatcode.littletasks.R
-import com.flatcode.littletasks.core.utils.*
-import com.flatcode.littletasks.model.Category
-import com.flatcode.littletasks.databinding.ActivityPageStaggeredBinding
-import com.flatcode.littletasks.ui.plan.PlansActivity
-import com.flatcode.littletasks.ui.task.TaskAddActivity
-import dagger.hilt.android.AndroidEntryPoint
-import java.text.MessageFormat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.flatcode.littletasks.R
+import com.flatcode.littletasks.databinding.ActivityPageStaggeredBinding
+import com.flatcode.littletasks.model.Category
+import com.flatcode.littletasks.ui.plan.PlansActivity
+import com.flatcode.littletasks.ui.task.TaskAddActivity
 import com.flatcode.littletasks.utils.DATA
 import com.flatcode.littletasks.utils.dialogOptionDelete
 import com.flatcode.littletasks.utils.openActivity
 import com.flatcode.littletasks.utils.showMoreOptions
+import com.flatcode.littletasks.utils.viewBinding
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.text.MessageFormat
 
 @AndroidEntryPoint
 class CategoriesActivity : AppCompatActivity(), CategoriesAdapter.CategoryListener {
 
-    private var _binding: ActivityPageStaggeredBinding? = null
-    private val binding get() = _binding!!
+    private val binding by viewBinding(ActivityPageStaggeredBinding::inflate)
 
     private val context: Context = this@CategoriesActivity
     private val list = ArrayList<Category?>()
@@ -40,14 +39,12 @@ class CategoriesActivity : AppCompatActivity(), CategoriesAdapter.CategoryListen
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        _binding = ActivityPageStaggeredBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
         binding.toolbar.nameSpace.setText(R.string.categories)
         binding.toolbar.back.setOnClickListener { handleBackPressed() }
         binding.toolbar.close.setOnClickListener { handleBackPressed() }
         binding.add.add.setText(R.string.add_category)
-        binding.add.item.setOnClickListener {
+        binding.add.add.setOnClickListener {
             context.openActivity(PlansActivity::class.java, DATA.NEW_PLAN to "true")
         }
 
@@ -62,10 +59,11 @@ class CategoriesActivity : AppCompatActivity(), CategoriesAdapter.CategoryListen
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 adapter?.filter?.filter(s)
             }
+
             override fun afterTextChanged(s: Editable?) {}
         })
 
-        adapter = CategoriesAdapter(context, list, this)
+        adapter = CategoriesAdapter(context, this)
         binding.recyclerView.adapter = adapter
 
         lifecycleScope.launch {
@@ -73,7 +71,7 @@ class CategoriesActivity : AppCompatActivity(), CategoriesAdapter.CategoryListen
                 viewModel.categories.collectLatest { newList ->
                     list.clear()
                     list.addAll(newList)
-                    adapter?.notifyDataSetChanged()
+                    adapter?.setFullList(newList)
 
                     binding.toolbar.number.text = MessageFormat.format("( {0} )", list.size)
                     binding.bar.visibility = View.GONE
@@ -93,8 +91,18 @@ class CategoriesActivity : AppCompatActivity(), CategoriesAdapter.CategoryListen
         val options = arrayOf("Add Task", "Edit", "Delete")
         context.showMoreOptions(options) { which ->
             when (which) {
-                0 -> context.openActivity(TaskAddActivity::class.java, DATA.CATEGORY_ID to item.id, DATA.PLAN_ID to item.plan)
-                1 -> context.openActivity(CategoryEditActivity::class.java, DATA.CATEGORY_ID to item.id, DATA.PLAN_ID to item.plan)
+                0 -> context.openActivity(
+                    TaskAddActivity::class.java,
+                    DATA.CATEGORY_ID to item.id,
+                    DATA.PLAN_ID to item.plan
+                )
+
+                1 -> context.openActivity(
+                    CategoryEditActivity::class.java,
+                    DATA.CATEGORY_ID to item.id,
+                    DATA.PLAN_ID to item.plan
+                )
+
                 2 -> context.dialogOptionDelete(DATA.CATEGORIES, item.id, item.name ?: "") {
                     viewModel.deleteTask(DATA.CATEGORIES, item.id ?: "")
                 }
@@ -116,10 +124,5 @@ class CategoriesActivity : AppCompatActivity(), CategoriesAdapter.CategoryListen
     override fun onResume() {
         super.onResume()
         viewModel.getCategories(DATA.NAME)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        _binding = null
     }
 }

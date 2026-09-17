@@ -9,15 +9,14 @@ import android.widget.ImageView
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.flatcode.littletasks.R
-import com.flatcode.littletasks.core.utils.*
-import com.flatcode.littletasks.model.TaskItem
-import com.flatcode.littletasks.databinding.ActivityObjectsBinding
-import dagger.hilt.android.AndroidEntryPoint
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.flatcode.littletasks.R
+import com.flatcode.littletasks.databinding.ActivityObjectsBinding
+import com.flatcode.littletasks.model.TaskItem
 import com.flatcode.littletasks.utils.DATA
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -45,7 +44,7 @@ class ObjectsToPlanActivity : AppCompatActivity(), ObjectOptionAdapter.ObjectOpt
         binding.toolbar.nameSpace.setText(R.string.add_object_to_plan)
         binding.toolbar.back.setOnClickListener { handleBackPressed() }
         binding.toolbar.close.setOnClickListener { handleBackPressed() }
-        binding.add.item.visibility = View.GONE
+        binding.add.add.visibility = View.GONE
 
         binding.toolbar.search.setOnClickListener {
             binding.toolbar.toolbar.visibility = View.GONE
@@ -58,6 +57,7 @@ class ObjectsToPlanActivity : AppCompatActivity(), ObjectOptionAdapter.ObjectOpt
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 adapter?.filter?.filter(s)
             }
+
             override fun afterTextChanged(s: Editable?) {}
         })
 

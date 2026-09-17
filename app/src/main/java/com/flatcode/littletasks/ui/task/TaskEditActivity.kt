@@ -44,7 +44,7 @@ class TaskEditActivity : AppCompatActivity() {
 
         binding.toolbar.nameSpace.setText(R.string.edit_task)
         binding.toolbar.back.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
-        binding.name.setText(R.string.task_name)
+        binding.nameLabel.setText(R.string.task_name)
         binding.toolbar.ok.setOnClickListener { validateData() }
 
         lifecycleScope.launch {

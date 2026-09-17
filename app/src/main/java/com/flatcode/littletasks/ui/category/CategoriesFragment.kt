@@ -1,39 +1,37 @@
 package com.flatcode.littletasks.ui.category
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.flatcode.littletasks.model.Category
-import com.flatcode.littletasks.databinding.FragmentCategoriesBinding
-import com.flatcode.littletasks.ui.task.TaskAddActivity
-import dagger.hilt.android.AndroidEntryPoint
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.flatcode.littletasks.R
+import com.flatcode.littletasks.databinding.FragmentCategoriesBinding
+import com.flatcode.littletasks.model.Category
+import com.flatcode.littletasks.ui.task.TaskAddActivity
 import com.flatcode.littletasks.utils.DATA
 import com.flatcode.littletasks.utils.dialogOptionDelete
 import com.flatcode.littletasks.utils.openActivity
 import com.flatcode.littletasks.utils.showMoreOptions
+import com.flatcode.littletasks.utils.viewBinding
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class CategoriesFragment : Fragment(), CategoryMainAdapter.CategoryMainListener {
+class CategoriesFragment : Fragment(R.layout.fragment_categories),
+    CategoryMainAdapter.CategoryMainListener {
 
-    private var _binding: FragmentCategoriesBinding? = null
-    private val binding get() = _binding!!
+    private val binding by viewBinding(FragmentCategoriesBinding::bind)
 
     private val list = ArrayList<Category?>()
     private var adapter: CategoryMainAdapter? = null
     private val viewModel: CategoryViewModel by viewModels()
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
-    ): View {
-        _binding = FragmentCategoriesBinding.inflate(inflater, container, false)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         adapter = CategoryMainAdapter(context, list, this)
         binding.recyclerView.adapter = adapter
@@ -57,15 +55,24 @@ class CategoriesFragment : Fragment(), CategoryMainAdapter.CategoryMainListener 
             }
         }
 
-        return binding.root
     }
 
     override fun onMoreClick(item: Category) {
         val options = arrayOf("Add Task", "Edit", "Delete")
         context?.showMoreOptions(options) { which ->
             when (which) {
-                0 -> context?.openActivity(TaskAddActivity::class.java, DATA.CATEGORY_ID to item.id, DATA.PLAN_ID to item.plan)
-                1 -> context?.openActivity(CategoryEditActivity::class.java, DATA.CATEGORY_ID to item.id, DATA.PLAN_ID to item.plan)
+                0 -> context?.openActivity(
+                    TaskAddActivity::class.java,
+                    DATA.CATEGORY_ID to item.id,
+                    DATA.PLAN_ID to item.plan
+                )
+
+                1 -> context?.openActivity(
+                    CategoryEditActivity::class.java,
+                    DATA.CATEGORY_ID to item.id,
+                    DATA.PLAN_ID to item.plan
+                )
+
                 2 -> context?.dialogOptionDelete(DATA.CATEGORIES, item.id, item.name ?: "") {
                     viewModel.deleteTask(DATA.CATEGORIES, item.id ?: "")
                 }
@@ -76,10 +83,5 @@ class CategoriesFragment : Fragment(), CategoryMainAdapter.CategoryMainListener 
     override fun onResume() {
         super.onResume()
         viewModel.getCategories(DATA.NAME)
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }
