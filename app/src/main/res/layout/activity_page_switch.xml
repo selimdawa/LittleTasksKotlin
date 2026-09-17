@@ -11,68 +11,61 @@
         android:id="@+id/toolbar"
         layout="@layout/toolbar_page_event" />
 
-    <LinearLayout
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/view"
-        android:layout_below="@+id/toolbar"
-        android:orientation="vertical">
+        android:layout_below="@+id/toolbar">
 
-        <androidx.core.widget.NestedScrollView
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="5sp">
+
+            <include
+                android:id="@+id/filter"
+                layout="@layout/item_switch_filter" />
+
+            <include
+                android:id="@+id/add"
+                layout="@layout/item_add"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginHorizontal="5sp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:paddingHorizontal="5sp">
+                android:layout_marginHorizontal="5sp"
+                android:orientation="vertical">
 
-                <include
-                    android:id="@+id/filter"
-                    layout="@layout/item_switch_filter" />
-
-                <include
-                    android:id="@+id/add"
-                    layout="@layout/item_add"
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerView"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginHorizontal="5sp" />
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    app:reverseLayout="true"
+                    app:stackFromEnd="true"
+                    tools:listitem="@layout/item_task" />
 
-                <LinearLayout
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerViewReverse"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginHorizontal="5sp"
-                    android:orientation="vertical">
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/recyclerView"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:visibility="gone"
-                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                        app:reverseLayout="true"
-                        app:stackFromEnd="true"
-                        tools:listitem="@layout/item_task" />
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/recyclerViewReverse"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:orientation="vertical"
-                        android:visibility="gone"
-                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                        tools:listitem="@layout/item_task" />
-
-                </LinearLayout>
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    tools:listitem="@layout/item_task" />
 
             </LinearLayout>
 
-        </androidx.core.widget.NestedScrollView>
+        </LinearLayout>
 
-    </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
     <View
         android:id="@+id/view"
@@ -87,6 +80,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:background="?mc_bg"
+        android:baselineAligned="false"
         android:gravity="center"
         android:orientation="horizontal">
 
@@ -99,10 +93,9 @@
 
             <TextView
                 android:layout_width="match_parent"
-                android:layout_height="0sp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginHorizontal="10sp"
-                android:layout_weight="1"
                 android:gravity="center"
                 android:text="@string/availablePoints"
                 android:textColor="@color/white"
@@ -112,10 +105,9 @@
             <TextView
                 android:id="@+id/av"
                 android:layout_width="match_parent"
-                android:layout_height="0sp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginHorizontal="10sp"
-                android:layout_weight="1"
                 android:gravity="center"
                 android:text="@string/zero"
                 android:textColor="@color/white"
@@ -133,10 +125,9 @@
 
             <TextView
                 android:layout_width="match_parent"
-                android:layout_height="0sp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginHorizontal="10sp"
-                android:layout_weight="1"
                 android:gravity="center"
                 android:text="@string/level"
                 android:textColor="@color/white"
@@ -146,10 +137,9 @@
             <TextView
                 android:id="@+id/level"
                 android:layout_width="match_parent"
-                android:layout_height="0sp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginHorizontal="10sp"
-                android:layout_weight="1"
                 android:gravity="center"
                 android:text="@string/zero"
                 android:textColor="@color/white"
@@ -167,10 +157,9 @@
 
             <TextView
                 android:layout_width="match_parent"
-                android:layout_height="0sp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginHorizontal="10sp"
-                android:layout_weight="1"
                 android:gravity="center"
                 android:text="@string/allPoints"
                 android:textColor="@color/white"
@@ -180,10 +169,9 @@
             <TextView
                 android:id="@+id/allPoints"
                 android:layout_width="match_parent"
-                android:layout_height="0sp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginHorizontal="10sp"
-                android:layout_weight="1"
                 android:gravity="center"
                 android:text="@string/zero"
                 android:textColor="@color/white"
