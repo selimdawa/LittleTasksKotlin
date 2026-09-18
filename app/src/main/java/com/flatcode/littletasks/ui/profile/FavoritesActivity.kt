@@ -130,8 +130,8 @@ class FavoritesActivity : AppCompatActivity(), TaskAdapter.TaskListener {
         MaterialAlertDialogBuilder(context).setTitle("Choose Options")
             .setItems(options) { _, which ->
                 when (which) {
-                    0 -> context.openActivity(
-                        TaskEditActivity::class.java,
+                    0 -> context.openActivity<TaskEditActivity>(
+                        false,
                         DATA.TASK_ID to item.id,
                         DATA.CATEGORY_ID to item.category
                     )

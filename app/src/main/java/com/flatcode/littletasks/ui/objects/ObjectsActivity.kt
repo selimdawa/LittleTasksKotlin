@@ -40,7 +40,7 @@ class ObjectsActivity : AppCompatActivity(), ObjectAdapter.ObjectListener {
         binding.toolbar.back.setOnClickListener { handleBackPressed() }
         binding.toolbar.close.setOnClickListener { handleBackPressed() }
         binding.add.add.setText(R.string.add_object)
-        binding.add.add.setOnClickListener { context.openActivity(ObjectAddActivity::class.java) }
+        binding.add.add.setOnClickListener { context.openActivity<ObjectAddActivity>() }
 
         binding.toolbar.search.setOnClickListener {
             binding.toolbar.toolbar.visibility = View.GONE
@@ -82,7 +82,7 @@ class ObjectsActivity : AppCompatActivity(), ObjectAdapter.ObjectListener {
         val options = arrayOf("Edit", "Delete")
         context.showMoreOptions(options) { which ->
             when (which) {
-                0 -> context.openActivity(ObjectEditActivity::class.java, DATA.ID to item.id)
+                0 -> context.openActivity<ObjectEditActivity>(false, DATA.ID to item.id)
                 1 -> context.dialogOptionDelete(DATA.OBJECTS) {
                     viewModel.deleteTask(DATA.OBJECTS, item.id)
                 }

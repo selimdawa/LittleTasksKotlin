@@ -39,11 +39,11 @@ class ForgetPasswordActivity : AppCompatActivity() {
             AlertDialog.Builder(this).setView(loadingBinding.root).setCancelable(false).create()
 
         binding.noAccount.setOnClickListener {
-            context.openActivity(RegisterActivity::class.java)
+            context.openActivity<RegisterActivity>()
             finish()
         }
         binding.login.setOnClickListener {
-            context.openActivity(LoginActivity::class.java)
+            context.openActivity<LoginActivity>()
             finish()
         }
         binding.go.setOnClickListener { validateData() }

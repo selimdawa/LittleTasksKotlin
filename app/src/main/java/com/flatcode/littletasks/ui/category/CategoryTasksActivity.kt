@@ -54,7 +54,7 @@ class CategoryTasksActivity : AppCompatActivity(), TaskAdapter.TaskListener {
         binding.toolbar.close.setOnClickListener { handleBackPressed() }
         binding.add.add.setText(R.string.add_task)
         binding.add.add.setOnClickListener {
-            context.openActivity(TaskAddActivity::class.java, DATA.CATEGORY_ID to id)
+            context.openActivity<TaskAddActivity>(false, DATA.CATEGORY_ID to id)
         }
 
         binding.toolbar.search.setOnClickListener {
@@ -146,8 +146,8 @@ class CategoryTasksActivity : AppCompatActivity(), TaskAdapter.TaskListener {
         MaterialAlertDialogBuilder(context).setTitle("Choose Options")
             .setItems(options) { _, which ->
                 when (which) {
-                    0 -> context.openActivity(
-                        TaskEditActivity::class.java,
+                    0 -> context.openActivity<TaskEditActivity>(
+                        false,
                         DATA.TASK_ID to item.id,
                         DATA.CATEGORY_ID to item.category
                     )

@@ -45,7 +45,7 @@ class CategoriesActivity : AppCompatActivity(), CategoriesAdapter.CategoryListen
         binding.toolbar.close.setOnClickListener { handleBackPressed() }
         binding.add.add.setText(R.string.add_category)
         binding.add.add.setOnClickListener {
-            context.openActivity(PlansActivity::class.java, DATA.NEW_PLAN to "true")
+            context.openActivity<PlansActivity>(false, DATA.NEW_PLAN to "true")
         }
 
         binding.toolbar.search.setOnClickListener {
@@ -91,14 +91,14 @@ class CategoriesActivity : AppCompatActivity(), CategoriesAdapter.CategoryListen
         val options = arrayOf("Add Task", "Edit", "Delete")
         context.showMoreOptions(options) { which ->
             when (which) {
-                0 -> context.openActivity(
-                    TaskAddActivity::class.java,
+                0 -> context.openActivity<TaskAddActivity>(
+                    false,
                     DATA.CATEGORY_ID to item.id,
                     DATA.PLAN_ID to item.plan
                 )
 
-                1 -> context.openActivity(
-                    CategoryEditActivity::class.java,
+                1 -> context.openActivity<CategoryEditActivity>(
+                    false,
                     DATA.CATEGORY_ID to item.id,
                     DATA.PLAN_ID to item.plan
                 )

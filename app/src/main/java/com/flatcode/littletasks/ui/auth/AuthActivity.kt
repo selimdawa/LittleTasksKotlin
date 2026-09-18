@@ -22,8 +22,8 @@ class AuthActivity : AppCompatActivity() {
         _binding = ActivityAuthBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.loginBtn.setOnClickListener { context.openActivity(LoginActivity::class.java) }
-        binding.skipBtn.setOnClickListener { context.openActivity(RegisterActivity::class.java) }
+        binding.loginBtn.setOnClickListener { context.openActivity<LoginActivity>() }
+        binding.skipBtn.setOnClickListener { context.openActivity<RegisterActivity>() }
     }
 
     override fun onDestroy() {

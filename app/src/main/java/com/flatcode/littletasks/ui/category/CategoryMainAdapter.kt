@@ -46,7 +46,7 @@ class CategoryMainAdapter(
 
         holder.binding.more.setOnClickListener { listener.onMoreClick(item) }
         holder.binding.card.setOnClickListener {
-            context?.openActivity(CategoryTasksActivity::class.java, DATA.ID to id, DATA.NAME to name)
+            context?.openActivity<CategoryTasksActivity>(false, DATA.ID to id, DATA.NAME to name)
         }
     }
 

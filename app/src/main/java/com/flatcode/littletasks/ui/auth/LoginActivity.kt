@@ -42,8 +42,8 @@ class LoginActivity : AppCompatActivity() {
             .setCancelable(false)
             .create()
 
-        binding.forget.setOnClickListener { context.openActivity(ForgetPasswordActivity::class.java) }
-        binding.noAccount.setOnClickListener { context.openActivity(RegisterActivity::class.java) }
+        binding.forget.setOnClickListener { context.openActivity<ForgetPasswordActivity>() }
+        binding.noAccount.setOnClickListener { context.openActivity<RegisterActivity>() }
         binding.loginBtn.setOnClickListener { validateData() }
 
         lifecycleScope.launch {
@@ -52,7 +52,7 @@ class LoginActivity : AppCompatActivity() {
                     result?.let {
                         dialog?.dismiss()
                         it.onSuccess {
-                            context.openActivityAndClear(MainActivity::class.java)
+                            context.openActivity<MainActivity>(true)
                         }.onFailure { e ->
                             Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
                         }

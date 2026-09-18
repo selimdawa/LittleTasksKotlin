@@ -41,10 +41,10 @@ class RegisterActivity : AppCompatActivity() {
             AlertDialog.Builder(this).setView(loadingBinding.root).setCancelable(false).create()
 
         binding.login.setOnClickListener {
-            context.openActivity(LoginActivity::class.java)
+            context.openActivity<LoginActivity>()
             finish()
         }
-        binding.forget.setOnClickListener { context.openActivity(ForgetPasswordActivity::class.java) }
+        binding.forget.setOnClickListener { context.openActivity<ForgetPasswordActivity>() }
         binding.go.setOnClickListener { validateData() }
 
         lifecycleScope.launch {
@@ -54,7 +54,7 @@ class RegisterActivity : AppCompatActivity() {
                         dialog?.dismiss()
                         it.onSuccess {
                             Toast.makeText(context, "Account created...", Toast.LENGTH_SHORT).show()
-                            context.openActivityAndClear(MainActivity::class.java)
+                            context.openActivity<MainActivity>(true)
                             finish()
                         }.onFailure { e ->
                             Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()

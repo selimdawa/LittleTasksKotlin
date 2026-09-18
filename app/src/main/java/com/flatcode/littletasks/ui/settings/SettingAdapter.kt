@@ -2,6 +2,7 @@ package com.flatcode.littletasks.ui.settings
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -47,9 +48,9 @@ class SettingAdapter(private val context: Context?, private val list: ArrayList<
         holder.binding.item.setOnClickListener {
             if (type != null) {
                 if (type == DATA.PLANS) {
-                    context?.openActivity(PlansActivity::class.java, DATA.NEW_PLAN to "false")
+                    context?.openActivity<PlansActivity>(false, DATA.NEW_PLAN to "false")
                 } else if (type == DATA.CHOOSE_PLAN) {
-                    context?.openActivity(PlansActivity::class.java, DATA.NEW_PLAN to "true")
+                    context?.openActivity<PlansActivity>(false, DATA.NEW_PLAN to "true")
                 }
             } else {
                 when (id) {
@@ -57,7 +58,7 @@ class SettingAdapter(private val context: Context?, private val list: ArrayList<
                     "11" -> (context as? Activity)?.dialogLogout()
                     "12" -> context?.shareApp()
                     "13" -> context?.rateApp()
-                    else -> if (to != null) context?.openActivity(to)
+                    else -> if (to != null) context?.startActivity(Intent(context, to))
                 }
             }
         }

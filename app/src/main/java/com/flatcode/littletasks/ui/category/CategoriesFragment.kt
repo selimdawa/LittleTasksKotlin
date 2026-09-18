@@ -58,14 +58,14 @@ class CategoriesFragment : Fragment(R.layout.fragment_categories),
         val options = arrayOf("Add Task", "Edit", "Delete")
         context?.showMoreOptions(options) { which ->
             when (which) {
-                0 -> context?.openActivity(
-                    TaskAddActivity::class.java,
+                0 -> context?.openActivity<TaskAddActivity>(
+                    false,
                     DATA.CATEGORY_ID to item.id,
                     DATA.PLAN_ID to item.plan
                 )
 
-                1 -> context?.openActivity(
-                    CategoryEditActivity::class.java,
+                1 -> context?.openActivity<CategoryEditActivity>(
+                    false,
                     DATA.CATEGORY_ID to item.id,
                     DATA.PLAN_ID to item.plan
                 )

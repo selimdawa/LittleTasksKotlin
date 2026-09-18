@@ -20,21 +20,21 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         super.onViewCreated(view, savedInstanceState)
 
         binding.one.setOnClickListener {
-            context?.openActivity(FavoritesActivity::class.java, DATA.TASK_TYPE to DATA.TASKS_ALL)
+            context?.openActivity<FavoritesActivity>(false, DATA.TASK_TYPE to DATA.TASKS_ALL)
         }
         binding.two.setOnClickListener {
-            context?.openActivity(
-                FavoritesActivity::class.java, DATA.TASK_TYPE to DATA.TASKS_UN_STARTED
+            context?.openActivity<FavoritesActivity>(
+                false, DATA.TASK_TYPE to DATA.TASKS_UN_STARTED
             )
         }
         binding.three.setOnClickListener {
-            context?.openActivity(
-                FavoritesActivity::class.java, DATA.TASK_TYPE to DATA.TASKS_STARTED
+            context?.openActivity<FavoritesActivity>(
+                false, DATA.TASK_TYPE to DATA.TASKS_STARTED
             )
         }
         binding.four.setOnClickListener {
-            context?.openActivity(
-                FavoritesActivity::class.java, DATA.TASK_TYPE to DATA.TASKS_COMPLETED
+            context?.openActivity<FavoritesActivity>(
+                false, DATA.TASK_TYPE to DATA.TASKS_COMPLETED
             )
         }
     }

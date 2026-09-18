@@ -34,7 +34,7 @@ class ProfileActivity : AppCompatActivity() {
 
         profileId = intent.getStringExtra(DATA.PROFILE_ID)
 
-        binding.edit.setOnClickListener { context.openActivity(ProfileEditActivity::class.java) }
+        binding.edit.setOnClickListener { context.openActivity<ProfileEditActivity>() }
         binding.back.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
 
         lifecycleScope.launch {

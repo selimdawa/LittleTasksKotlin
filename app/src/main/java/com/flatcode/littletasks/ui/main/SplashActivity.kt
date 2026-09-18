@@ -39,9 +39,9 @@ class SplashActivity : AppCompatActivity() {
     private fun checkUser() {
         val firebaseUser = auth.currentUser
         if (firebaseUser == null) {
-            context.openActivity(AuthActivity::class.java)
+            context.openActivity<AuthActivity>()
         } else {
-            context.openActivity(MainActivity::class.java)
+            context.openActivity<MainActivity>()
         }
         finish()
     }

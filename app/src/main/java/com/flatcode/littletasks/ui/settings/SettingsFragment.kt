@@ -44,8 +44,8 @@ class SettingsFragment : Fragment() {
         binding.recyclerView.adapter = adapter
 
         binding.toolbar.item.setOnClickListener {
-            context?.openActivity(
-                ProfileActivity::class.java, DATA.PROFILE_ID to DATA.firebaseUserUid
+            context?.openActivity<ProfileActivity>(
+                false, DATA.PROFILE_ID to DATA.firebaseUserUid
             )
         }
 

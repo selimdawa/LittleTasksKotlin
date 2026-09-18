@@ -36,15 +36,24 @@ import com.flatcode.littletasks.ui.auth.AuthActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.theartofdev.edmodo.cropper.CropImage
 import com.theartofdev.edmodo.cropper.CropImageView
+import java.io.Serializable
 import java.text.MessageFormat
 
-fun Context.openActivity(c: Class<*>, isFinished: Boolean = false, vararg extras: Pair<String, String?>) {
-    val intent = Intent(this, c)
-    if (isFinished) {
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+inline fun <reified T : Activity> Context.openActivity(
+    clear: Boolean = false, vararg extras: Pair<String, Any?>
+) {
+    val intent = Intent(this, T::class.java).apply {
+        if (clear) addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+        extras.forEach { (key, value) ->
+            when (value) {
+                is String -> putExtra(key, value)
+                is Int -> putExtra(key, value)
+                is Boolean -> putExtra(key, value)
+                is Serializable -> putExtra(key, value)
+            }
+        }
     }
-    extras.forEach { intent.putExtra(it.first, it.second) }
-    this.startActivity(intent)
+    startActivity(intent)
 }
 
 fun Activity.closeApp() {
@@ -100,7 +109,7 @@ fun Activity.dialogLogout() {
 
     binding.yes.setOnClickListener {
         FirebaseAuth.getInstance().signOut()
-        this@dialogLogout.openActivity(AuthActivity::class.java, true)
+        this@dialogLogout.openActivity<AuthActivity>(true)
         dialog.dismiss()
     }
 
@@ -170,7 +179,6 @@ fun Activity.startCropImageWide() {
         .setMinCropResultSize(DATA.MIX_SQUARE, DATA.MIX_SQUARE).setAspectRatio(2, 1)
         .setCropShape(CropImageView.CropShape.OVAL).start(this)
 }
-
 
 fun Context.shareApp() {
     val shareIntent = Intent(Intent.ACTION_SEND).apply {

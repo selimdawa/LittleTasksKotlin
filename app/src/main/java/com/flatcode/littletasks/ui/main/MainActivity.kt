@@ -69,9 +69,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.toolbar.image.setOnClickListener {
-            context.openActivity(
-                ProfileActivity::class.java,
-                DATA.PROFILE_ID to DATA.firebaseUserUid
+            context.openActivity<ProfileActivity>(
+                false, DATA.PROFILE_ID to DATA.firebaseUserUid
             )
         }
 

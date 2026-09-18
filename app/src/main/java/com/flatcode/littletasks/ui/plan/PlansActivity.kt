@@ -45,7 +45,7 @@ class PlansActivity : AppCompatActivity(), PlanAdapter.PlanListener {
         binding.toolbar.back.setOnClickListener { handleBackPressed() }
         binding.toolbar.close.setOnClickListener { handleBackPressed() }
         binding.add.add.setText(R.string.add_plan)
-        binding.add.add.setOnClickListener { context.openActivity(PlanAddActivity::class.java) }
+        binding.add.add.setOnClickListener { context.openActivity<PlanAddActivity>() }
 
         binding.toolbar.search.setOnClickListener {
             binding.toolbar.toolbar.visibility = View.GONE
@@ -88,7 +88,7 @@ class PlansActivity : AppCompatActivity(), PlanAdapter.PlanListener {
         val options = arrayOf("Edit", "Delete")
         context.showMoreOptions(options) { which ->
             when (which) {
-                0 -> context.openActivity(PlanEditActivity::class.java, DATA.ID to item.id)
+                0 -> context.openActivity<PlanEditActivity>(false, DATA.ID to item.id)
                 1 -> context.dialogOptionDelete(DATA.PLANS) {
                     viewModel.deletePlan(item.id)
                 }

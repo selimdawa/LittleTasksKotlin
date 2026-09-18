@@ -45,7 +45,7 @@ class ObjectsPlanActivity : AppCompatActivity(), ObjectAdapter.ObjectListener {
         binding.toolbar.back.setOnClickListener { handleBackPressed() }
         binding.toolbar.close.setOnClickListener { handleBackPressed() }
         binding.add.add.setOnClickListener {
-            context.openActivity(ObjectsToPlanActivity::class.java, DATA.ID to id)
+            context.openActivity<ObjectsToPlanActivity>(false, DATA.ID to id)
         }
 
         binding.toolbar.search.setOnClickListener {
@@ -88,7 +88,7 @@ class ObjectsPlanActivity : AppCompatActivity(), ObjectAdapter.ObjectListener {
         val options = arrayOf("Edit", "Delete")
         context.showMoreOptions(options) { which ->
             when (which) {
-                0 -> context.openActivity(ObjectEditActivity::class.java, DATA.ID to item.id)
+                0 -> context.openActivity<ObjectEditActivity>(false, DATA.ID to item.id)
                 1 -> context.dialogOptionDelete(DATA.OBJECTS) {
                     viewModel.deleteTask(DATA.OBJECTS, item.id)
                 }
