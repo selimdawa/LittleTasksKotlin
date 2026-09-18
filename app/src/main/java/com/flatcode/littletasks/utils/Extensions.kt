@@ -38,7 +38,14 @@ import com.theartofdev.edmodo.cropper.CropImage
 import com.theartofdev.edmodo.cropper.CropImageView
 import java.text.MessageFormat
 
-// --- Activity Extensions ---
+fun Context.openActivity(c: Class<*>, isFinished: Boolean = false, vararg extras: Pair<String, String?>) {
+    val intent = Intent(this, c)
+    if (isFinished) {
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+    extras.forEach { intent.putExtra(it.first, it.second) }
+    this.startActivity(intent)
+}
 
 fun Activity.closeApp() {
     if (this.isFinishing || this.isDestroyed) return
@@ -93,12 +100,7 @@ fun Activity.dialogLogout() {
 
     binding.yes.setOnClickListener {
         FirebaseAuth.getInstance().signOut()
-
-        val intent = Intent(this@dialogLogout, AuthActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-        }
-        this@dialogLogout.startActivity(intent)
-
+        this@dialogLogout.openActivity(AuthActivity::class.java, true)
         dialog.dismiss()
     }
 
@@ -169,19 +171,6 @@ fun Activity.startCropImageWide() {
         .setCropShape(CropImageView.CropShape.OVAL).start(this)
 }
 
-// --- Context Extensions ---
-
-fun Context.openActivityAndClear(c: Class<*>) {
-    val intent = Intent(this, c)
-    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
-    this.startActivity(intent)
-}
-
-fun Context.openActivity(c: Class<*>, vararg extras: Pair<String, String?>) {
-    val intent = Intent(this, c)
-    extras.forEach { intent.putExtra(it.first, it.second) }
-    this.startActivity(intent)
-}
 
 fun Context.shareApp() {
     val shareIntent = Intent(Intent.ACTION_SEND).apply {
@@ -249,8 +238,6 @@ fun Context.showMoreOptions(options: Array<String>, onOptionSelected: (Int) -> U
         }.show()
 }
 
-// --- ImageView Extensions ---
-
 fun ImageView.loadImage(isUser: Boolean, url: String?) {
     try {
         if (url == DATA.BASIC) {
@@ -288,8 +275,6 @@ fun ImageView.loadBlurImage(isUser: Boolean, url: String, level: Int) {
         this.setImageResource(R.drawable.basic_book)
     }
 }
-
-// --- Other Extensions ---
 
 fun Int.levelPoint(): Int {
     val initialPoint = 10
@@ -329,8 +314,6 @@ fun Uri.getFileExtension(context: Context): String {
     val mime: MimeTypeMap = MimeTypeMap.getSingleton()
     return mime.getExtensionFromMimeType(cR.getType(this))!!
 }
-
-// --- Time Ago Utility ---
 
 object GetTimeAgo {
     private const val SECOND_MILLIS = 1000
@@ -374,8 +357,6 @@ object GetTimeAgo {
         }
     }
 }
-
-// --- Blur Transformation ---
 
 class SimpleBlurTransformation(private val radius: Float) : Transformation() {
     override val cacheKey: String = "${SimpleBlurTransformation::class.java.name}-$radius"
