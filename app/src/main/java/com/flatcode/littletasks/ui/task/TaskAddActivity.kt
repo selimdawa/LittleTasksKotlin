@@ -8,16 +8,15 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.flatcode.littletasks.R
-import com.flatcode.littletasks.utils.DATA
-import com.flatcode.littletasks.utils.loadImage
-import com.flatcode.littletasks.databinding.ActivityTaskAddBinding
-import com.flatcode.littletasks.databinding.LayoutLoadingDialogBinding
-import dagger.hilt.android.AndroidEntryPoint
-
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.flatcode.littletasks.R
+import com.flatcode.littletasks.databinding.ActivityTaskAddBinding
+import com.flatcode.littletasks.databinding.LayoutLoadingDialogBinding
+import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.utils.loadImage
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -61,10 +60,12 @@ class TaskAddActivity : AppCompatActivity() {
                     result?.let {
                         dismissLoading()
                         it.onSuccess {
-                            Toast.makeText(context, "Successfully uploaded...", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Successfully uploaded...", Toast.LENGTH_SHORT)
+                                .show()
                             finish()
                         }.onFailure { e ->
-                            Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT)
+                                .show()
                         }
                     }
                 }
@@ -77,10 +78,9 @@ class TaskAddActivity : AppCompatActivity() {
     private fun showLoading() {
         if (progressDialog == null) {
             val loadingBinding = LayoutLoadingDialogBinding.inflate(layoutInflater)
-            progressDialog = AlertDialog.Builder(context)
-                .setView(loadingBinding.root)
-                .setCancelable(false)
-                .create()
+            progressDialog =
+                AlertDialog.Builder(context).setView(loadingBinding.root).setCancelable(false)
+                    .create()
         }
         progressDialog?.show()
     }

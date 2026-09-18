@@ -72,7 +72,7 @@ class CategoryTasksActivity : AppCompatActivity(), TaskAdapter.TaskListener {
             override fun afterTextChanged(s: Editable?) {}
         })
 
-        adapter = TaskAdapter(context, this)
+        adapter = TaskAdapter(this)
         binding.recyclerView.adapter = adapter
         binding.recyclerViewReverse.adapter = adapter
 
@@ -152,8 +152,8 @@ class CategoryTasksActivity : AppCompatActivity(), TaskAdapter.TaskListener {
                         DATA.CATEGORY_ID to item.category
                     )
 
-                    1 -> context.dialogOptionDelete(DATA.TASKS, item.id, item.name ?: "") {
-                        viewModel.deleteTask(DATA.TASKS, item.id ?: "")
+                    1 -> context.dialogOptionDelete(DATA.TASKS) {
+                        viewModel.deleteTask(DATA.TASKS, item.id)
                     }
 
                     2 -> viewModel.updateTaskStatus(

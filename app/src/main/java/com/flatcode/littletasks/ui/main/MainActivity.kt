@@ -8,21 +8,20 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.flatcode.littletasks.R
+import com.flatcode.littletasks.databinding.ActivityMainBinding
+import com.flatcode.littletasks.ui.profile.ProfileActivity
 import com.flatcode.littletasks.utils.DATA
 import com.flatcode.littletasks.utils.closeApp
 import com.flatcode.littletasks.utils.loadImage
 import com.flatcode.littletasks.utils.openActivity
-import com.flatcode.littletasks.databinding.ActivityMainBinding
-import com.flatcode.littletasks.ui.profile.ProfileActivity
 import dagger.hilt.android.AndroidEntryPoint
 import io.selimdawa.bubblebottom.BubbleBottomNavigation
-
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -70,7 +69,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.toolbar.image.setOnClickListener {
-            context.openActivity(ProfileActivity::class.java, DATA.PROFILE_ID to DATA.firebaseUserUid)
+            context.openActivity(
+                ProfileActivity::class.java,
+                DATA.PROFILE_ID to DATA.firebaseUserUid
+            )
         }
 
         lifecycleScope.launch {

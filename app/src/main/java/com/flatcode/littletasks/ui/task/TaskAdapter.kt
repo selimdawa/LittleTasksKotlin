@@ -1,6 +1,5 @@
 package com.flatcode.littletasks.ui.task
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,17 +11,19 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.flatcode.littletasks.R
-import com.flatcode.littletasks.utils.DATA
-import com.flatcode.littletasks.utils.GetTimeAgo
-import com.flatcode.littletasks.utils.loadImage
+import com.flatcode.littletasks.databinding.ItemTaskBinding
 import com.flatcode.littletasks.filter.TaskCategoryFilter
 import com.flatcode.littletasks.model.Category
 import com.flatcode.littletasks.model.Task
-import com.flatcode.littletasks.databinding.ItemTaskBinding
-import com.google.firebase.database.*
+import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.utils.GetTimeAgo
+import com.flatcode.littletasks.utils.loadImage
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 
 class TaskAdapter(
-    private val context: Context,
     private val listener: TaskListener
 ) : ListAdapter<Task, TaskAdapter.ViewHolder>(TaskDiffCallback()), Filterable {
 
@@ -60,15 +61,17 @@ class TaskAdapter(
 
         holder.binding.name.text = name
         holder.binding.name.visibility = if (name.isEmpty()) View.GONE else View.VISIBLE
-        
+
         holder.binding.points.text = points
         holder.binding.AVPoints.text = avPoints
 
         val addTime = timestamp.toLongOrNull() ?: 0L
         holder.binding.add.text = GetTimeAgo.getMessageAgo(addTime)
 
-        holder.binding.start.text = if (start == "0") "-" else GetTimeAgo.getMessageAgo(start.toLongOrNull() ?: 0L)
-        holder.binding.end.text = if (end == "0") "-" else GetTimeAgo.getMessageAgo(end.toLongOrNull() ?: 0L)
+        holder.binding.start.text =
+            if (start == "0") "-" else GetTimeAgo.getMessageAgo(start.toLongOrNull() ?: 0L)
+        holder.binding.end.text =
+            if (end == "0") "-" else GetTimeAgo.getMessageAgo(end.toLongOrNull() ?: 0L)
 
         // UI Updates for task status stars
         when {
@@ -78,9 +81,9 @@ class TaskAdapter(
         }
 
         getData(category, holder.binding.category, holder.binding.image)
-        
+
         listener.isFavorite(id, publisher, holder.binding.favorites)
-        
+
         holder.binding.favorites.setOnClickListener { listener.onFavoriteClick(item) }
         holder.binding.task.setOnClickListener { listener.onTaskClick(item) }
         holder.binding.more.setOnClickListener { listener.onMoreClick(item) }
@@ -113,6 +116,7 @@ class TaskAdapter(
                     name.text = item.name
                     image.loadImage(false, item.image)
                 }
+
                 override fun onCancelled(databaseError: DatabaseError) {}
             })
     }

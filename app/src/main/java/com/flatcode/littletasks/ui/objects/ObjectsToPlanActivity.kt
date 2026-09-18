@@ -1,6 +1,5 @@
 package com.flatcode.littletasks.ui.objects
 
-import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -16,19 +15,17 @@ import com.flatcode.littletasks.R
 import com.flatcode.littletasks.databinding.ActivityObjectsBinding
 import com.flatcode.littletasks.model.TaskItem
 import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.utils.viewBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-
-import com.flatcode.littletasks.utils.viewBinding
 
 @AndroidEntryPoint
 class ObjectsToPlanActivity : AppCompatActivity(), ObjectOptionAdapter.ObjectOptionListener {
 
     private val binding by viewBinding(ActivityObjectsBinding::inflate)
 
-    private val context: Context = this@ObjectsToPlanActivity
     private var adapter: ObjectOptionAdapter? = null
     private var id: String? = null
     private val viewModel: ObjectsViewModel by viewModels()

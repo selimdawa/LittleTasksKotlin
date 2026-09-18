@@ -9,17 +9,15 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.flatcode.littletasks.R
-import com.flatcode.littletasks.utils.openActivity
-import com.flatcode.littletasks.utils.openActivityAndClear
-import com.flatcode.littletasks.databinding.ActivityLoginBinding
-import com.flatcode.littletasks.databinding.LayoutLoadingDialogBinding
-import com.flatcode.littletasks.ui.main.MainActivity
-import dagger.hilt.android.AndroidEntryPoint
-
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.flatcode.littletasks.databinding.ActivityLoginBinding
+import com.flatcode.littletasks.databinding.LayoutLoadingDialogBinding
+import com.flatcode.littletasks.ui.main.MainActivity
+import com.flatcode.littletasks.utils.openActivity
+import com.flatcode.littletasks.utils.openActivityAndClear
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 

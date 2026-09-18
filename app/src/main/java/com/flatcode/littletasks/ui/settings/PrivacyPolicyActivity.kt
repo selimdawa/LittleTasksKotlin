@@ -5,13 +5,12 @@ import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.flatcode.littletasks.R
-import com.flatcode.littletasks.databinding.ActivityPrivacyPolicyBinding
-import dagger.hilt.android.AndroidEntryPoint
-
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.flatcode.littletasks.R
+import com.flatcode.littletasks.databinding.ActivityPrivacyPolicyBinding
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 

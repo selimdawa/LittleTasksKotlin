@@ -150,7 +150,7 @@ class CategoryAddActivity : AppCompatActivity() {
             Toast.makeText(context, "Pick Image...", Toast.LENGTH_SHORT).show()
         } else {
             showLoading()
-            val ext = imageUri?.getFileExtension(context) ?: "jpg"
+            val ext = imageUri!!.getFileExtension(context)
             viewModel.addCategory(title, planId ?: "", imageUri!!, ext)
         }
     }

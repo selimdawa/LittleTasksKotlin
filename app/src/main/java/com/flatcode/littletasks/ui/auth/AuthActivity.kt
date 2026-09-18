@@ -4,8 +4,8 @@ import android.content.Context
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import com.flatcode.littletasks.utils.openActivity
 import com.flatcode.littletasks.databinding.ActivityAuthBinding
+import com.flatcode.littletasks.utils.openActivity
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

@@ -8,8 +8,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 @Entity(tableName = "task_items")
 data class TaskItem(
-    @PrimaryKey
-    var id: String = "",
+    @PrimaryKey var id: String = "",
     var name: String? = null,
     var publisher: String? = null,
     var points: Int = 0,

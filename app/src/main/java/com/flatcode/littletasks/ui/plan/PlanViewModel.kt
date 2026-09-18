@@ -3,9 +3,9 @@ package com.flatcode.littletasks.ui.plan
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.flatcode.littletasks.utils.DATA
 import com.flatcode.littletasks.model.Plan
-import com.flatcode.littletasks.data.repository.TaskRepository
+import com.flatcode.littletasks.repository.TaskRepository
+import com.flatcode.littletasks.utils.DATA
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -39,9 +39,7 @@ class PlanViewModel @Inject constructor(
 
     fun loadPlans() {
         val uid = auth.currentUser?.uid ?: return
-        database.getReference(DATA.PLANS)
-            .orderByChild("publisher")
-            .equalTo(uid)
+        database.getReference(DATA.PLANS).orderByChild("publisher").equalTo(uid)
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val list = mutableListOf<Plan>()

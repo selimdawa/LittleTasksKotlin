@@ -6,15 +6,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.flatcode.littletasks.databinding.ItemSettingBinding
+import com.flatcode.littletasks.model.Setting
+import com.flatcode.littletasks.ui.plan.PlansActivity
 import com.flatcode.littletasks.utils.DATA
 import com.flatcode.littletasks.utils.dialogAboutApp
 import com.flatcode.littletasks.utils.dialogLogout
 import com.flatcode.littletasks.utils.openActivity
 import com.flatcode.littletasks.utils.rateApp
 import com.flatcode.littletasks.utils.shareApp
-import com.flatcode.littletasks.model.Setting
-import com.flatcode.littletasks.databinding.ItemSettingBinding
-import com.flatcode.littletasks.ui.plan.PlansActivity
 import java.text.MessageFormat
 
 class SettingAdapter(private val context: Context?, private val list: ArrayList<Setting>) :

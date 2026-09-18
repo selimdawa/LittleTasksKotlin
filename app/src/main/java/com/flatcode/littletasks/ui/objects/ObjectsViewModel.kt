@@ -2,11 +2,14 @@ package com.flatcode.littletasks.ui.objects
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.flatcode.littletasks.utils.DATA
 import com.flatcode.littletasks.model.TaskItem
-import com.flatcode.littletasks.data.repository.TaskRepository
+import com.flatcode.littletasks.repository.TaskRepository
+import com.flatcode.littletasks.utils.DATA
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.*
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,9 +36,7 @@ class ObjectsViewModel @Inject constructor(
 
     fun loadAllObjects() {
         val uid = auth.currentUser?.uid ?: return
-        database.getReference(DATA.OBJECTS)
-            .orderByChild("publisher")
-            .equalTo(uid)
+        database.getReference(DATA.OBJECTS).orderByChild("publisher").equalTo(uid)
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val list = mutableListOf<TaskItem>()
@@ -70,9 +71,11 @@ class ObjectsViewModel @Inject constructor(
                                 }
                                 _objects.value = list
                             }
+
                             override fun onCancelled(error: DatabaseError) {}
                         })
                 }
+
                 override fun onCancelled(error: DatabaseError) {}
             })
     }
@@ -84,6 +87,7 @@ class ObjectsViewModel @Inject constructor(
                     val item = snapshot.getValue(TaskItem::class.java) ?: return
                     _objectInfo.value = item
                 }
+
                 override fun onCancelled(error: DatabaseError) {}
             })
     }

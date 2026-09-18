@@ -13,7 +13,6 @@ material = "1.14.0"
 activityKtx = "1.13.0"
 fragmentKtx = "1.9.0"
 materialRipple = "1.0.2"
-datastore = "1.2.1"
 googleServices = "4.5.0"
 navigation = "2.10.1"
 multicolors = "1.0.10"
@@ -27,7 +26,6 @@ ksp = "2.3.11"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
-androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -45,12 +43,10 @@ android-image-cropper = { module = "com.theartofdev.edmodo:android-image-cropper
 navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigation" }
 navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigation" }
 #Firebase
-firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-auth = { module = "com.google.firebase:firebase-auth" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-database = { module = "com.google.firebase:firebase-database" }
 firebase-storage = { module = "com.google.firebase:firebase-storage" }
-firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 #Other's
 bubblebottom = { module = "com.github.selimdawa:BubbleBottom", version.ref = "bubblebottom" }
 material-ripple = { module = "com.balysv:material-ripple", version.ref = "materialRipple" }

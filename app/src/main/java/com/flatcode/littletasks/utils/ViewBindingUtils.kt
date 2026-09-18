@@ -26,8 +26,7 @@ inline fun <T : ViewBinding> AppCompatActivity.viewBinding(
  * Automatically cleans up references in onDestroyView to prevent memory leaks.
  */
 class FragmentViewBindingDelegate<T : ViewBinding>(
-    val fragment: Fragment,
-    val viewBindingFactory: (View) -> T
+    val fragment: Fragment, val viewBindingFactory: (View) -> T
 ) : ReadOnlyProperty<Fragment, T> {
     private var binding: T? = null
 

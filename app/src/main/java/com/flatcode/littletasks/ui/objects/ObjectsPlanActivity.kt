@@ -18,11 +18,10 @@ import com.flatcode.littletasks.utils.DATA
 import com.flatcode.littletasks.utils.dialogOptionDelete
 import com.flatcode.littletasks.utils.openActivity
 import com.flatcode.littletasks.utils.showMoreOptions
+import com.flatcode.littletasks.utils.viewBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-
-import com.flatcode.littletasks.utils.viewBinding
 
 @AndroidEntryPoint
 class ObjectsPlanActivity : AppCompatActivity(), ObjectAdapter.ObjectListener {
@@ -90,8 +89,8 @@ class ObjectsPlanActivity : AppCompatActivity(), ObjectAdapter.ObjectListener {
         context.showMoreOptions(options) { which ->
             when (which) {
                 0 -> context.openActivity(ObjectEditActivity::class.java, DATA.ID to item.id)
-                1 -> context.dialogOptionDelete(DATA.OBJECTS, item.id, item.name ?: "") {
-                    viewModel.deleteTask(DATA.OBJECTS, item.id ?: "")
+                1 -> context.dialogOptionDelete(DATA.OBJECTS) {
+                    viewModel.deleteTask(DATA.OBJECTS, item.id)
                 }
             }
         }

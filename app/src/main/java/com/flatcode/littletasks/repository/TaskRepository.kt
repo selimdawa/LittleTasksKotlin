@@ -1,4 +1,4 @@
-package com.flatcode.littletasks.data.repository
+package com.flatcode.littletasks.repository
 
 import com.flatcode.littletasks.utils.DATA
 import com.flatcode.littletasks.db.TaskDao

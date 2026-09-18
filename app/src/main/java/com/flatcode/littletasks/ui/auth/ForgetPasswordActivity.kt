@@ -8,15 +8,13 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.flatcode.littletasks.R
-import com.flatcode.littletasks.utils.openActivity
-import com.flatcode.littletasks.databinding.ActivityForgetPasswordBinding
-import com.flatcode.littletasks.databinding.LayoutLoadingDialogBinding
-import dagger.hilt.android.AndroidEntryPoint
-
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.flatcode.littletasks.databinding.ActivityForgetPasswordBinding
+import com.flatcode.littletasks.databinding.LayoutLoadingDialogBinding
+import com.flatcode.littletasks.utils.openActivity
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -37,10 +35,8 @@ class ForgetPasswordActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val loadingBinding = LayoutLoadingDialogBinding.inflate(layoutInflater)
-        dialog = AlertDialog.Builder(this)
-            .setView(loadingBinding.root)
-            .setCancelable(false)
-            .create()
+        dialog =
+            AlertDialog.Builder(this).setView(loadingBinding.root).setCancelable(false).create()
 
         binding.noAccount.setOnClickListener {
             context.openActivity(RegisterActivity::class.java)
@@ -62,7 +58,9 @@ class ForgetPasswordActivity : AppCompatActivity() {
                                 context, "Instructions to reset password sent", Toast.LENGTH_SHORT
                             ).show()
                         }.onFailure { e ->
-                            Toast.makeText(context, "Failed to send: " + e.message, Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                context, "Failed to send: " + e.message, Toast.LENGTH_SHORT
+                            ).show()
                         }
                     }
                 }

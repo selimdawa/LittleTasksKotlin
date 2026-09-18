@@ -13,16 +13,15 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.flatcode.littletasks.R
-import com.flatcode.littletasks.utils.getFileExtension
-import com.flatcode.littletasks.databinding.ActivityPlanAddBinding
-import com.flatcode.littletasks.databinding.LayoutLoadingDialogBinding
-import com.theartofdev.edmodo.cropper.CropImage
-import dagger.hilt.android.AndroidEntryPoint
-
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.flatcode.littletasks.R
+import com.flatcode.littletasks.databinding.ActivityPlanAddBinding
+import com.flatcode.littletasks.databinding.LayoutLoadingDialogBinding
+import com.flatcode.littletasks.utils.getFileExtension
+import com.theartofdev.edmodo.cropper.CropImage
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -37,16 +36,16 @@ class PlanAddActivity : AppCompatActivity() {
     private var progressDialog: AlertDialog? = null
     private val viewModel: PlanViewModel by viewModels()
 
-    private val cropImageLauncher = registerForActivityResult(
-        object : ActivityResultContract<Intent?, CropImage.ActivityResult?>() {
-            override fun createIntent(context: Context, input: Intent?): Intent {
-                return input ?: CropImage.activity().getIntent(context)
-            }
-            override fun parseResult(resultCode: Int, intent: Intent?): CropImage.ActivityResult? {
-                return if (intent != null) CropImage.getActivityResult(intent) else null
-            }
+    private val cropImageLauncher = registerForActivityResult(object :
+        ActivityResultContract<Intent?, CropImage.ActivityResult?>() {
+        override fun createIntent(context: Context, input: Intent?): Intent {
+            return input ?: CropImage.activity().getIntent(context)
         }
-    ) { result ->
+
+        override fun parseResult(resultCode: Int, intent: Intent?): CropImage.ActivityResult? {
+            return if (intent != null) CropImage.getActivityResult(intent) else null
+        }
+    }) { result ->
         if (result != null) {
             if (result.error == null) {
                 imageUri = result.uri
@@ -100,10 +99,12 @@ class PlanAddActivity : AppCompatActivity() {
                     result?.let {
                         dismissLoading()
                         it.onSuccess {
-                            Toast.makeText(context, "Successfully uploaded...", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Successfully uploaded...", Toast.LENGTH_SHORT)
+                                .show()
                             finish()
                         }.onFailure { e ->
-                            Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT)
+                                .show()
                         }
                     }
                 }
@@ -114,10 +115,9 @@ class PlanAddActivity : AppCompatActivity() {
     private fun showLoading() {
         if (progressDialog == null) {
             val loadingBinding = LayoutLoadingDialogBinding.inflate(layoutInflater)
-            progressDialog = AlertDialog.Builder(context)
-                .setView(loadingBinding.root)
-                .setCancelable(false)
-                .create()
+            progressDialog =
+                AlertDialog.Builder(context).setView(loadingBinding.root).setCancelable(false)
+                    .create()
         }
         progressDialog?.show()
     }
@@ -135,7 +135,7 @@ class PlanAddActivity : AppCompatActivity() {
             Toast.makeText(context, "Pick Image...", Toast.LENGTH_SHORT).show()
         } else {
             showLoading()
-            val ext = imageUri?.getFileExtension(context) ?: "jpg"
+            val ext = imageUri!!.getFileExtension(context)
             viewModel.addPlan(title, imageUri!!, ext)
         }
     }

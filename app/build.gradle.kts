@@ -48,7 +48,6 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.fragment.ktx)
-    implementation(libs.androidx.datastore.preferences)   //DataStore
     //Layout
     implementation(libs.material)
     implementation(libs.multicolors)
@@ -61,8 +60,6 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.firebase.database)
     implementation(libs.firebase.storage)
-    implementation(libs.firebase.analytics)
-    implementation(libs.firebase.crashlytics)
     //MVVM
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     //Hilt

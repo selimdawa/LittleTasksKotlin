@@ -8,9 +8,9 @@ import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
-import com.flatcode.littletasks.utils.DATA
-import com.flatcode.littletasks.model.TaskItem
 import com.flatcode.littletasks.databinding.ItemNewPlanBinding
+import com.flatcode.littletasks.model.TaskItem
+import com.flatcode.littletasks.utils.DATA
 import com.google.firebase.database.FirebaseDatabase
 import java.text.MessageFormat
 
@@ -34,7 +34,12 @@ class ObjectAddAdapter(private val context: Context, var list: List<TaskItem>) :
 
         holder.binding.number.text = MessageFormat.format("{0}{1}", DATA.EMPTY, id)
         holder.binding.add.setOnClickListener {
-            validateData(holder.binding.nameEt, holder.binding.PointsEt, holder.binding.add, holder.binding.done)
+            validateData(
+                holder.binding.nameEt,
+                holder.binding.PointsEt,
+                holder.binding.add,
+                holder.binding.done
+            )
         }
         holder.binding.done.setOnClickListener {
             Toast.makeText(context, "Already done", Toast.LENGTH_SHORT).show()

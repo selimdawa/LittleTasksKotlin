@@ -8,22 +8,26 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Build
 import android.view.LayoutInflater
-import android.view.View
 import android.view.Window
 import android.view.WindowManager
 import android.webkit.MimeTypeMap
 import android.widget.ImageView
-import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.drawable.toDrawable
+import androidx.core.graphics.scale
+import androidx.core.net.toUri
 import coil3.load
 import coil3.request.crossfade
 import coil3.request.placeholder
 import coil3.request.transformations
+import coil3.size.Size
+import coil3.transform.Transformation
 import com.flatcode.littletasks.R
 import com.flatcode.littletasks.databinding.DialogAboutAppBinding
 import com.flatcode.littletasks.databinding.DialogCloseAppBinding
@@ -32,11 +36,6 @@ import com.flatcode.littletasks.ui.auth.AuthActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.theartofdev.edmodo.cropper.CropImage
 import com.theartofdev.edmodo.cropper.CropImageView
-import android.graphics.Bitmap
-import androidx.core.graphics.createBitmap
-import androidx.core.graphics.scale
-import coil3.size.Size
-import coil3.transform.Transformation
 import java.text.MessageFormat
 
 // --- Activity Extensions ---
@@ -52,7 +51,7 @@ fun Activity.closeApp() {
     dialog.setCancelable(true)
 
     dialog.window?.let { window ->
-        window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        window.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
         val lp = WindowManager.LayoutParams().apply {
             copyFrom(window.attributes)
             width = WindowManager.LayoutParams.WRAP_CONTENT
@@ -83,7 +82,7 @@ fun Activity.dialogLogout() {
     dialog.setCancelable(true)
 
     dialog.window?.let { window ->
-        window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        window.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
         val lp = WindowManager.LayoutParams().apply {
             copyFrom(window.attributes)
             width = WindowManager.LayoutParams.WRAP_CONTENT
@@ -121,7 +120,7 @@ fun Activity.dialogAboutApp() {
     dialog.setCancelable(true)
 
     dialog.window?.let { window ->
-        window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        window.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
         val lp = WindowManager.LayoutParams().apply {
             copyFrom(window.attributes)
             width = WindowManager.LayoutParams.WRAP_CONTENT
@@ -131,7 +130,7 @@ fun Activity.dialogAboutApp() {
     }
 
     binding.website.setOnClickListener {
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(DATA.WEBSITE))
+        val intent = Intent(Intent.ACTION_VIEW, DATA.WEBSITE.toUri())
         this@dialogAboutApp.startActivity(intent)
     }
 
@@ -143,8 +142,7 @@ fun Activity.dialogAboutApp() {
                 )
             } else {
                 @Suppress("DEPRECATION") this@dialogAboutApp.packageManager.getPackageInfo(
-                    "com.facebook.katana",
-                    0
+                    "com.facebook.katana", 0
                 )
             }
             "fb://profile/${DATA.FB_ID}"
@@ -152,7 +150,7 @@ fun Activity.dialogAboutApp() {
             "https://facebook.com${DATA.FB_ID}"
         }
 
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(facebookUri))
+        val intent = Intent(Intent.ACTION_VIEW, facebookUri.toUri())
         this@dialogAboutApp.startActivity(intent)
     }
 
@@ -199,8 +197,8 @@ fun Context.shareApp() {
 
 fun Context.rateApp() {
     val packageName = this.packageName
-    val marketUri = Uri.parse("market://details?id=$packageName")
-    val webUri = Uri.parse("https://google.com")
+    val marketUri = "market://details?id=$packageName".toUri()
+    val webUri = "https://google.com".toUri()
 
     try {
         this.startActivity(Intent(Intent.ACTION_VIEW, marketUri))
@@ -209,14 +207,14 @@ fun Context.rateApp() {
     }
 }
 
-fun Context.dialogOptionDelete(database: String?, id: String?, name: String, onDelete: () -> Unit) {
+fun Context.dialogOptionDelete(database: String?, onDelete: () -> Unit) {
     val binding = DialogLogoutBinding.inflate(LayoutInflater.from(this))
     val dialog = Dialog(this)
     dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
     dialog.setContentView(binding.root)
     dialog.setCancelable(true)
     dialog.window?.let { window ->
-        window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        window.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
         val lp = WindowManager.LayoutParams().apply {
             copyFrom(window.attributes)
             width = WindowManager.LayoutParams.WRAP_CONTENT
@@ -293,7 +291,8 @@ fun ImageView.loadBlurImage(isUser: Boolean, url: String, level: Int) {
 
 // --- Other Extensions ---
 
-fun Int.levelPoint(initialPoint: Int): Int {
+fun Int.levelPoint(): Int {
+    val initialPoint = 10
     var mutablePoint = initialPoint
     val half = mutablePoint / 2
 
@@ -404,7 +403,8 @@ class SimpleBlurTransformation(private val radius: Float) : Transformation() {
                 bs += p and 0xff
                 c++
             }
-            blurred[y * w + x] = (0xff shl 24) or ((rs / c).toInt() shl 16) or ((gs / c).toInt() shl 8) or (bs / c).toInt()
+            blurred[y * w + x] =
+                (0xff shl 24) or ((rs / c).toInt() shl 16) or ((gs / c).toInt() shl 8) or (bs / c).toInt()
         }
         for (x in 0 until w) for (y in 0 until h) {
             var rs = 0L
@@ -419,7 +419,8 @@ class SimpleBlurTransformation(private val radius: Float) : Transformation() {
                 bs += p and 0xff
                 c++
             }
-            pix[y * w + x] = (0xff shl 24) or ((rs / c).toInt() shl 16) or ((gs / c).toInt() shl 8) or (bs / c).toInt()
+            pix[y * w + x] =
+                (0xff shl 24) or ((rs / c).toInt() shl 16) or ((gs / c).toInt() shl 8) or (bs / c).toInt()
         }
         val output = createBitmap(w, h, Bitmap.Config.ARGB_8888)
         output.setPixels(pix, 0, w, 0, 0, w, h)

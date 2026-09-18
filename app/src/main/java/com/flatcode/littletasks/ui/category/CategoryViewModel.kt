@@ -2,13 +2,13 @@ package com.flatcode.littletasks.ui.category
 
 import android.net.Uri
 import androidx.lifecycle.ViewModel
-import com.flatcode.littletasks.utils.DATA
+import androidx.lifecycle.viewModelScope
 import com.flatcode.littletasks.model.Category
 import com.flatcode.littletasks.model.Plan
 import com.flatcode.littletasks.model.Task
 import com.flatcode.littletasks.model.TaskItem
-import androidx.lifecycle.viewModelScope
-import com.flatcode.littletasks.data.repository.TaskRepository
+import com.flatcode.littletasks.repository.TaskRepository
+import com.flatcode.littletasks.utils.DATA
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -49,8 +49,7 @@ class CategoryViewModel @Inject constructor(
 
     fun getCategories(orderBy: String) {
         val uid = auth.currentUser?.uid ?: return
-        database.getReference(DATA.CATEGORIES)
-            .orderByChild(orderBy)
+        database.getReference(DATA.CATEGORIES).orderByChild(orderBy)
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val list = mutableListOf<Category>()
@@ -90,31 +89,29 @@ class CategoryViewModel @Inject constructor(
         val filePath = "Images/Category/$id.$extension"
         val storageRef = storage.getReference(filePath)
 
-        storageRef.putFile(imageUri)
-            .addOnSuccessListener {
-                it.storage.downloadUrl.addOnSuccessListener { uri ->
-                    val hashMap = HashMap<String, Any?>().apply {
-                        put(DATA.PUBLISHER, uid)
-                        put(DATA.TIMESTAMP, System.currentTimeMillis())
-                        put(DATA.ID, id)
-                        put(DATA.NAME, title)
-                        put(DATA.PLAN, planId)
-                        put(DATA.IMAGE, uri.toString())
-                    }
-                    ref.child(id).setValue(hashMap).addOnSuccessListener {
-                        addAutoTasksForCategory(id, planId)
-                        Timber.d("Category added successfully: $id")
-                        _uploadResult.value = Result.success("Category uploaded")
-                    }.addOnFailureListener { e ->
-                        Timber.e(e, "Failed to add category to database")
-                        _uploadResult.value = Result.failure(e)
-                    }
+        storageRef.putFile(imageUri).addOnSuccessListener {
+            it.storage.downloadUrl.addOnSuccessListener { uri ->
+                val hashMap = HashMap<String, Any?>().apply {
+                    put(DATA.PUBLISHER, uid)
+                    put(DATA.TIMESTAMP, System.currentTimeMillis())
+                    put(DATA.ID, id)
+                    put(DATA.NAME, title)
+                    put(DATA.PLAN, planId)
+                    put(DATA.IMAGE, uri.toString())
+                }
+                ref.child(id).setValue(hashMap).addOnSuccessListener {
+                    addAutoTasksForCategory(id, planId)
+                    Timber.d("Category added successfully: $id")
+                    _uploadResult.value = Result.success("Category uploaded")
+                }.addOnFailureListener { e ->
+                    Timber.e(e, "Failed to add category to database")
+                    _uploadResult.value = Result.failure(e)
                 }
             }
-            .addOnFailureListener {
-                Timber.e(it, "Failed to upload category image")
-                _uploadResult.value = Result.failure(it)
-            }
+        }.addOnFailureListener {
+            Timber.e(it, "Failed to upload category image")
+            _uploadResult.value = Result.failure(it)
+        }
     }
 
     private fun addAutoTasksForCategory(categoryId: String, planId: String) {
@@ -131,7 +128,9 @@ class CategoryViewModel @Inject constructor(
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    Timber.e(error.toException(), "Error adding auto tasks for category: $categoryId")
+                    Timber.e(
+                        error.toException(), "Error adding auto tasks for category: $categoryId"
+                    )
                 }
             })
     }
@@ -194,8 +193,7 @@ class CategoryViewModel @Inject constructor(
             .addOnSuccessListener {
                 Timber.d("Category updated successfully: $categoryId")
                 _uploadResult.value = Result.success("Category updated")
-            }
-            .addOnFailureListener { e ->
+            }.addOnFailureListener { e ->
                 Timber.e(e, "Failed to update category in database")
                 _uploadResult.value = Result.failure(e)
             }
@@ -203,8 +201,7 @@ class CategoryViewModel @Inject constructor(
 
     fun getCategoryTasks(categoryId: String, orderBy: String) {
         val uid = auth.currentUser?.uid ?: return
-        database.getReference(DATA.TASKS)
-            .orderByChild(orderBy)
+        database.getReference(DATA.TASKS).orderByChild(orderBy)
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val list = mutableListOf<Task>()
@@ -219,7 +216,7 @@ class CategoryViewModel @Inject constructor(
                         }
                     }
                     _categoryTasks.value = list
-                    val level = levelPoint(avPoints, 10)
+                    val level = levelPoint(avPoints)
                     _pointsSummary.value = Triple(totalPoints, avPoints, level)
                 }
 
@@ -231,7 +228,7 @@ class CategoryViewModel @Inject constructor(
 
     fun toggleFavorite(task: Task) {
         val uid = auth.currentUser?.uid ?: return
-        val taskId = task.id ?: return
+        val taskId = task.id
         viewModelScope.launch {
             val isFav = isTaskFavorite(taskId, uid)
             repository.toggleFavorite(taskId, uid, !isFav)
@@ -240,23 +237,24 @@ class CategoryViewModel @Inject constructor(
 
     private suspend fun isTaskFavorite(taskId: String, userId: String): Boolean {
         return try {
-            database.getReference(DATA.FAVORITES).child(userId).child(taskId)
-                .get().await().exists()
-        } catch (e: Exception) {
+            database.getReference(DATA.FAVORITES).child(userId).child(taskId).get().await().exists()
+        } catch (_: Exception) {
             false
         }
     }
 
     fun onTaskAction(task: Task) {
-        val taskId = task.id ?: return
+        val taskId = task.id
         viewModelScope.launch {
             when {
                 task.end != 0L -> {
                     // Task already completed
                 }
+
                 task.start != 0L -> {
                     repository.setTaskEnd(taskId, task.points)
                 }
+
                 else -> {
                     repository.setTaskStart(taskId)
                 }
@@ -276,10 +274,12 @@ class CategoryViewModel @Inject constructor(
         }
     }
 
-    fun observeFavoriteStatus(taskId: String, userId: String) = repository.isFavorite(taskId, userId)
+    fun observeFavoriteStatus(taskId: String, userId: String) =
+        repository.isFavorite(taskId, userId)
 
     // Copying the levelPoint logic here for MVVM compliance
-    private fun levelPoint(AVPoints: Int, initialPoint: Int = 10): Int {
+    private fun levelPoint(avPoints: Int): Int {
+        val initialPoint = 10
         var mutablePoint = initialPoint
         val half = mutablePoint / 2
         val thresholds = IntArray(21)
@@ -289,17 +289,18 @@ class CategoryViewModel @Inject constructor(
         }
 
         return when {
-            AVPoints <= thresholds[1] -> AVPoints / mutablePoint
-            AVPoints <= thresholds[20] -> {
+            avPoints <= thresholds[1] -> avPoints / mutablePoint
+            avPoints <= thresholds[20] -> {
                 var stepIndex = 1
-                while (stepIndex < 19 && AVPoints > thresholds[stepIndex + 1]) {
+                while (stepIndex < 19 && avPoints > thresholds[stepIndex + 1]) {
                     stepIndex++
                 }
                 val baseLevel = 5 * stepIndex
-                val remainderPoints = AVPoints - thresholds[stepIndex]
+                val remainderPoints = avPoints - thresholds[stepIndex]
                 mutablePoint += half * (stepIndex - 1)
                 baseLevel + (remainderPoints / mutablePoint)
             }
+
             else -> 100
         }
     }

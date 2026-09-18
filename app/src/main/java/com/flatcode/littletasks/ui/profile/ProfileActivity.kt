@@ -5,15 +5,14 @@ import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.flatcode.littletasks.utils.DATA
-import com.flatcode.littletasks.utils.loadImage
-import com.flatcode.littletasks.utils.openActivity
-import com.flatcode.littletasks.databinding.ActivityProfileBinding
-import dagger.hilt.android.AndroidEntryPoint
-
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.flatcode.littletasks.databinding.ActivityProfileBinding
+import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.utils.loadImage
+import com.flatcode.littletasks.utils.openActivity
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -66,7 +65,9 @@ class ProfileActivity : AppCompatActivity() {
         }
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.nrCategories.collectLatest { binding.numberCategories.text = it.toString() }
+                viewModel.nrCategories.collectLatest {
+                    binding.numberCategories.text = it.toString()
+                }
             }
         }
     }

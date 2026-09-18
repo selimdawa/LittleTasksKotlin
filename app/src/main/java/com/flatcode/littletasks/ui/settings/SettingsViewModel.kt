@@ -1,9 +1,9 @@
 package com.flatcode.littletasks.ui.settings
 
 import androidx.lifecycle.ViewModel
-import com.flatcode.littletasks.utils.DATA
 import com.flatcode.littletasks.model.Task
 import com.flatcode.littletasks.model.User
+import com.flatcode.littletasks.utils.DATA
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -18,8 +18,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val auth: FirebaseAuth,
-    private val database: FirebaseDatabase
+    private val auth: FirebaseAuth, private val database: FirebaseDatabase
 ) : ViewModel() {
 
     private val _userInfo = MutableStateFlow<User?>(null)
@@ -50,24 +49,23 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun loadPoints() {
-        database.getReference(DATA.TASKS)
-            .addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    var total = 0
-                    var av = 0
-                    for (data in snapshot.children) {
-                        val task = data.getValue(Task::class.java) ?: continue
-                        total += task.points
-                        av += task.aVPoints
-                    }
-                    val level = levelPoint(av, 10)
-                    _pointsSummary.value = Triple(total, av, level)
+        database.getReference(DATA.TASKS).addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                var total = 0
+                var av = 0
+                for (data in snapshot.children) {
+                    val task = data.getValue(Task::class.java) ?: continue
+                    total += task.points
+                    av += task.aVPoints
                 }
+                val level = levelPoint(av)
+                _pointsSummary.value = Triple(total, av, level)
+            }
 
-                override fun onCancelled(error: DatabaseError) {
-                    Timber.e(error.toException(), "Error loading points summary")
-                }
-            })
+            override fun onCancelled(error: DatabaseError) {
+                Timber.e(error.toException(), "Error loading points summary")
+            }
+        })
     }
 
     fun loadItemCounts() {
@@ -91,16 +89,17 @@ class SettingsViewModel @Inject constructor(
             })
         }
 
-        database.getReference(DATA.FAVORITES).child(uid).addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                counts[DATA.FAVORITES] = snapshot.childrenCount.toInt()
-                if (counts.size == 4) _itemCounts.value = counts
-            }
+        database.getReference(DATA.FAVORITES).child(uid)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    counts[DATA.FAVORITES] = snapshot.childrenCount.toInt()
+                    if (counts.size == 4) _itemCounts.value = counts
+                }
 
-            override fun onCancelled(error: DatabaseError) {
-                Timber.e(error.toException(), "Error counting favorites")
-            }
-        })
+                override fun onCancelled(error: DatabaseError) {
+                    Timber.e(error.toException(), "Error counting favorites")
+                }
+            })
     }
 
     fun loadPrivacyPolicy() {
@@ -116,7 +115,8 @@ class SettingsViewModel @Inject constructor(
             })
     }
 
-    private fun levelPoint(AVPoints: Int, initialPoint: Int = 10): Int {
+    private fun levelPoint(avPoints: Int): Int {
+        val initialPoint = 10
         var mutablePoint = initialPoint
         val half = mutablePoint / 2
         val thresholds = IntArray(21)
@@ -126,17 +126,18 @@ class SettingsViewModel @Inject constructor(
         }
 
         return when {
-            AVPoints <= thresholds[1] -> AVPoints / mutablePoint
-            AVPoints <= thresholds[20] -> {
+            avPoints <= thresholds[1] -> avPoints / mutablePoint
+            avPoints <= thresholds[20] -> {
                 var stepIndex = 1
-                while (stepIndex < 19 && AVPoints > thresholds[stepIndex + 1]) {
+                while (stepIndex < 19 && avPoints > thresholds[stepIndex + 1]) {
                     stepIndex++
                 }
                 val baseLevel = 5 * stepIndex
-                val remainderPoints = AVPoints - thresholds[stepIndex]
+                val remainderPoints = avPoints - thresholds[stepIndex]
                 mutablePoint += half * (stepIndex - 1)
                 baseLevel + (remainderPoints / mutablePoint)
             }
+
             else -> 100
         }
     }

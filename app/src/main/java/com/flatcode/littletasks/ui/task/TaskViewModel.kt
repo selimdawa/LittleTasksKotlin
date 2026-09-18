@@ -1,9 +1,9 @@
 package com.flatcode.littletasks.ui.task
 
 import androidx.lifecycle.ViewModel
-import com.flatcode.littletasks.utils.DATA
 import com.flatcode.littletasks.model.Category
 import com.flatcode.littletasks.model.Task
+import com.flatcode.littletasks.utils.DATA
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -18,8 +18,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class TaskViewModel @Inject constructor(
-    private val auth: FirebaseAuth,
-    private val database: FirebaseDatabase
+    private val auth: FirebaseAuth, private val database: FirebaseDatabase
 ) : ViewModel() {
 
     private val _categoryInfo = MutableStateFlow<Category?>(null)

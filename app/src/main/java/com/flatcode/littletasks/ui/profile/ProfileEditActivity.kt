@@ -13,18 +13,17 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.flatcode.littletasks.R
-import com.flatcode.littletasks.utils.DATA
-import com.flatcode.littletasks.utils.getFileExtension
-import com.flatcode.littletasks.utils.loadImage
-import com.flatcode.littletasks.databinding.ActivityProfileEditBinding
-import com.flatcode.littletasks.databinding.LayoutLoadingDialogBinding
-import com.theartofdev.edmodo.cropper.CropImage
-import dagger.hilt.android.AndroidEntryPoint
-
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.flatcode.littletasks.R
+import com.flatcode.littletasks.databinding.ActivityProfileEditBinding
+import com.flatcode.littletasks.databinding.LayoutLoadingDialogBinding
+import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.utils.getFileExtension
+import com.flatcode.littletasks.utils.loadImage
+import com.theartofdev.edmodo.cropper.CropImage
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -39,16 +38,16 @@ class ProfileEditActivity : AppCompatActivity() {
     private var progressDialog: AlertDialog? = null
     private val viewModel: ProfileViewModel by viewModels()
 
-    private val cropImageLauncher = registerForActivityResult(
-        object : ActivityResultContract<Intent?, CropImage.ActivityResult?>() {
-            override fun createIntent(context: Context, input: Intent?): Intent {
-                return input ?: CropImage.activity().getIntent(context)
-            }
-            override fun parseResult(resultCode: Int, intent: Intent?): CropImage.ActivityResult? {
-                return if (intent != null) CropImage.getActivityResult(intent) else null
-            }
+    private val cropImageLauncher = registerForActivityResult(object :
+        ActivityResultContract<Intent?, CropImage.ActivityResult?>() {
+        override fun createIntent(context: Context, input: Intent?): Intent {
+            return input ?: CropImage.activity().getIntent(context)
         }
-    ) { result ->
+
+        override fun parseResult(resultCode: Int, intent: Intent?): CropImage.ActivityResult? {
+            return if (intent != null) CropImage.getActivityResult(intent) else null
+        }
+    }) { result ->
         if (result != null) {
             if (result.error == null) {
                 imageUri = result.uri
@@ -116,7 +115,8 @@ class ProfileEditActivity : AppCompatActivity() {
                             Toast.makeText(context, "Profile updated...", Toast.LENGTH_SHORT).show()
                             finish()
                         }.onFailure { e ->
-                            Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT)
+                                .show()
                         }
                     }
                 }
@@ -129,10 +129,9 @@ class ProfileEditActivity : AppCompatActivity() {
     private fun showLoading() {
         if (progressDialog == null) {
             val loadingBinding = LayoutLoadingDialogBinding.inflate(layoutInflater)
-            progressDialog = AlertDialog.Builder(context)
-                .setView(loadingBinding.root)
-                .setCancelable(false)
-                .create()
+            progressDialog =
+                AlertDialog.Builder(context).setView(loadingBinding.root).setCancelable(false)
+                    .create()
         }
         progressDialog?.show()
     }

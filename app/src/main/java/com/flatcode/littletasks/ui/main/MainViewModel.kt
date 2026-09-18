@@ -16,8 +16,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val auth: FirebaseAuth,
-    private val database: FirebaseDatabase
+    private val auth: FirebaseAuth, private val database: FirebaseDatabase
 ) : ViewModel() {
 
     private val _profileImage = MutableStateFlow("")

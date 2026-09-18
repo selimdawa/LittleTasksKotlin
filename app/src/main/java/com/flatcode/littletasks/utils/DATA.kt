@@ -29,16 +29,13 @@ object DATA {
     const val IMAGE = "image"
     const val PUBLISHER = "publisher"
     const val CATEGORY = "category"
-    const val TITLE = "title"
     const val FAVORITES = "Favorites"
     const val NAME = "name"
     const val PLAN = "plan"
 
     //Others
-    const val DOT = "."
     const val EMPTY = ""
     const val CURRENT_VERSION = 1
-    const val SPLASH_TIME = 2000
     const val MIX_SQUARE = 500
     const val ZERO = 0
     var searchStatus = false
@@ -53,7 +50,6 @@ object DATA {
     const val TASKS_STARTED = "tasksStarted"
     const val TASKS_COMPLETED = "tasksCompleted"
     const val PLAN_ID = "planId"
-    const val COLOR_OPTION = "color_option"
     const val NEW_PLAN = "newPlan"
 
     //Other

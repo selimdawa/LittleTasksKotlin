@@ -1,6 +1,9 @@
+@file:Suppress("unused")
+
 package com.flatcode.littletasks.di
 
-import com.flatcode.littletasks.data.repository.*
+import com.flatcode.littletasks.repository.TaskRepository
+import com.flatcode.littletasks.repository.TaskRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

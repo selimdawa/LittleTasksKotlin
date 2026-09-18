@@ -9,14 +9,13 @@ import android.widget.ImageView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.databinding.ItemObjectBinding
 import com.flatcode.littletasks.filter.ObjectOptionFilter
 import com.flatcode.littletasks.model.TaskItem
-import com.flatcode.littletasks.databinding.ItemObjectBinding
+import com.flatcode.littletasks.utils.DATA
 
 class ObjectOptionAdapter(
-    var planId: String?,
-    private val listener: ObjectOptionListener
+    var planId: String?, private val listener: ObjectOptionListener
 ) : ListAdapter<TaskItem, ObjectOptionAdapter.ViewHolder>(ObjectDiffCallback()), Filterable {
 
     interface ObjectOptionListener {

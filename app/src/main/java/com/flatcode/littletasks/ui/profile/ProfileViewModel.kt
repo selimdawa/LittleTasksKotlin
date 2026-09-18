@@ -3,10 +3,10 @@ package com.flatcode.littletasks.ui.profile
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.flatcode.littletasks.utils.DATA
 import com.flatcode.littletasks.model.Task
 import com.flatcode.littletasks.model.User
-import com.flatcode.littletasks.data.repository.TaskRepository
+import com.flatcode.littletasks.repository.TaskRepository
+import com.flatcode.littletasks.utils.DATA
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -83,7 +83,10 @@ class ProfileViewModel @Inject constructor(
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    Timber.e(error.toException(), "Error counting items in $databaseName for userId: $userId")
+                    Timber.e(
+                        error.toException(),
+                        "Error counting items in $databaseName for userId: $userId"
+                    )
                 }
             })
     }
@@ -111,15 +114,13 @@ class ProfileViewModel @Inject constructor(
             put(DATA.USER_NAME, username)
             imageUrl?.let { put(DATA.PROFILE_IMAGE, it) }
         }
-        database.getReference(DATA.USERS).child(uid).updateChildren(hashMap)
-            .addOnSuccessListener {
-                Timber.d("Profile updated successfully for uid: $uid")
-                _actionResult.value = Result.success("Profile updated")
-            }
-            .addOnFailureListener { e ->
-                Timber.e(e, "Failed to update profile in database for uid: $uid")
-                _actionResult.value = Result.failure(e)
-            }
+        database.getReference(DATA.USERS).child(uid).updateChildren(hashMap).addOnSuccessListener {
+            Timber.d("Profile updated successfully for uid: $uid")
+            _actionResult.value = Result.success("Profile updated")
+        }.addOnFailureListener { e ->
+            Timber.e(e, "Failed to update profile in database for uid: $uid")
+            _actionResult.value = Result.failure(e)
+        }
     }
 
     fun fetchFavoriteTasks(tasksType: String, orderBy: String) {
@@ -137,9 +138,17 @@ class ProfileViewModel @Inject constructor(
                                     if (task.id in favoriteKeys && task.publisher == uid) {
                                         when (tasksType) {
                                             DATA.TASKS_ALL -> list.add(task)
-                                            DATA.TASKS_UN_STARTED -> if (task.start == 0L && task.end == 0L) list.add(task)
-                                            DATA.TASKS_STARTED -> if (task.start != 0L && task.end == 0L) list.add(task)
-                                            DATA.TASKS_COMPLETED -> if (task.start != 0L && task.end != 0L) list.add(task)
+                                            DATA.TASKS_UN_STARTED -> if (task.start == 0L && task.end == 0L) list.add(
+                                                task
+                                            )
+
+                                            DATA.TASKS_STARTED -> if (task.start != 0L && task.end == 0L) list.add(
+                                                task
+                                            )
+
+                                            DATA.TASKS_COMPLETED -> if (task.start != 0L && task.end != 0L) list.add(
+                                                task
+                                            )
                                         }
                                     }
                                 }
@@ -160,7 +169,7 @@ class ProfileViewModel @Inject constructor(
 
     fun toggleFavorite(task: Task) {
         val uid = auth.currentUser?.uid ?: return
-        val taskId = task.id ?: return
+        val taskId = task.id
         viewModelScope.launch {
             val isFav = isTaskFavorite(taskId, uid)
             repository.toggleFavorite(taskId, uid, !isFav)
@@ -169,15 +178,14 @@ class ProfileViewModel @Inject constructor(
 
     private suspend fun isTaskFavorite(taskId: String, userId: String): Boolean {
         return try {
-            database.getReference(DATA.FAVORITES).child(userId).child(taskId)
-                .get().await().exists()
-        } catch (e: Exception) {
+            database.getReference(DATA.FAVORITES).child(userId).child(taskId).get().await().exists()
+        } catch (_: Exception) {
             false
         }
     }
 
     fun onTaskAction(task: Task) {
-        val taskId = task.id ?: return
+        val taskId = task.id
         viewModelScope.launch {
             when {
                 task.end != 0L -> {}
@@ -199,5 +207,6 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun observeFavoriteStatus(taskId: String, userId: String) = repository.isFavorite(taskId, userId)
+    fun observeFavoriteStatus(taskId: String, userId: String) =
+        repository.isFavorite(taskId, userId)
 }

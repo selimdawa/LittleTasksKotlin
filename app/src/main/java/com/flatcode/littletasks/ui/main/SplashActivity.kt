@@ -6,9 +6,9 @@ import android.os.Handler
 import android.os.Looper
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import com.flatcode.littletasks.utils.openActivity
 import com.flatcode.littletasks.databinding.ActivitySplashBinding
 import com.flatcode.littletasks.ui.auth.AuthActivity
+import com.flatcode.littletasks.utils.openActivity
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -20,7 +20,7 @@ class SplashActivity : AppCompatActivity() {
     private val binding get() = _binding!!
 
     private val context: Context = this@SplashActivity
-    
+
     @Inject
     lateinit var auth: FirebaseAuth
 

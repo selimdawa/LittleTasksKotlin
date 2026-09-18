@@ -103,8 +103,8 @@ class CategoriesActivity : AppCompatActivity(), CategoriesAdapter.CategoryListen
                     DATA.PLAN_ID to item.plan
                 )
 
-                2 -> context.dialogOptionDelete(DATA.CATEGORIES, item.id, item.name ?: "") {
-                    viewModel.deleteTask(DATA.CATEGORIES, item.id ?: "")
+                2 -> context.dialogOptionDelete(DATA.CATEGORIES) {
+                    viewModel.deleteTask(DATA.CATEGORIES, item.id)
                 }
             }
         }

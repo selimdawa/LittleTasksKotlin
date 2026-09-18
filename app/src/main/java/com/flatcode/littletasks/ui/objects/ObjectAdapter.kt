@@ -8,10 +8,10 @@ import android.widget.Filterable
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.databinding.ItemObjectBinding
 import com.flatcode.littletasks.filter.ObjectsFilter
 import com.flatcode.littletasks.model.TaskItem
-import com.flatcode.littletasks.databinding.ItemObjectBinding
+import com.flatcode.littletasks.utils.DATA
 
 class ObjectAdapter(
     private val listener: ObjectListener

@@ -13,18 +13,17 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.flatcode.littletasks.R
-import com.flatcode.littletasks.utils.DATA
-import com.flatcode.littletasks.utils.getFileExtension
-import com.flatcode.littletasks.utils.loadImage
-import com.flatcode.littletasks.databinding.ActivityPlanAddBinding
-import com.flatcode.littletasks.databinding.LayoutLoadingDialogBinding
-import com.theartofdev.edmodo.cropper.CropImage
-import dagger.hilt.android.AndroidEntryPoint
-
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.flatcode.littletasks.R
+import com.flatcode.littletasks.databinding.ActivityPlanAddBinding
+import com.flatcode.littletasks.databinding.LayoutLoadingDialogBinding
+import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.utils.getFileExtension
+import com.flatcode.littletasks.utils.loadImage
+import com.theartofdev.edmodo.cropper.CropImage
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -45,6 +44,7 @@ class PlanEditActivity : AppCompatActivity() {
             override fun createIntent(context: Context, input: Intent?): Intent {
                 return input ?: CropImage.activity().getIntent(context)
             }
+
             override fun parseResult(resultCode: Int, intent: Intent?): CropImage.ActivityResult? {
                 return if (intent != null) CropImage.getActivityResult(intent) else null
             }
@@ -119,7 +119,8 @@ class PlanEditActivity : AppCompatActivity() {
                             Toast.makeText(context, "Plan updated...", Toast.LENGTH_SHORT).show()
                             finish()
                         }.onFailure { e ->
-                            Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT)
+                                .show()
                         }
                     }
                 }

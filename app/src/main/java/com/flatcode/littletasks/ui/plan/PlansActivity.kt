@@ -18,12 +18,11 @@ import com.flatcode.littletasks.utils.DATA
 import com.flatcode.littletasks.utils.dialogOptionDelete
 import com.flatcode.littletasks.utils.openActivity
 import com.flatcode.littletasks.utils.showMoreOptions
+import com.flatcode.littletasks.utils.viewBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.text.MessageFormat
-
-import com.flatcode.littletasks.utils.viewBinding
 
 @AndroidEntryPoint
 class PlansActivity : AppCompatActivity(), PlanAdapter.PlanListener {
@@ -90,8 +89,8 @@ class PlansActivity : AppCompatActivity(), PlanAdapter.PlanListener {
         context.showMoreOptions(options) { which ->
             when (which) {
                 0 -> context.openActivity(PlanEditActivity::class.java, DATA.ID to item.id)
-                1 -> context.dialogOptionDelete(DATA.PLANS, item.id, item.name ?: "") {
-                    viewModel.deletePlan(item.id ?: "")
+                1 -> context.dialogOptionDelete(DATA.PLANS) {
+                    viewModel.deletePlan(item.id)
                 }
             }
         }
