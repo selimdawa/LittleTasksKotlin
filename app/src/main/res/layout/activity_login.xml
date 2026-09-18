@@ -35,8 +35,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:fitsSystemWindows="true">
+        android:fitsSystemWindows="true"
+        android:orientation="vertical">
 
         <RelativeLayout
             android:id="@+id/toolbarRl"
@@ -82,11 +82,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="10sp"
+                    android:drawablePadding="5sp"
+                    android:gravity="center"
                     android:text="@string/email"
                     android:textColor="?colorError"
                     android:textSize="14sp"
                     android:textStyle="bold"
-                    android:drawablePadding="5sp"
                     app:drawableStartCompat="@drawable/ic_email_gray"
                     app:drawableTint="?colorError" />
 
@@ -101,6 +102,7 @@
                         android:id="@+id/emailEt"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:autofillHints="emailAddress"
                         android:background="@drawable/button"
                         android:hint="@string/email_example"
                         android:inputType="textEmailAddress"
@@ -109,8 +111,7 @@
                         android:textColor="?colorError"
                         android:textColorHint="?colorError"
                         android:textSize="14sp"
-                        android:textStyle="normal"
-                        android:autofillHints="emailAddress" />
+                        android:textStyle="normal" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -118,11 +119,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="10sp"
+                    android:drawablePadding="5sp"
+                    android:gravity="center"
                     android:text="@string/password"
                     android:textColor="?colorError"
                     android:textSize="14sp"
                     android:textStyle="bold"
-                    android:drawablePadding="5sp"
                     app:drawableStartCompat="@drawable/ic_lock_gray"
                     app:drawableTint="?colorError" />
 
@@ -138,6 +140,7 @@
                         android:id="@+id/passwordEt"
                         android:layout_width="match_parent"
                         android:layout_height="50sp"
+                        android:autofillHints="password"
                         android:background="@drawable/button"
                         android:hint="@string/password_hint"
                         android:inputType="textPassword"
@@ -146,8 +149,7 @@
                         android:textColor="?colorError"
                         android:textColorHint="?colorError"
                         android:textSize="14sp"
-                        android:textStyle="normal"
-                        android:autofillHints="password" />
+                        android:textStyle="normal" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -164,7 +166,7 @@
                         android:layout_alignParentEnd="true"
                         android:background="@drawable/button6"
                         android:backgroundTint="@color/black"
-                        android:gravity="start"
+                        android:gravity="center"
                         android:padding="10sp"
                         android:text="@string/forget_password"
                         android:textColor="@color/white" />
@@ -174,9 +176,9 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentStart="true"
-                        android:layout_toStartOf="@id/forget"
                         android:background="@drawable/button6"
                         android:backgroundTint="?mc_track"
+                        android:gravity="center"
                         android:padding="10sp"
                         android:text="@string/new_user_signup"
                         android:textColor="@color/white"
@@ -200,9 +202,9 @@
                 android:layout_height="60sp"
                 android:layout_margin="20sp"
                 android:background="@drawable/button2"
+                android:contentDescription="@string/login"
                 android:rotation="180"
-                android:src="@drawable/ic_back_white"
-                android:contentDescription="@string/login" />
+                android:src="@drawable/ic_back_white" />
 
         </LinearLayout>
 
