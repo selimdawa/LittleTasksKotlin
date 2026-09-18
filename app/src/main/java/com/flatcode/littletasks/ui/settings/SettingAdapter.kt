@@ -1,7 +1,6 @@
 package com.flatcode.littletasks.ui.settings
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
@@ -18,7 +17,7 @@ import com.flatcode.littletasks.utils.rateApp
 import com.flatcode.littletasks.utils.shareApp
 import java.text.MessageFormat
 
-class SettingAdapter(private val context: Context?, private val list: ArrayList<Setting>) :
+class SettingAdapter(private val list: ArrayList<Setting>) :
     RecyclerView.Adapter<SettingAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -27,44 +26,48 @@ class SettingAdapter(private val context: Context?, private val list: ArrayList<
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = list[position]
-        val id = DATA.EMPTY + item.id
-        val name = DATA.EMPTY + item.name
-        val image = item.image
-        val number = item.number
-        val to = item.c
-        val type = item.type
-
-        holder.binding.name.text = name
-        holder.binding.image.setImageResource(image)
-
-        if (number != 0) {
-            holder.binding.number.visibility = View.VISIBLE
-            holder.binding.number.text = MessageFormat.format("{0}{1}", DATA.EMPTY, number)
-        } else {
-            holder.binding.number.visibility = View.GONE
-        }
-
-        holder.binding.item.setOnClickListener {
-            if (type != null) {
-                if (type == DATA.PLANS) {
-                    context?.openActivity<PlansActivity>(false, DATA.NEW_PLAN to "false")
-                } else if (type == DATA.CHOOSE_PLAN) {
-                    context?.openActivity<PlansActivity>(false, DATA.NEW_PLAN to "true")
-                }
-            } else {
-                when (id) {
-                    "10" -> (context as? Activity)?.dialogAboutApp()
-                    "11" -> (context as? Activity)?.dialogLogout()
-                    "12" -> context?.shareApp()
-                    "13" -> context?.rateApp()
-                    else -> if (to != null) context?.startActivity(Intent(context, to))
-                }
-            }
-        }
+        holder.bind(list[position])
     }
 
     override fun getItemCount(): Int = list.size
 
-    class ViewHolder(val binding: ItemSettingBinding) : RecyclerView.ViewHolder(binding.root)
+    class ViewHolder(val binding: ItemSettingBinding) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(item: Setting) {
+            val id = DATA.EMPTY + item.id
+            val name = DATA.EMPTY + item.name
+            val image = item.image
+            val number = item.number
+            val to = item.c
+            val type = item.type
+
+            binding.name.text = name
+            binding.image.setImageResource(image)
+
+            if (number != 0) {
+                binding.number.visibility = View.VISIBLE
+                binding.number.text = MessageFormat.format("{0}{1}", DATA.EMPTY, number)
+            } else {
+                binding.number.visibility = View.GONE
+            }
+
+            binding.item.setOnClickListener {
+                val context = itemView.context
+                if (type != null) {
+                    if (type == DATA.PLANS) {
+                        context.openActivity<PlansActivity>(false, DATA.NEW_PLAN to "false")
+                    } else if (type == DATA.CHOOSE_PLAN) {
+                        context.openActivity<PlansActivity>(false, DATA.NEW_PLAN to "true")
+                    }
+                } else {
+                    when (id) {
+                        "10" -> (context as? Activity)?.dialogAboutApp()
+                        "11" -> (context as? Activity)?.dialogLogout()
+                        "12" -> context.shareApp()
+                        "13" -> context.rateApp()
+                        else -> if (to != null) context.startActivity(Intent(context, to))
+                    }
+                }
+            }
+        }
+    }
 }

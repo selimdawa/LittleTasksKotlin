@@ -38,24 +38,7 @@ class ObjectOptionAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = getItem(position) ?: return
-        val id = DATA.EMPTY + item.id
-        val name = DATA.EMPTY + item.name
-        val points = DATA.EMPTY + item.points
-
-        holder.binding.option.visibility = View.VISIBLE
-        holder.binding.more.visibility = View.GONE
-
-        if (name == DATA.EMPTY) {
-            holder.binding.name.visibility = View.GONE
-        } else {
-            holder.binding.name.visibility = View.VISIBLE
-            holder.binding.name.text = name
-        }
-
-        holder.binding.points.text = points
-
-        listener.isPlan(id, planId ?: "", holder.binding.option)
-        holder.binding.option.setOnClickListener { listener.onOptionClick(item) }
+        holder.bind(item, planId, listener)
     }
 
     override fun getFilter(): Filter {
@@ -65,7 +48,28 @@ class ObjectOptionAdapter(
         return filter!!
     }
 
-    class ViewHolder(val binding: ItemObjectBinding) : RecyclerView.ViewHolder(binding.root)
+    class ViewHolder(val binding: ItemObjectBinding) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(item: TaskItem, planId: String?, listener: ObjectOptionListener) {
+            val id = DATA.EMPTY + item.id
+            val name = DATA.EMPTY + item.name
+            val points = DATA.EMPTY + item.points
+
+            binding.option.visibility = View.VISIBLE
+            binding.more.visibility = View.GONE
+
+            if (name == DATA.EMPTY) {
+                binding.name.visibility = View.GONE
+            } else {
+                binding.name.visibility = View.VISIBLE
+                binding.name.text = name
+            }
+
+            binding.points.text = points
+
+            listener.isPlan(id, planId ?: "", binding.option)
+            binding.option.setOnClickListener { listener.onOptionClick(item) }
+        }
+    }
 
     class ObjectDiffCallback : DiffUtil.ItemCallback<TaskItem>() {
         override fun areItemsTheSame(oldItem: TaskItem, newItem: TaskItem): Boolean {

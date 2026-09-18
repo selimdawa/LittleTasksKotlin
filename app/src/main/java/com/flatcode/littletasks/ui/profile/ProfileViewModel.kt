@@ -3,6 +3,7 @@ package com.flatcode.littletasks.ui.profile
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.flatcode.littletasks.model.Category
 import com.flatcode.littletasks.model.Task
 import com.flatcode.littletasks.model.User
 import com.flatcode.littletasks.repository.TaskRepository
@@ -125,44 +126,68 @@ class ProfileViewModel @Inject constructor(
 
     fun fetchFavoriteTasks(tasksType: String, orderBy: String) {
         val uid = auth.currentUser?.uid ?: return
-        database.getReference(DATA.FAVORITES).child(uid)
+        database.getReference(DATA.CATEGORIES)
             .addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val favoriteKeys = snapshot.children.mapNotNull { it.key }
-                    database.getReference(DATA.TASKS).orderByChild(orderBy)
+                override fun onDataChange(catSnapshot: DataSnapshot) {
+                    val categoriesMap = mutableMapOf<String, Category>()
+                    for (data in catSnapshot.children) {
+                        val cat = data.getValue(Category::class.java) ?: continue
+                        categoriesMap[cat.id] = cat
+                    }
+
+                    database.getReference(DATA.FAVORITES).child(uid)
                         .addListenerForSingleValueEvent(object : ValueEventListener {
-                            override fun onDataChange(tasksSnapshot: DataSnapshot) {
-                                val list = mutableListOf<Task>()
-                                for (data in tasksSnapshot.children) {
-                                    val task = data.getValue(Task::class.java) ?: continue
-                                    if (task.id in favoriteKeys && task.publisher == uid) {
-                                        when (tasksType) {
-                                            DATA.TASKS_ALL -> list.add(task)
-                                            DATA.TASKS_UN_STARTED -> if (task.start == 0L && task.end == 0L) list.add(
-                                                task
-                                            )
+                            override fun onDataChange(snapshot: DataSnapshot) {
+                                val favoriteKeys = snapshot.children.mapNotNull { it.key }
+                                database.getReference(DATA.TASKS).orderByChild(orderBy)
+                                    .addListenerForSingleValueEvent(object : ValueEventListener {
+                                        override fun onDataChange(tasksSnapshot: DataSnapshot) {
+                                            val list = mutableListOf<Task>()
+                                            for (data in tasksSnapshot.children) {
+                                                val task = data.getValue(Task::class.java) ?: continue
+                                                if (task.id in favoriteKeys && task.publisher == uid) {
+                                                    val category = categoriesMap[task.category]
+                                                    task.categoryName = category?.name
+                                                    task.categoryImage = category?.image
+                                                    when (tasksType) {
+                                                        DATA.TASKS_ALL -> list.add(task)
+                                                        DATA.TASKS_UN_STARTED -> if (task.start == 0L && task.end == 0L) list.add(
+                                                            task
+                                                        )
 
-                                            DATA.TASKS_STARTED -> if (task.start != 0L && task.end == 0L) list.add(
-                                                task
-                                            )
+                                                        DATA.TASKS_STARTED -> if (task.start != 0L && task.end == 0L) list.add(
+                                                            task
+                                                        )
 
-                                            DATA.TASKS_COMPLETED -> if (task.start != 0L && task.end != 0L) list.add(
-                                                task
+                                                        DATA.TASKS_COMPLETED -> if (task.start != 0L && task.end != 0L) list.add(
+                                                            task
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                            _favoriteTasks.value = list
+                                        }
+
+                                        override fun onCancelled(error: DatabaseError) {
+                                            Timber.e(
+                                                error.toException(),
+                                                "Error fetching tasks for favorites"
                                             )
                                         }
-                                    }
-                                }
-                                _favoriteTasks.value = list
+                                    })
                             }
 
                             override fun onCancelled(error: DatabaseError) {
-                                Timber.e(error.toException(), "Error fetching tasks for favorites")
+                                Timber.e(
+                                    error.toException(),
+                                    "Error fetching favorite keys for uid: $uid"
+                                )
                             }
                         })
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    Timber.e(error.toException(), "Error fetching favorite keys for uid: $uid")
+                    Timber.e(error.toException(), "Error fetching categories for favorites mapping")
                 }
             })
     }

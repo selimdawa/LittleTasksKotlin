@@ -32,7 +32,7 @@ class CategoriesFragment : Fragment(R.layout.fragment_categories),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter = CategoryMainAdapter(context, this)
+        adapter = CategoryMainAdapter(this)
         binding.recyclerView.adapter = adapter
 
         viewLifecycleOwner.lifecycleScope.launch {

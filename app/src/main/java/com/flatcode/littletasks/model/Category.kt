@@ -13,5 +13,6 @@ data class Category(
     var image: String? = null,
     var publisher: String? = null,
     var plan: String? = null,
-    var timestamp: Long = 0
+    var timestamp: Long = 0,
+    var taskCount: Int = 0
 ) : Parcelable

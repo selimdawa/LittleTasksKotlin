@@ -59,13 +59,35 @@ class CategoryViewModel @Inject constructor(
                             list.add(item)
                         }
                     }
-                    _categories.value = list.reversed()
+                    fetchTaskCountsAndPost(list)
                 }
 
                 override fun onCancelled(error: DatabaseError) {
                     Timber.e(error.toException(), "Error fetching categories")
                 }
             })
+    }
+
+    private fun fetchTaskCountsAndPost(categories: List<Category>) {
+        val uid = auth.currentUser?.uid ?: return
+        database.getReference(DATA.TASKS).addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val taskMap = mutableMapOf<String, Int>()
+                for (data in snapshot.children) {
+                    val task = data.getValue(Task::class.java) ?: continue
+                    if (task.publisher == uid) {
+                        val catId = task.category ?: continue
+                        taskMap[catId] = (taskMap[catId] ?: 0) + 1
+                    }
+                }
+                categories.forEach { it.taskCount = taskMap[it.id] ?: 0 }
+                _categories.value = categories.reversed()
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                _categories.value = categories.reversed()
+            }
+        })
     }
 
     fun loadPlanName(planId: String) {
@@ -201,27 +223,42 @@ class CategoryViewModel @Inject constructor(
 
     fun getCategoryTasks(categoryId: String, orderBy: String) {
         val uid = auth.currentUser?.uid ?: return
-        database.getReference(DATA.TASKS).orderByChild(orderBy)
-            .addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val list = mutableListOf<Task>()
-                    var totalPoints = 0
-                    var avPoints = 0
-                    for (data in snapshot.children) {
-                        val item = data.getValue(Task::class.java) ?: continue
-                        if (item.category == categoryId && item.publisher == uid) {
-                            list.add(item)
-                            totalPoints += item.points
-                            avPoints += item.aVPoints
-                        }
-                    }
-                    _categoryTasks.value = list
-                    val level = levelPoint(avPoints)
-                    _pointsSummary.value = Triple(totalPoints, avPoints, level)
+        database.getReference(DATA.CATEGORIES).child(categoryId)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(catSnapshot: DataSnapshot) {
+                    val category = catSnapshot.getValue(Category::class.java)
+                    database.getReference(DATA.TASKS).orderByChild(orderBy)
+                        .addValueEventListener(object : ValueEventListener {
+                            override fun onDataChange(snapshot: DataSnapshot) {
+                                val list = mutableListOf<Task>()
+                                var totalPoints = 0
+                                var avPoints = 0
+                                for (data in snapshot.children) {
+                                    val item = data.getValue(Task::class.java) ?: continue
+                                    if (item.category == categoryId && item.publisher == uid) {
+                                        item.categoryName = category?.name
+                                        item.categoryImage = category?.image
+                                        list.add(item)
+                                        totalPoints += item.points
+                                        avPoints += item.aVPoints
+                                    }
+                                }
+                                _categoryTasks.value = list
+                                val level = levelPoint(avPoints)
+                                _pointsSummary.value = Triple(totalPoints, avPoints, level)
+                            }
+
+                            override fun onCancelled(error: DatabaseError) {
+                                Timber.e(
+                                    error.toException(),
+                                    "Error fetching tasks for category: $categoryId"
+                                )
+                            }
+                        })
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    Timber.e(error.toException(), "Error fetching tasks for category: $categoryId")
+                    Timber.e(error.toException(), "Error fetching category for tasks")
                 }
             })
     }

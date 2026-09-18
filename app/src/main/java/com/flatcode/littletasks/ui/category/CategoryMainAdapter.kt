@@ -1,21 +1,19 @@
 package com.flatcode.littletasks.ui.category
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.flatcode.littletasks.databinding.ItemCategoryBinding
+import com.flatcode.littletasks.model.Category
 import com.flatcode.littletasks.utils.DATA
 import com.flatcode.littletasks.utils.loadBlurImage
 import com.flatcode.littletasks.utils.loadImage
 import com.flatcode.littletasks.utils.openActivity
-import com.flatcode.littletasks.model.Category
-import com.flatcode.littletasks.databinding.ItemCategoryBinding
 
 class CategoryMainAdapter(
-    private val context: Context?,
     private val listener: CategoryMainListener
 ) : ListAdapter<Category, CategoryMainAdapter.ViewHolder>(CategoryDiffCallback()) {
 
@@ -24,33 +22,40 @@ class CategoryMainAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val binding = ItemCategoryBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding =
+            ItemCategoryBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = getItem(position) ?: return
-        val id = DATA.EMPTY + item.id
-        val name = DATA.EMPTY + item.name
-        val image = DATA.EMPTY + item.image
-
-        holder.binding.image.loadImage(false, image)
-        holder.binding.imageBlur.loadBlurImage(false, image, 50)
-
-        if (name == DATA.EMPTY) {
-            holder.binding.name.visibility = View.GONE
-        } else {
-            holder.binding.name.visibility = View.VISIBLE
-            holder.binding.name.text = name
-        }
-
-        holder.binding.more.setOnClickListener { listener.onMoreClick(item) }
-        holder.binding.card.setOnClickListener {
-            context?.openActivity<CategoryTasksActivity>(false, DATA.ID to id, DATA.NAME to name)
-        }
+        holder.bind(item, listener)
     }
 
-    class ViewHolder(val binding: ItemCategoryBinding) : RecyclerView.ViewHolder(binding.root)
+    class ViewHolder(val binding: ItemCategoryBinding) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(item: Category, listener: CategoryMainListener) {
+            val id = DATA.EMPTY + item.id
+            val name = DATA.EMPTY + item.name
+            val image = DATA.EMPTY + item.image
+
+            binding.image.loadImage(false, image)
+            binding.imageBlur.loadBlurImage(false, image, 50)
+
+            if (name == DATA.EMPTY) {
+                binding.name.visibility = View.GONE
+            } else {
+                binding.name.visibility = View.VISIBLE
+                binding.name.text = name
+            }
+
+            binding.more.setOnClickListener { listener.onMoreClick(item) }
+            binding.card.setOnClickListener {
+                itemView.context.openActivity<CategoryTasksActivity>(
+                    false, DATA.ID to id, DATA.NAME to name
+                )
+            }
+        }
+    }
 
     class CategoryDiffCallback : DiffUtil.ItemCallback<Category>() {
         override fun areItemsTheSame(oldItem: Category, newItem: Category): Boolean {

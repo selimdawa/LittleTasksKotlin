@@ -117,5 +117,25 @@ class ObjectsViewModel @Inject constructor(
         }
     }
 
+    fun addObject(name: String, points: Int) {
+        val uid = auth.currentUser?.uid ?: return
+        val ref = database.getReference(DATA.OBJECTS)
+        val id = ref.push().key ?: return
+
+        val hashMap = HashMap<String, Any?>().apply {
+            put(DATA.PUBLISHER, uid)
+            put(DATA.ID, id)
+            put(DATA.NAME, name)
+            put(DATA.POINTS, points)
+            put(DATA.TIMESTAMP, System.currentTimeMillis())
+        }
+
+        ref.child(id).setValue(hashMap).addOnSuccessListener {
+            _actionResult.value = Result.success("Object added: $id")
+        }.addOnFailureListener { e ->
+            _actionResult.value = Result.failure(e)
+        }
+    }
+
     fun observePlanStatus(objectId: String, planId: String) = repository.isPlan(objectId, planId)
 }

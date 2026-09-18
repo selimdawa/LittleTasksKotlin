@@ -49,7 +49,20 @@ class TaskViewModel @Inject constructor(
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val item = snapshot.getValue(Task::class.java) ?: return
-                    _taskInfo.value = item
+                    val catId = item.category ?: return
+                    database.getReference(DATA.CATEGORIES).child(catId)
+                        .addListenerForSingleValueEvent(object : ValueEventListener {
+                            override fun onDataChange(catSnapshot: DataSnapshot) {
+                                val category = catSnapshot.getValue(Category::class.java)
+                                item.categoryName = category?.name
+                                item.categoryImage = category?.image
+                                _taskInfo.value = item
+                            }
+
+                            override fun onCancelled(error: DatabaseError) {
+                                _taskInfo.value = item
+                            }
+                        })
                 }
 
                 override fun onCancelled(error: DatabaseError) {

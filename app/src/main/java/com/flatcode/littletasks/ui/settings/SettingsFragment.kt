@@ -40,7 +40,7 @@ class SettingsFragment : Fragment() {
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
 
         initStaticSettings()
-        adapter = SettingAdapter(context, list)
+        adapter = SettingAdapter(list)
         binding.recyclerView.adapter = adapter
 
         binding.toolbar.item.setOnClickListener {

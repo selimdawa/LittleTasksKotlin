@@ -1,30 +1,22 @@
 package com.flatcode.littletasks.ui.category
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Filter
 import android.widget.Filterable
-import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.flatcode.littletasks.databinding.ItemCategoriesBinding
+import com.flatcode.littletasks.filter.CategoriesFilter
+import com.flatcode.littletasks.model.Category
 import com.flatcode.littletasks.utils.DATA
 import com.flatcode.littletasks.utils.loadImage
 import com.flatcode.littletasks.utils.openActivity
-import com.flatcode.littletasks.filter.CategoriesFilter
-import com.flatcode.littletasks.model.Category
-import com.flatcode.littletasks.model.Task
-import com.flatcode.littletasks.databinding.ItemCategoriesBinding
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 import java.text.MessageFormat
 
 class CategoriesAdapter(
-    private val context: Context,
     private val listener: CategoryListener
 ) : ListAdapter<Category, CategoriesAdapter.ViewHolder>(CategoryDiffCallback()), Filterable {
 
@@ -41,13 +33,14 @@ class CategoriesAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val binding = ItemCategoriesBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding =
+            ItemCategoriesBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = getItem(position) ?: return
-        holder.bind(item, context, listener)
+        holder.bind(item, listener)
     }
 
     override fun getFilter(): Filter {
@@ -57,11 +50,13 @@ class CategoriesAdapter(
         return filter!!
     }
 
-    class ViewHolder(private val binding: ItemCategoriesBinding) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(item: Category, context: Context, listener: CategoryListener) {
+    class ViewHolder(private val binding: ItemCategoriesBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        fun bind(item: Category, listener: CategoryListener) {
             val id = DATA.EMPTY + item.id
             val name = DATA.EMPTY + item.name
             val image = DATA.EMPTY + item.image
+            val taskCount = item.taskCount
 
             binding.image.loadImage(false, image)
 
@@ -72,11 +67,13 @@ class CategoriesAdapter(
                 binding.name.text = name
             }
 
-            nrBooks(binding.number, id)
+            binding.number.text = MessageFormat.format("{0}{1}", DATA.EMPTY, taskCount)
             binding.more.setOnClickListener { listener.onMoreClick(item) }
 
             binding.card.setOnClickListener {
-                context.openActivity<CategoryTasksActivity>(false, DATA.ID to id, DATA.NAME to name)
+                itemView.context.openActivity<CategoryTasksActivity>(
+                    false, DATA.ID to id, DATA.NAME to name
+                )
             }
         }
     }
@@ -88,24 +85,6 @@ class CategoriesAdapter(
 
         override fun areContentsTheSame(oldItem: Category, newItem: Category): Boolean {
             return oldItem == newItem
-        }
-    }
-
-    companion object {
-        fun nrBooks(number: TextView, categoryId: String) {
-            val reference = FirebaseDatabase.getInstance().getReference(DATA.TASKS)
-            reference.addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    var i = 0
-                    for (snapshot in dataSnapshot.children) {
-                        val item = snapshot.getValue(Task::class.java) ?: continue
-                        if (item.category == categoryId) i++
-                    }
-                    number.text = MessageFormat.format("{0}{1}", DATA.EMPTY, i)
-                }
-
-                override fun onCancelled(databaseError: DatabaseError) {}
-            })
         }
     }
 }

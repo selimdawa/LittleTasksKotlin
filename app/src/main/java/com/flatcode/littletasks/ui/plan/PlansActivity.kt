@@ -62,7 +62,7 @@ class PlansActivity : AppCompatActivity(), PlanAdapter.PlanListener {
             override fun afterTextChanged(s: Editable?) {}
         })
 
-        adapter = PlanAdapter(context, isNew, this)
+        adapter = PlanAdapter(isNew, this)
         binding.recyclerView.adapter = adapter
 
         lifecycleScope.launch {

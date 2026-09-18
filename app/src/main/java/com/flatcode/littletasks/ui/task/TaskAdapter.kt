@@ -6,22 +6,16 @@ import android.view.ViewGroup
 import android.widget.Filter
 import android.widget.Filterable
 import android.widget.ImageView
-import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.flatcode.littletasks.R
 import com.flatcode.littletasks.databinding.ItemTaskBinding
 import com.flatcode.littletasks.filter.TaskCategoryFilter
-import com.flatcode.littletasks.model.Category
 import com.flatcode.littletasks.model.Task
 import com.flatcode.littletasks.utils.DATA
 import com.flatcode.littletasks.utils.GetTimeAgo
 import com.flatcode.littletasks.utils.loadImage
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 
 class TaskAdapter(
     private val listener: TaskListener
@@ -49,44 +43,7 @@ class TaskAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = getItem(position) ?: return
-        val id = DATA.EMPTY + item.id
-        val name = DATA.EMPTY + item.name
-        val publisher = DATA.EMPTY + item.publisher
-        val category = DATA.EMPTY + item.category
-        val timestamp = DATA.EMPTY + item.timestamp
-        val start = DATA.EMPTY + item.start
-        val end = DATA.EMPTY + item.end
-        val points = DATA.EMPTY + item.points
-        val avPoints = DATA.EMPTY + item.aVPoints
-
-        holder.binding.name.text = name
-        holder.binding.name.visibility = if (name.isEmpty()) View.GONE else View.VISIBLE
-
-        holder.binding.points.text = points
-        holder.binding.AVPoints.text = avPoints
-
-        val addTime = timestamp.toLongOrNull() ?: 0L
-        holder.binding.add.text = GetTimeAgo.getMessageAgo(addTime)
-
-        holder.binding.start.text =
-            if (start == "0") "-" else GetTimeAgo.getMessageAgo(start.toLongOrNull() ?: 0L)
-        holder.binding.end.text =
-            if (end == "0") "-" else GetTimeAgo.getMessageAgo(end.toLongOrNull() ?: 0L)
-
-        // UI Updates for task status stars
-        when {
-            item.end != 0L -> holder.binding.task.setImageResource(R.drawable.ic_star_selected)
-            item.start != 0L -> holder.binding.task.setImageResource(R.drawable.ic_star_half)
-            else -> holder.binding.task.setImageResource(R.drawable.ic_star_unselected)
-        }
-
-        getData(category, holder.binding.category, holder.binding.image)
-
-        listener.isFavorite(id, publisher, holder.binding.favorites)
-
-        holder.binding.favorites.setOnClickListener { listener.onFavoriteClick(item) }
-        holder.binding.task.setOnClickListener { listener.onTaskClick(item) }
-        holder.binding.more.setOnClickListener { listener.onMoreClick(item) }
+        holder.bind(item, listener)
     }
 
     override fun getFilter(): Filter {
@@ -96,7 +53,50 @@ class TaskAdapter(
         return filter!!
     }
 
-    class ViewHolder(val binding: ItemTaskBinding) : RecyclerView.ViewHolder(binding.root)
+    class ViewHolder(val binding: ItemTaskBinding) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(item: Task, listener: TaskListener) {
+            val id = DATA.EMPTY + item.id
+            val name = DATA.EMPTY + item.name
+            val publisher = DATA.EMPTY + item.publisher
+            val categoryName = DATA.EMPTY + item.categoryName
+            val categoryImage = DATA.EMPTY + item.categoryImage
+            val timestamp = DATA.EMPTY + item.timestamp
+            val start = DATA.EMPTY + item.start
+            val end = DATA.EMPTY + item.end
+            val points = DATA.EMPTY + item.points
+            val avPoints = DATA.EMPTY + item.aVPoints
+
+            binding.name.text = name
+            binding.name.visibility = if (name.isEmpty()) View.GONE else View.VISIBLE
+
+            binding.points.text = points
+            binding.AVPoints.text = avPoints
+
+            val addTime = timestamp.toLongOrNull() ?: 0L
+            binding.add.text = GetTimeAgo.getMessageAgo(addTime)
+
+            binding.start.text =
+                if (start == "0") "-" else GetTimeAgo.getMessageAgo(start.toLongOrNull() ?: 0L)
+            binding.end.text =
+                if (end == "0") "-" else GetTimeAgo.getMessageAgo(end.toLongOrNull() ?: 0L)
+
+            // UI Updates for task status stars
+            when {
+                item.end != 0L -> binding.task.setImageResource(R.drawable.ic_star_selected)
+                item.start != 0L -> binding.task.setImageResource(R.drawable.ic_star_half)
+                else -> binding.task.setImageResource(R.drawable.ic_star_unselected)
+            }
+
+            binding.category.text = categoryName
+            binding.image.loadImage(false, categoryImage)
+
+            listener.isFavorite(id, publisher, binding.favorites)
+
+            binding.favorites.setOnClickListener { listener.onFavoriteClick(item) }
+            binding.task.setOnClickListener { listener.onTaskClick(item) }
+            binding.more.setOnClickListener { listener.onMoreClick(item) }
+        }
+    }
 
     class TaskDiffCallback : DiffUtil.ItemCallback<Task>() {
         override fun areItemsTheSame(oldItem: Task, newItem: Task): Boolean {
@@ -106,18 +106,5 @@ class TaskAdapter(
         override fun areContentsTheSame(oldItem: Task, newItem: Task): Boolean {
             return oldItem == newItem
         }
-    }
-
-    private fun getData(categoryId: String, name: TextView, image: ImageView) {
-        FirebaseDatabase.getInstance().getReference(DATA.CATEGORIES).child(categoryId)
-            .addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    val item = dataSnapshot.getValue(Category::class.java) ?: return
-                    name.text = item.name
-                    image.loadImage(false, item.image)
-                }
-
-                override fun onCancelled(databaseError: DatabaseError) {}
-            })
     }
 }

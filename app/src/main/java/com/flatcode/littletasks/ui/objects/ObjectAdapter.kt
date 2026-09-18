@@ -36,19 +36,7 @@ class ObjectAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = getItem(position) ?: return
-        val name = DATA.EMPTY + item.name
-        val points = DATA.EMPTY + item.points
-
-        if (name == DATA.EMPTY) {
-            holder.binding.name.visibility = View.GONE
-        } else {
-            holder.binding.name.visibility = View.VISIBLE
-            holder.binding.name.text = name
-        }
-
-        holder.binding.points.text = points
-
-        holder.binding.more.setOnClickListener { listener.onMoreClick(item) }
+        holder.bind(item, listener)
     }
 
     override fun getFilter(): Filter {
@@ -58,7 +46,22 @@ class ObjectAdapter(
         return filter!!
     }
 
-    class ViewHolder(val binding: ItemObjectBinding) : RecyclerView.ViewHolder(binding.root)
+    class ViewHolder(val binding: ItemObjectBinding) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(item: TaskItem, listener: ObjectListener) {
+            val name = DATA.EMPTY + item.name
+            val points = DATA.EMPTY + item.points
+
+            if (name == DATA.EMPTY) {
+                binding.name.visibility = View.GONE
+            } else {
+                binding.name.visibility = View.VISIBLE
+                binding.name.text = name
+            }
+
+            binding.points.text = points
+            binding.more.setOnClickListener { listener.onMoreClick(item) }
+        }
+    }
 
     class ObjectDiffCallback : DiffUtil.ItemCallback<TaskItem>() {
         override fun areItemsTheSame(oldItem: TaskItem, newItem: TaskItem): Boolean {

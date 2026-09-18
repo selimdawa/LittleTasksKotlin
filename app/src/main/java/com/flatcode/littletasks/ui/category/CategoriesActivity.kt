@@ -63,7 +63,7 @@ class CategoriesActivity : AppCompatActivity(), CategoriesAdapter.CategoryListen
             override fun afterTextChanged(s: Editable?) {}
         })
 
-        adapter = CategoriesAdapter(context, this)
+        adapter = CategoriesAdapter(this)
         binding.recyclerView.adapter = adapter
 
         lifecycleScope.launch {
@@ -92,15 +92,11 @@ class CategoriesActivity : AppCompatActivity(), CategoriesAdapter.CategoryListen
         context.showMoreOptions(options) { which ->
             when (which) {
                 0 -> context.openActivity<TaskAddActivity>(
-                    false,
-                    DATA.CATEGORY_ID to item.id,
-                    DATA.PLAN_ID to item.plan
+                    false, DATA.CATEGORY_ID to item.id, DATA.PLAN_ID to item.plan
                 )
 
                 1 -> context.openActivity<CategoryEditActivity>(
-                    false,
-                    DATA.CATEGORY_ID to item.id,
-                    DATA.PLAN_ID to item.plan
+                    false, DATA.CATEGORY_ID to item.id, DATA.PLAN_ID to item.plan
                 )
 
                 2 -> context.dialogOptionDelete(DATA.CATEGORIES) {

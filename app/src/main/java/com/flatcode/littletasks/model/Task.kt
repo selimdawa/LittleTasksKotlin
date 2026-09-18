@@ -16,5 +16,7 @@ data class Task(
     var start: Long = 0,
     var end: Long = 0,
     var points: Int = 0,
-    var aVPoints: Int = 0
+    var aVPoints: Int = 0,
+    var categoryName: String? = null,
+    var categoryImage: String? = null
 ) : Parcelable

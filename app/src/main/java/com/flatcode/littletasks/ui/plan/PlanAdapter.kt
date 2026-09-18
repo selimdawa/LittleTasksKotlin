@@ -1,6 +1,5 @@
 package com.flatcode.littletasks.ui.plan
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,9 +18,7 @@ import com.flatcode.littletasks.utils.loadImage
 import com.flatcode.littletasks.utils.openActivity
 
 class PlanAdapter(
-    private val context: Context,
-    var isNew: Boolean,
-    private val listener: PlanListener
+    var isNew: Boolean, private val listener: PlanListener
 ) : ListAdapter<Plan, PlanAdapter.ViewHolder>(PlanDiffCallback()), Filterable {
 
     interface PlanListener {
@@ -61,12 +58,10 @@ class PlanAdapter(
         holder.binding.more.setOnClickListener { listener.onMoreClick(item) }
         holder.binding.item.setOnClickListener {
             if (isNew) {
-                context.openActivity<CategoryAddActivity>(false, DATA.ID to id)
+                holder.itemView.context.openActivity<CategoryAddActivity>(false, DATA.ID to id)
             } else {
-                context.openActivity<ObjectsPlanActivity>(
-                    false,
-                    DATA.ID to id,
-                    DATA.NAME to name
+                holder.itemView.context.openActivity<ObjectsPlanActivity>(
+                    false, DATA.ID to id, DATA.NAME to name
                 )
             }
         }
