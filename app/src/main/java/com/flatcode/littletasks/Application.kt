@@ -1,6 +1,8 @@
 package com.flatcode.littletasks
 
 import android.app.Application
+import com.cloudinary.android.MediaManager
+import com.flatcode.littletasks.utils.DATA
 import dagger.hilt.android.HiltAndroidApp
 import io.selimdawa.multicolors.MultiColorManager
 
@@ -10,5 +12,11 @@ class Application : Application() {
     override fun onCreate() {
         super.onCreate()
         MultiColorManager.init(this)
+
+        // Cloudinary Initialization
+        val config = mapOf(
+            "cloud_name" to DATA.CLOUDINARY_CLOUD_NAME, "secure" to true
+        )
+        MediaManager.init(this, config)
     }
 }

@@ -13,7 +13,9 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.storage.FirebaseStorage
+import com.cloudinary.android.MediaManager
+import com.cloudinary.android.callback.ErrorInfo
+import com.cloudinary.android.callback.UploadCallback
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,7 +29,6 @@ import javax.inject.Inject
 class ProfileViewModel @Inject constructor(
     private val auth: FirebaseAuth,
     private val database: FirebaseDatabase,
-    private val storage: FirebaseStorage,
     private val repository: TaskRepository
 ) : ViewModel() {
 
@@ -92,21 +93,32 @@ class ProfileViewModel @Inject constructor(
             })
     }
 
-    fun updateProfile(username: String, imageUri: Uri?, extension: String?) {
+    fun updateProfile(username: String, imageUri: Uri?) {
         val uid = auth.currentUser?.uid ?: return
         if (imageUri == null) {
             updateProfileInDB(uid, username, null)
         } else {
-            val filePath = "Images/Profile/$uid.$extension"
-            val storageRef = storage.getReference(filePath)
-            storageRef.putFile(imageUri).addOnSuccessListener {
-                it.storage.downloadUrl.addOnSuccessListener { uri ->
-                    updateProfileInDB(uid, username, uri.toString())
-                }
-            }.addOnFailureListener {
-                Timber.e(it, "Failed to upload profile image for uid: $uid")
-                _actionResult.value = Result.failure(it)
-            }
+            val publicId = "${uid}_${System.currentTimeMillis()}"
+            MediaManager.get().upload(imageUri)
+                .option("public_id", publicId)
+                .option("folder", "Images/Profile")
+                .unsigned(DATA.CLOUDINARY_UPLOAD_PRESET)
+                .callback(object : UploadCallback {
+                    override fun onStart(requestId: String?) {}
+                    override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {}
+                    override fun onSuccess(requestId: String?, resultData: Map<*, *>?) {
+                        val imageUrl = resultData?.get("secure_url") as? String ?: ""
+                        updateProfileInDB(uid, username, imageUrl)
+                    }
+
+                    override fun onError(requestId: String?, error: ErrorInfo?) {
+                        val message = error?.description ?: "Unknown error"
+                        Timber.e("Cloudinary profile upload error: $message")
+                        _actionResult.value = Result.failure(Exception(message))
+                    }
+
+                    override fun onReschedule(requestId: String?, error: ErrorInfo?) {}
+                }).dispatch()
         }
     }
 

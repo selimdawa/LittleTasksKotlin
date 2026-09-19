@@ -24,6 +24,8 @@ import androidx.core.graphics.scale
 import androidx.core.net.toUri
 import coil3.load
 import coil3.request.crossfade
+import coil3.request.error
+import coil3.request.fallback
 import coil3.request.placeholder
 import coil3.request.transformations
 import coil3.size.Size
@@ -34,8 +36,6 @@ import com.flatcode.littletasks.databinding.DialogCloseAppBinding
 import com.flatcode.littletasks.databinding.DialogLogoutBinding
 import com.flatcode.littletasks.ui.auth.AuthActivity
 import com.google.firebase.auth.FirebaseAuth
-import com.theartofdev.edmodo.cropper.CropImage
-import com.theartofdev.edmodo.cropper.CropImageView
 import java.io.Serializable
 import java.text.MessageFormat
 
@@ -168,16 +168,17 @@ fun Activity.dialogAboutApp() {
     dialog.show()
 }
 
-fun Activity.startCropImageSquare() {
-    CropImage.activity().setGuidelines(CropImageView.Guidelines.ON).setMultiTouchEnabled(true)
-        .setMinCropResultSize(DATA.MIX_SQUARE, DATA.MIX_SQUARE).setAspectRatio(1, 1)
-        .setCropShape(CropImageView.CropShape.OVAL).start(this)
-}
-
-fun Activity.startCropImageWide() {
-    CropImage.activity().setGuidelines(CropImageView.Guidelines.ON).setMultiTouchEnabled(true)
-        .setMinCropResultSize(DATA.MIX_SQUARE, DATA.MIX_SQUARE).setAspectRatio(2, 1)
-        .setCropShape(CropImageView.CropShape.OVAL).start(this)
+fun Context.startCropActivity(
+    uri: Uri, aspectRatioX: Int = 1, aspectRatioY: Int = 1, isOval: Boolean = false
+): Intent {
+    return Intent(this, CropActivity::class.java).apply {
+        putExtra("IMAGE_URI", uri)
+        putExtra("ASPECT_RATIO_X", aspectRatioX)
+        putExtra("ASPECT_RATIO_Y", aspectRatioY)
+        putExtra("IS_OVAL", isOval)
+        putExtra("MIN_WIDTH", DATA.MIX_SQUARE)
+        putExtra("MIN_HEIGHT", DATA.MIX_SQUARE)
+    }
 }
 
 fun Context.shareApp() {
@@ -248,7 +249,7 @@ fun Context.showMoreOptions(options: Array<String>, onOptionSelected: (Int) -> U
 
 fun ImageView.loadImage(isUser: Boolean, url: String?) {
     try {
-        if (url == DATA.BASIC) {
+        if (url.isNullOrEmpty() || url == DATA.BASIC) {
             if (isUser) {
                 this.setImageResource(R.drawable.basic_user)
             } else {
@@ -257,17 +258,23 @@ fun ImageView.loadImage(isUser: Boolean, url: String?) {
         } else {
             this.load(url) {
                 placeholder(R.color.image_profile)
+                error(R.color.image_profile)
+                fallback(R.color.image_profile)
                 crossfade(true)
             }
         }
     } catch (_: Exception) {
-        this.setImageResource(R.drawable.basic_book)
+        if (isUser) {
+            this.setImageResource(R.drawable.basic_user)
+        } else {
+            this.setImageResource(R.drawable.basic_book)
+        }
     }
 }
 
-fun ImageView.loadBlurImage(isUser: Boolean, url: String, level: Int) {
+fun ImageView.loadBlurImage(isUser: Boolean, url: String?, level: Int) {
     try {
-        if (url == DATA.BASIC) {
+        if (url.isNullOrEmpty() || url == DATA.BASIC) {
             if (isUser) {
                 this.setImageResource(R.drawable.basic_user)
             } else {
@@ -276,11 +283,17 @@ fun ImageView.loadBlurImage(isUser: Boolean, url: String, level: Int) {
         } else {
             this.load(url) {
                 placeholder(R.color.image_profile)
+                error(R.color.image_profile)
+                fallback(R.color.image_profile)
                 transformations(SimpleBlurTransformation(level.toFloat()))
             }
         }
     } catch (_: Exception) {
-        this.setImageResource(R.drawable.basic_book)
+        if (isUser) {
+            this.setImageResource(R.drawable.basic_user)
+        } else {
+            this.setImageResource(R.drawable.basic_book)
+        }
     }
 }
 

@@ -33,6 +33,10 @@ object DATA {
     const val NAME = "name"
     const val PLAN = "plan"
 
+    //Cloudinary
+    const val CLOUDINARY_CLOUD_NAME = "j8jsphcf"
+    const val CLOUDINARY_UPLOAD_PRESET = "flat_code"
+
     //Others
     const val EMPTY = ""
     const val CURRENT_VERSION = 1

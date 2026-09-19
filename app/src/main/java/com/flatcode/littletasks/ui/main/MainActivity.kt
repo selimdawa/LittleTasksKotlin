@@ -77,9 +77,7 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.profileImage.collectLatest { profileImage ->
-                    if (profileImage.isNotEmpty()) {
-                        binding.toolbar.image.loadImage(true, profileImage)
-                    }
+                    binding.toolbar.image.loadImage(true, profileImage)
                 }
             }
         }

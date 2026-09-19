@@ -14,7 +14,9 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.storage.FirebaseStorage
+import com.cloudinary.android.MediaManager
+import com.cloudinary.android.callback.ErrorInfo
+import com.cloudinary.android.callback.UploadCallback
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,7 +30,6 @@ import javax.inject.Inject
 class CategoryViewModel @Inject constructor(
     private val auth: FirebaseAuth,
     private val database: FirebaseDatabase,
-    private val storage: FirebaseStorage,
     private val repository: TaskRepository
 ) : ViewModel() {
 
@@ -104,36 +105,46 @@ class CategoryViewModel @Inject constructor(
             })
     }
 
-    fun addCategory(title: String, planId: String, imageUri: Uri, extension: String) {
+    fun addCategory(title: String, planId: String, imageUri: Uri) {
         val uid = auth.currentUser?.uid ?: return
         val ref = database.getReference(DATA.CATEGORIES)
         val id = ref.push().key ?: return
-        val filePath = "Images/Category/$id.$extension"
-        val storageRef = storage.getReference(filePath)
 
-        storageRef.putFile(imageUri).addOnSuccessListener {
-            it.storage.downloadUrl.addOnSuccessListener { uri ->
-                val hashMap = HashMap<String, Any?>().apply {
-                    put(DATA.PUBLISHER, uid)
-                    put(DATA.TIMESTAMP, System.currentTimeMillis())
-                    put(DATA.ID, id)
-                    put(DATA.NAME, title)
-                    put(DATA.PLAN, planId)
-                    put(DATA.IMAGE, uri.toString())
+        MediaManager.get().upload(imageUri)
+            .option("public_id", id)
+            .option("folder", "Images/Category")
+            .unsigned(DATA.CLOUDINARY_UPLOAD_PRESET)
+            .callback(object : UploadCallback {
+                override fun onStart(requestId: String?) {}
+                override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {}
+                override fun onSuccess(requestId: String?, resultData: Map<*, *>?) {
+                    val imageUrl = resultData?.get("secure_url") as? String ?: ""
+                    val hashMap = HashMap<String, Any?>().apply {
+                        put(DATA.PUBLISHER, uid)
+                        put(DATA.TIMESTAMP, System.currentTimeMillis())
+                        put(DATA.ID, id)
+                        put(DATA.NAME, title)
+                        put(DATA.PLAN, planId)
+                        put(DATA.IMAGE, imageUrl)
+                    }
+                    ref.child(id).setValue(hashMap).addOnSuccessListener {
+                        addAutoTasksForCategory(id, planId)
+                        Timber.d("Category added successfully: $id")
+                        _uploadResult.value = Result.success("Category uploaded")
+                    }.addOnFailureListener { e ->
+                        Timber.e(e, "Failed to add category to database")
+                        _uploadResult.value = Result.failure(e)
+                    }
                 }
-                ref.child(id).setValue(hashMap).addOnSuccessListener {
-                    addAutoTasksForCategory(id, planId)
-                    Timber.d("Category added successfully: $id")
-                    _uploadResult.value = Result.success("Category uploaded")
-                }.addOnFailureListener { e ->
-                    Timber.e(e, "Failed to add category to database")
-                    _uploadResult.value = Result.failure(e)
+
+                override fun onError(requestId: String?, error: ErrorInfo?) {
+                    val message = error?.description ?: "Unknown error"
+                    Timber.e("Cloudinary upload error: $message")
+                    _uploadResult.value = Result.failure(Exception(message))
                 }
-            }
-        }.addOnFailureListener {
-            Timber.e(it, "Failed to upload category image")
-            _uploadResult.value = Result.failure(it)
-        }
+
+                override fun onReschedule(requestId: String?, error: ErrorInfo?) {}
+            }).dispatch()
     }
 
     private fun addAutoTasksForCategory(categoryId: String, planId: String) {
@@ -189,20 +200,31 @@ class CategoryViewModel @Inject constructor(
             })
     }
 
-    fun updateCategory(categoryId: String, name: String, imageUri: Uri?, extension: String?) {
+    fun updateCategory(categoryId: String, name: String, imageUri: Uri?) {
         if (imageUri == null) {
             updateCategoryInDB(categoryId, name, null)
         } else {
-            val filePath = "Images/Category/$categoryId.$extension"
-            val storageRef = storage.getReference(filePath)
-            storageRef.putFile(imageUri).addOnSuccessListener {
-                it.storage.downloadUrl.addOnSuccessListener { uri ->
-                    updateCategoryInDB(categoryId, name, uri.toString())
-                }
-            }.addOnFailureListener {
-                Timber.e(it, "Failed to upload updated category image")
-                _uploadResult.value = Result.failure(it)
-            }
+            val publicId = "${categoryId}_${System.currentTimeMillis()}"
+            MediaManager.get().upload(imageUri)
+                .option("public_id", publicId)
+                .option("folder", "Images/Category")
+                .unsigned(DATA.CLOUDINARY_UPLOAD_PRESET)
+                .callback(object : UploadCallback {
+                    override fun onStart(requestId: String?) {}
+                    override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {}
+                    override fun onSuccess(requestId: String?, resultData: Map<*, *>?) {
+                        val imageUrl = resultData?.get("secure_url") as? String ?: ""
+                        updateCategoryInDB(categoryId, name, imageUrl)
+                    }
+
+                    override fun onError(requestId: String?, error: ErrorInfo?) {
+                        val message = error?.description ?: "Unknown error"
+                        Timber.e("Cloudinary update upload error: $message")
+                        _uploadResult.value = Result.failure(Exception(message))
+                    }
+
+                    override fun onReschedule(requestId: String?, error: ErrorInfo?) {}
+                }).dispatch()
         }
     }
 

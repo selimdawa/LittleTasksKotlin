@@ -1,14 +1,11 @@
 package com.flatcode.littletasks.ui.plan
 
-import android.Manifest
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.text.TextUtils
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
@@ -20,9 +17,8 @@ import com.flatcode.littletasks.R
 import com.flatcode.littletasks.databinding.ActivityPlanAddBinding
 import com.flatcode.littletasks.databinding.LayoutLoadingDialogBinding
 import com.flatcode.littletasks.utils.DATA
-import com.flatcode.littletasks.utils.getFileExtension
 import com.flatcode.littletasks.utils.loadImage
-import com.theartofdev.edmodo.cropper.CropImage
+import com.flatcode.littletasks.utils.startCropActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -38,51 +34,21 @@ class PlanEditActivity : AppCompatActivity() {
     private var imageUri: Uri? = null
     private var progressDialog: AlertDialog? = null
     private val viewModel: PlanViewModel by viewModels()
+    private var isLoaded = false
 
-    private val cropImageLauncher = registerForActivityResult(
-        object : ActivityResultContract<Intent?, CropImage.ActivityResult?>() {
-            override fun createIntent(context: Context, input: Intent?): Intent {
-                return input ?: CropImage.activity().getIntent(context)
-            }
-
-            override fun parseResult(resultCode: Int, intent: Intent?): CropImage.ActivityResult? {
-                return if (intent != null) CropImage.getActivityResult(intent) else null
-            }
-        }
-    ) { result ->
-        if (result != null) {
-            if (result.error == null) {
-                imageUri = result.uri
+    private val cropImageLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                imageUri = result.data?.getParcelableExtra("CROP_RESULT_URI")
+                binding.image.setImageURI(null)
                 binding.image.setImageURI(imageUri)
-            } else {
-                Toast.makeText(this, "Error! ${result.error}", Toast.LENGTH_SHORT).show()
             }
         }
-    }
 
-    private val pickImageLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == RESULT_OK) {
-            val uri = CropImage.getPickImageResultUri(context, result.data)
-            if (CropImage.isReadExternalStoragePermissionsRequired(context, uri)) {
-                imageUri = uri
-                requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
-            } else {
-                cropImageLauncher.launch(CropImage.activity(uri).getIntent(this))
-            }
+    private val pickImageLauncher =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            uri?.let { cropImageLauncher.launch(context.startCropActivity(it, 2, 1, false)) }
         }
-    }
-
-    private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            cropImageLauncher.launch(CropImage.activity(imageUri).getIntent(this))
-        } else {
-            Toast.makeText(context, "Permission denied...", Toast.LENGTH_SHORT).show()
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -95,7 +61,7 @@ class PlanEditActivity : AppCompatActivity() {
         binding.toolbar.nameSpace.setText(R.string.edit_plan)
         binding.toolbar.back.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
         binding.editImage.setOnClickListener {
-            pickImageLauncher.launch(CropImage.getPickImageChooserIntent(this))
+            pickImageLauncher.launch("image/*")
         }
         binding.toolbar.ok.setOnClickListener { validateData() }
 
@@ -103,8 +69,11 @@ class PlanEditActivity : AppCompatActivity() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.planInfo.collectLatest { plan ->
                     plan?.let {
-                        binding.planEt.setText(it.name)
-                        binding.image.loadImage(true, it.image)
+                        if (!isLoaded) {
+                            binding.planEt.setText(it.name)
+                            binding.image.loadImage(true, it.image)
+                            isLoaded = true
+                        }
                     }
                 }
             }
@@ -133,10 +102,9 @@ class PlanEditActivity : AppCompatActivity() {
     private fun showLoading() {
         if (progressDialog == null) {
             val loadingBinding = LayoutLoadingDialogBinding.inflate(layoutInflater)
-            progressDialog = AlertDialog.Builder(context)
-                .setView(loadingBinding.root)
-                .setCancelable(false)
-                .create()
+            progressDialog =
+                AlertDialog.Builder(context).setView(loadingBinding.root).setCancelable(false)
+                    .create()
         }
         progressDialog?.show()
     }
@@ -151,8 +119,7 @@ class PlanEditActivity : AppCompatActivity() {
             Toast.makeText(context, "Enter name...", Toast.LENGTH_SHORT).show()
         } else {
             showLoading()
-            val ext = imageUri?.getFileExtension(context)
-            viewModel.updatePlan(id ?: "", name, imageUri, ext)
+            viewModel.updatePlan(id ?: "", name, imageUri)
         }
     }
 

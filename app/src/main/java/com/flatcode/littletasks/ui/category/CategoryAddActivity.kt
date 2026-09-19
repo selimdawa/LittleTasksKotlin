@@ -1,29 +1,24 @@
 package com.flatcode.littletasks.ui.category
 
-import android.Manifest
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.text.TextUtils
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.flatcode.littletasks.R
-import com.flatcode.littletasks.utils.DATA
-import com.flatcode.littletasks.utils.getFileExtension
-import com.flatcode.littletasks.databinding.ActivityCategoryAddBinding
-import com.flatcode.littletasks.databinding.LayoutLoadingDialogBinding
-import com.theartofdev.edmodo.cropper.CropImage
-import dagger.hilt.android.AndroidEntryPoint
-
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.flatcode.littletasks.R
+import com.flatcode.littletasks.databinding.ActivityCategoryAddBinding
+import com.flatcode.littletasks.databinding.LayoutLoadingDialogBinding
+import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.utils.startCropActivity
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -39,50 +34,21 @@ class CategoryAddActivity : AppCompatActivity() {
     private var planId: String? = null
     private val viewModel: CategoryViewModel by viewModels()
 
-    private val cropImageLauncher = registerForActivityResult(
-        object : ActivityResultContract<Intent?, CropImage.ActivityResult?>() {
-            override fun createIntent(context: Context, input: Intent?): Intent {
-                return input ?: CropImage.activity().getIntent(context)
-            }
-
-            override fun parseResult(resultCode: Int, intent: Intent?): CropImage.ActivityResult? {
-                return if (intent != null) CropImage.getActivityResult(intent) else null
-            }
-        }
-    ) { result ->
-        if (result != null) {
-            if (result.error == null) {
-                imageUri = result.uri
+    private val cropImageLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                imageUri = result.data?.getParcelableExtra("CROP_RESULT_URI")
+                binding.image.setImageURI(null)
                 binding.image.setImageURI(imageUri)
-            } else {
-                Toast.makeText(this, "Error! ${result.error}", Toast.LENGTH_SHORT).show()
             }
         }
-    }
 
-    private val pickImageLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == RESULT_OK) {
-            val uri = CropImage.getPickImageResultUri(context, result.data)
-            if (CropImage.isReadExternalStoragePermissionsRequired(context, uri)) {
-                imageUri = uri
-                requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
-            } else {
-                cropImageLauncher.launch(CropImage.activity(uri).getIntent(this))
+    private val pickImageLauncher =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            uri?.let {
+                cropImageLauncher.launch(context.startCropActivity(it, 1, 1, false))
             }
         }
-    }
-
-    private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            cropImageLauncher.launch(CropImage.activity(imageUri).getIntent(this))
-        } else {
-            Toast.makeText(context, "Permission denied...", Toast.LENGTH_SHORT).show()
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -95,7 +61,7 @@ class CategoryAddActivity : AppCompatActivity() {
         binding.toolbar.nameSpace.setText(R.string.add_new_category)
         binding.toolbar.back.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
         binding.editImage.setOnClickListener {
-            pickImageLauncher.launch(CropImage.getPickImageChooserIntent(this))
+            pickImageLauncher.launch("image/*")
         }
         binding.toolbar.ok.setOnClickListener { validateData() }
 
@@ -113,10 +79,12 @@ class CategoryAddActivity : AppCompatActivity() {
                     result?.let {
                         dismissLoading()
                         it.onSuccess {
-                            Toast.makeText(context, "Successfully uploaded...", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Successfully uploaded...", Toast.LENGTH_SHORT)
+                                .show()
                             finish()
                         }.onFailure { e ->
-                            Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT)
+                                .show()
                         }
                     }
                 }
@@ -129,10 +97,9 @@ class CategoryAddActivity : AppCompatActivity() {
     private fun showLoading() {
         if (progressDialog == null) {
             val loadingBinding = LayoutLoadingDialogBinding.inflate(layoutInflater)
-            progressDialog = AlertDialog.Builder(context)
-                .setView(loadingBinding.root)
-                .setCancelable(false)
-                .create()
+            progressDialog =
+                AlertDialog.Builder(context).setView(loadingBinding.root).setCancelable(false)
+                    .create()
         }
         progressDialog?.show()
     }
@@ -150,8 +117,7 @@ class CategoryAddActivity : AppCompatActivity() {
             Toast.makeText(context, "Pick Image...", Toast.LENGTH_SHORT).show()
         } else {
             showLoading()
-            val ext = imageUri!!.getFileExtension(context)
-            viewModel.addCategory(title, planId ?: "", imageUri!!, ext)
+            viewModel.addCategory(title, planId ?: "", imageUri!!)
         }
     }
 

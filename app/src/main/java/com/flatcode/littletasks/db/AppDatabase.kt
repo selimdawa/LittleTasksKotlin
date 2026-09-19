@@ -10,14 +10,7 @@ import com.flatcode.littletasks.model.TaskItem
 import com.flatcode.littletasks.model.User
 
 @Database(
-    entities = [
-        Category::class,
-        Task::class,
-        Plan::class,
-        User::class,
-        Setting::class,
-        TaskItem::class
-    ],
+    entities = [Category::class, Task::class, Plan::class, User::class, Setting::class, TaskItem::class],
     version = 1,
     exportSchema = true
 )

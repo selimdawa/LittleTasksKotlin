@@ -134,9 +134,9 @@
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
+            android:name=".utils.CropActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/Base.Theme.AppCompat" />
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
 
     </application>
 

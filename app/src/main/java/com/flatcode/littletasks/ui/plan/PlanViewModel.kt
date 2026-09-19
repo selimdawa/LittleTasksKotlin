@@ -3,6 +3,9 @@ package com.flatcode.littletasks.ui.plan
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cloudinary.android.MediaManager
+import com.cloudinary.android.callback.ErrorInfo
+import com.cloudinary.android.callback.UploadCallback
 import com.flatcode.littletasks.model.Plan
 import com.flatcode.littletasks.repository.TaskRepository
 import com.flatcode.littletasks.utils.DATA
@@ -11,7 +14,6 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.storage.FirebaseStorage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,7 +26,6 @@ import javax.inject.Inject
 class PlanViewModel @Inject constructor(
     private val auth: FirebaseAuth,
     private val database: FirebaseDatabase,
-    private val storage: FirebaseStorage,
     private val repository: TaskRepository
 ) : ViewModel() {
 
@@ -70,50 +71,66 @@ class PlanViewModel @Inject constructor(
             })
     }
 
-    fun addPlan(title: String, imageUri: Uri, extension: String) {
+    fun addPlan(title: String, imageUri: Uri) {
         val uid = auth.currentUser?.uid ?: return
         val ref = database.getReference(DATA.PLANS)
         val id = ref.push().key ?: return
-        val filePath = "Images/Plans/$id.$extension"
-        val storageRef = storage.getReference(filePath)
 
-        storageRef.putFile(imageUri).addOnSuccessListener {
-            it.storage.downloadUrl.addOnSuccessListener { uri ->
-                val hashMap = HashMap<String, Any?>().apply {
-                    put(DATA.PUBLISHER, uid)
-                    put(DATA.TIMESTAMP, System.currentTimeMillis())
-                    put(DATA.ID, id)
-                    put(DATA.NAME, title)
-                    put(DATA.IMAGE, uri.toString())
+        MediaManager.get().upload(imageUri).option("public_id", id).option("folder", "Images/Plans")
+            .unsigned(DATA.CLOUDINARY_UPLOAD_PRESET).callback(object : UploadCallback {
+                override fun onStart(requestId: String?) {}
+                override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {}
+                override fun onSuccess(requestId: String?, resultData: Map<*, *>?) {
+                    val imageUrl = resultData?.get("secure_url") as? String ?: ""
+                    val hashMap = HashMap<String, Any?>().apply {
+                        put(DATA.PUBLISHER, uid)
+                        put(DATA.TIMESTAMP, System.currentTimeMillis())
+                        put(DATA.ID, id)
+                        put(DATA.NAME, title)
+                        put(DATA.IMAGE, imageUrl)
+                    }
+                    ref.child(id).setValue(hashMap).addOnSuccessListener {
+                        Timber.d("Plan added successfully: $id")
+                        _actionResult.value = Result.success("Plan added")
+                    }.addOnFailureListener { e ->
+                        Timber.e(e, "Failed to add plan to database")
+                        _actionResult.value = Result.failure(e)
+                    }
                 }
-                ref.child(id).setValue(hashMap).addOnSuccessListener {
-                    Timber.d("Plan added successfully: $id")
-                    _actionResult.value = Result.success("Plan added")
-                }.addOnFailureListener { e ->
-                    Timber.e(e, "Failed to add plan to database")
-                    _actionResult.value = Result.failure(e)
+
+                override fun onError(requestId: String?, error: ErrorInfo?) {
+                    val message = error?.description ?: "Unknown error"
+                    Timber.e("Cloudinary plan upload error: $message")
+                    _actionResult.value = Result.failure(Exception(message))
                 }
-            }
-        }.addOnFailureListener {
-            Timber.e(it, "Failed to upload plan image")
-            _actionResult.value = Result.failure(it)
-        }
+
+                override fun onReschedule(requestId: String?, error: ErrorInfo?) {}
+            }).dispatch()
     }
 
-    fun updatePlan(planId: String, name: String, imageUri: Uri?, extension: String?) {
+    fun updatePlan(planId: String, name: String, imageUri: Uri?) {
         if (imageUri == null) {
             updatePlanInDB(planId, name, null)
         } else {
-            val filePath = "Images/Plans/$planId.$extension"
-            val storageRef = storage.getReference(filePath)
-            storageRef.putFile(imageUri).addOnSuccessListener {
-                it.storage.downloadUrl.addOnSuccessListener { uri ->
-                    updatePlanInDB(planId, name, uri.toString())
-                }
-            }.addOnFailureListener {
-                Timber.e(it, "Failed to upload updated plan image")
-                _actionResult.value = Result.failure(it)
-            }
+            val publicId = "${planId}_${System.currentTimeMillis()}"
+            MediaManager.get().upload(imageUri).option("public_id", publicId)
+                .option("folder", "Images/Plans").unsigned(DATA.CLOUDINARY_UPLOAD_PRESET)
+                .callback(object : UploadCallback {
+                    override fun onStart(requestId: String?) {}
+                    override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {}
+                    override fun onSuccess(requestId: String?, resultData: Map<*, *>?) {
+                        val imageUrl = resultData?.get("secure_url") as? String ?: ""
+                        updatePlanInDB(planId, name, imageUrl)
+                    }
+
+                    override fun onError(requestId: String?, error: ErrorInfo?) {
+                        val message = error?.description ?: "Unknown error"
+                        Timber.e("Cloudinary plan update error: $message")
+                        _actionResult.value = Result.failure(Exception(message))
+                    }
+
+                    override fun onReschedule(requestId: String?, error: ErrorInfo?) {}
+                }).dispatch()
         }
     }
 
