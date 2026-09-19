@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.IntentCompat
 import com.canhub.cropper.CropImageOptions
 import com.canhub.cropper.CropImageView
 import com.flatcode.littletasks.databinding.ActivityCropBinding
@@ -24,7 +25,7 @@ class CropActivity : AppCompatActivity() {
         binding = ActivityCropBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        imageUri = intent.getParcelableExtra("IMAGE_URI")
+        imageUri = IntentCompat.getParcelableExtra(intent, "IMAGE_URI", Uri::class.java)
         aspectRatioX = intent.getIntExtra("ASPECT_RATIO_X", 1)
         aspectRatioY = intent.getIntExtra("ASPECT_RATIO_Y", 1)
         isOval = intent.getBooleanExtra("IS_OVAL", false)

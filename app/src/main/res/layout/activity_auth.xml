@@ -86,7 +86,7 @@
                 android:background="@drawable/button6"
                 android:text="@string/login"
                 android:textColor="@color/white"
-                android:textSize="14dp"
+                android:textSize="14sp"
                 android:textStyle="bold"
                 app:backgroundTint="?mc_track" />
 
@@ -100,7 +100,7 @@
                 android:background="@drawable/button"
                 android:text="@string/register"
                 android:textColor="?attr/colorError"
-                android:textSize="14dp"
+                android:textSize="14sp"
                 android:textStyle="bold" />
 
         </RelativeLayout>

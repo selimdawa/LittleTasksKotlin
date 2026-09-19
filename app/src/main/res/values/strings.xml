@@ -61,10 +61,12 @@
     <string name="please_wait">Please wait…</string>
     <string name="password_hint">********</string>
     <string name="back">Back</string>
+    <string name="close">Close</string>
     <string name="website">Website</string>
     <string name="facebook">Facebook</string>
     <string name="all_tasks">All tasks</string>
     <string name="tasks_not_started">Didn\'t start with it</string>
     <string name="tasks_started">I started with it</string>
     <string name="tasks_done">I\'m done with it</string>
+    <string name="crop_image">Crop Image</string>
 </resources>

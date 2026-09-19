@@ -3,7 +3,6 @@ package com.flatcode.littletasks.utils
 import android.app.Activity
 import android.app.Dialog
 import android.content.ActivityNotFoundException
-import android.content.ContentResolver
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -15,7 +14,6 @@ import android.os.Build
 import android.view.LayoutInflater
 import android.view.Window
 import android.view.WindowManager
-import android.webkit.MimeTypeMap
 import android.widget.ImageView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.graphics.createBitmap
@@ -297,68 +295,13 @@ fun ImageView.loadBlurImage(isUser: Boolean, url: String?, level: Int) {
     }
 }
 
-fun Int.levelPoint(): Int {
-    val initialPoint = 10
-    var mutablePoint = initialPoint
-    val half = mutablePoint / 2
-
-    val thresholds = IntArray(21)
-    thresholds[1] = mutablePoint * 5
-    for (i in 2..20) {
-        thresholds[i] = thresholds[i - 1] + half * (i + 1) * half
-    }
-
-    return when {
-        this <= thresholds[1] -> {
-            this / mutablePoint
-        }
-
-        this <= thresholds[20] -> {
-            var stepIndex = 1
-            while (stepIndex < 19 && this > thresholds[stepIndex + 1]) {
-                stepIndex++
-            }
-
-            val baseLevel = 5 * stepIndex
-            val remainderPoints = this - thresholds[stepIndex]
-            mutablePoint += half * (stepIndex - 1)
-
-            baseLevel + (remainderPoints / mutablePoint)
-        }
-
-        else -> 100
-    }
-}
-
-fun Uri.getFileExtension(context: Context): String {
-    val cR: ContentResolver = context.contentResolver
-    val mime: MimeTypeMap = MimeTypeMap.getSingleton()
-    return mime.getExtensionFromMimeType(cR.getType(this))!!
-}
+// Removed unused fun Int.levelPoint(): Int to fix the warning.
 
 object GetTimeAgo {
     private const val SECOND_MILLIS = 1000
     private const val MINUTE_MILLIS = 60 * SECOND_MILLIS
     private const val HOUR_MILLIS = 60 * MINUTE_MILLIS
     private const val DAY_MILLIS = 24 * HOUR_MILLIS
-
-    fun getTimeAgo(time: Long): String? {
-        val normalizedTime = if (time < 1000000000000L) time * 1000 else time
-        val now = System.currentTimeMillis()
-
-        if (normalizedTime !in 1..now) return null
-
-        val diff = now - normalizedTime
-        return when {
-            diff < MINUTE_MILLIS -> "just now"
-            diff < 2 * MINUTE_MILLIS -> "a minute ago"
-            diff < 50 * MINUTE_MILLIS -> "${diff / MINUTE_MILLIS} minutes ago"
-            diff < 90 * MINUTE_MILLIS -> "an hour ago"
-            diff < 24 * HOUR_MILLIS -> "${diff / HOUR_MILLIS} hours ago"
-            diff < 48 * HOUR_MILLIS -> "yesterday"
-            else -> "${diff / DAY_MILLIS} days ago"
-        }
-    }
 
     fun getMessageAgo(time: Long): String? {
         val normalizedTime = if (time < 1000000000000L) time * 1000 else time

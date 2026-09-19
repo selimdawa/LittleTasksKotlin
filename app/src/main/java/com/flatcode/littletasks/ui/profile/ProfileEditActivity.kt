@@ -10,6 +10,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.IntentCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -38,7 +39,9 @@ class ProfileEditActivity : AppCompatActivity() {
     private val cropImageLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
-                imageUri = result.data?.getParcelableExtra("CROP_RESULT_URI")
+                imageUri = result.data?.let { intent ->
+                    IntentCompat.getParcelableExtra(intent, "CROP_RESULT_URI", Uri::class.java)
+                }
                 binding.profileImage.setImageURI(null)
                 binding.profileImage.setImageURI(imageUri)
             }
