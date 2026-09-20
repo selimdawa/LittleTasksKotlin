@@ -59,13 +59,14 @@ dependencies {
     implementation(platform(libs.firebase.bom)) //Firebase BOM
     implementation(libs.firebase.auth)
     implementation(libs.firebase.database)
+    //Cloudinary
     implementation(libs.cloudinary.android)
     //MVVM
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     //Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
-    // Navigation
+    //Navigation
     implementation(libs.navigation.fragment.ktx)
     implementation(libs.navigation.ui.ktx)
     //Room
@@ -77,10 +78,6 @@ dependencies {
     implementation(libs.bubblebottom)                   //Bottom Navigation
     implementation(libs.material.ripple)                //Ripple Effect
     implementation(libs.timber)
-    //Test
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
 }
 
 ksp {

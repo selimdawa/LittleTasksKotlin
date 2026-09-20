@@ -295,8 +295,6 @@ fun ImageView.loadBlurImage(isUser: Boolean, url: String?, level: Int) {
     }
 }
 
-// Removed unused fun Int.levelPoint(): Int to fix the warning.
-
 object GetTimeAgo {
     private const val SECOND_MILLIS = 1000
     private const val MINUTE_MILLIS = 60 * SECOND_MILLIS
