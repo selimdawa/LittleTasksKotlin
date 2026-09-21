@@ -88,7 +88,7 @@ class SettingsFragment : Fragment() {
         list.clear()
         list.add(
             Setting(
-                "1",
+                DATA.EDIT_PROFILE,
                 "Edit Profile",
                 null,
                 R.drawable.ic_edit_white,
@@ -98,18 +98,18 @@ class SettingsFragment : Fragment() {
         )
         list.add(
             Setting(
-                "2", "Categories", null, R.drawable.ic_category, 0, CategoriesActivity::class.java
+                DATA.CATEGORIES_ID, "Categories", null, R.drawable.ic_category, 0, CategoriesActivity::class.java
             )
         )
-        list.add(Setting("4", "Plans", DATA.PLANS, R.drawable.ic_list, 0))
+        list.add(Setting(DATA.PLANS_ID, "Plans", DATA.PLANS, R.drawable.ic_list, 0))
         list.add(
             Setting(
-                "7", "Objects", null, R.drawable.ic_object, 0, ObjectsActivity::class.java
+                DATA.OBJECTS_ID, "Objects", null, R.drawable.ic_object, 0, ObjectsActivity::class.java
             )
         )
         list.add(
             Setting(
-                "9",
+                DATA.FAVORITES_ID,
                 "Favorites",
                 null,
                 R.drawable.ic_star_selected,
@@ -117,13 +117,13 @@ class SettingsFragment : Fragment() {
                 FavoritesActivity::class.java
             )
         )
-        list.add(Setting("10", "About App", null, R.drawable.ic_info, 0))
-        list.add(Setting("11", "Logout", null, R.drawable.ic_logout_white, 0))
-        list.add(Setting("12", "Share App", null, R.drawable.ic_share, 0))
-        list.add(Setting("13", "Rate APP", null, R.drawable.ic_heart_selected, 0))
+        list.add(Setting(DATA.ABOUT_APP, "About App", null, R.drawable.ic_info, 0))
+        list.add(Setting(DATA.LOGOUT, "Logout", null, R.drawable.ic_logout_white, 0))
+        list.add(Setting(DATA.SHARE_APP, "Share App", null, R.drawable.ic_share, 0))
+        list.add(Setting(DATA.RATE_APP, "Rate APP", null, R.drawable.ic_heart_selected, 0))
         list.add(
             Setting(
-                "14",
+                DATA.PRIVACY_POLICY_ID,
                 "Privacy Policy",
                 null,
                 R.drawable.ic_privacy_policy,

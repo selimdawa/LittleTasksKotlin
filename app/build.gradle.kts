@@ -75,8 +75,8 @@ dependencies {
     //Coroutines
     implementation(libs.kotlinx.coroutines.android)
     //Other
-    implementation(libs.bubblebottom)                   //Bottom Navigation
     implementation(libs.material.ripple)                //Ripple Effect
+    implementation(libs.bubblebottom)                   //Bottom Navigation
     implementation(libs.timber)
 }
 

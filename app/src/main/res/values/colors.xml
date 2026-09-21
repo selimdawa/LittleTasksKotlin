@@ -1,10 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#fff</color>
-    <color name="colorPrimaryDark">#000</color>
-    <color name="colorAccent">#000</color>
-
-    <!-- Needed -->
     <color name="image_profile">#e0e0e0</color>
     <color name="basic_night">#434343</color>
     <color name="dark">#000000</color>
@@ -12,7 +7,6 @@
     <color name="white">#ffffff</color>
     <color name="red">#FF5252</color>
     <color name="blue">#448AFF</color>
-    <color name="night_corner">#00B8D4</color>
-    <color name="night_corner_2">#221517</color>
     <color name="overlay_dark_20">#33000000</color>
+    <color name="shadow">#1f212121</color>
 </resources>

@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/homeFragment"
         android:name="com.flatcode.littletasks.ui.main.HomeFragment"
-        android:label="Home"
+        android:label="@string/home"
         tools:layout="@layout/fragment_home">
         <action
             android:id="@+id/action_homeFragment_to_categoriesFragment"
@@ -21,13 +21,13 @@
     <fragment
         android:id="@+id/categoriesFragment"
         android:name="com.flatcode.littletasks.ui.category.CategoriesFragment"
-        android:label="Categories"
+        android:label="@string/categories"
         tools:layout="@layout/fragment_categories" />
 
     <fragment
         android:id="@+id/settingsFragment"
         android:name="com.flatcode.littletasks.ui.settings.SettingsFragment"
-        android:label="Settings"
+        android:label="@string/settings"
         tools:layout="@layout/fragment_settings" />
 
 </navigation>

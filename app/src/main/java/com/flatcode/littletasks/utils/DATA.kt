@@ -33,6 +33,18 @@ object DATA {
     const val NAME = "name"
     const val PLAN = "plan"
 
+    //Setting IDs
+    const val EDIT_PROFILE = "editProfile"
+    const val CATEGORIES_ID = "categories"
+    const val PLANS_ID = "plans"
+    const val OBJECTS_ID = "objects"
+    const val FAVORITES_ID = "favorites"
+    const val ABOUT_APP = "aboutApp"
+    const val LOGOUT = "logout"
+    const val SHARE_APP = "shareApp"
+    const val RATE_APP = "rateApp"
+    const val PRIVACY_POLICY_ID = "privacyPolicy"
+
     //Cloudinary
     const val CLOUDINARY_CLOUD_NAME = "j8jsphcf"
     const val CLOUDINARY_UPLOAD_PRESET = "flat_code"

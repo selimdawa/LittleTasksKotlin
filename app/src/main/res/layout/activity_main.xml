@@ -33,6 +33,6 @@
         app:mbn_defaultIconColor="?colorOnBackground"
         app:mbn_rippleColor="?colorOnBackground"
         app:mbn_selectedIconColor="@color/white"
-        app:mbn_shadowColor="#1f212121" />
+        app:mbn_shadowColor="@color/shadow" />
 
 </LinearLayout>

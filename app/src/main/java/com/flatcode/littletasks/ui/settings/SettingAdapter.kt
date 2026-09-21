@@ -12,6 +12,7 @@ import com.flatcode.littletasks.ui.plan.PlansActivity
 import com.flatcode.littletasks.utils.DATA
 import com.flatcode.littletasks.utils.dialogAboutApp
 import com.flatcode.littletasks.utils.dialogLogout
+import com.flatcode.littletasks.utils.findActivity
 import com.flatcode.littletasks.utils.openActivity
 import com.flatcode.littletasks.utils.rateApp
 import com.flatcode.littletasks.utils.shareApp
@@ -52,6 +53,8 @@ class SettingAdapter(private val list: ArrayList<Setting>) :
 
             binding.item.setOnClickListener {
                 val context = itemView.context
+                val activity = context.findActivity()
+
                 if (type != null) {
                     if (type == DATA.PLANS) {
                         context.openActivity<PlansActivity>(false, DATA.NEW_PLAN to "false")
@@ -60,10 +63,10 @@ class SettingAdapter(private val list: ArrayList<Setting>) :
                     }
                 } else {
                     when (id) {
-                        "10" -> (context as? Activity)?.dialogAboutApp()
-                        "11" -> (context as? Activity)?.dialogLogout()
-                        "12" -> context.shareApp()
-                        "13" -> context.rateApp()
+                        DATA.ABOUT_APP -> activity?.dialogAboutApp()
+                        DATA.LOGOUT -> activity?.dialogLogout()
+                        DATA.SHARE_APP -> context.shareApp()
+                        DATA.RATE_APP -> context.rateApp()
                         else -> if (to != null) context.startActivity(Intent(context, to))
                     }
                 }

@@ -9,7 +9,7 @@ appcompat = "1.8.0"
 material = "1.14.0"
 activityKtx = "1.13.0"
 fragmentKtx = "1.9.0"
-materialRipple = "1.0.2"
+materialRipple = "1.0.1"
 googleServices = "4.5.0"
 navigation = "2.10.1"
 multicolors = "1.0.10"
@@ -54,7 +54,7 @@ kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
 #Other
 bubblebottom = { module = "com.github.selimdawa:BubbleBottom", version.ref = "bubblebottom" }
-material-ripple = { module = "com.balysv:material-ripple", version.ref = "materialRipple" }
+material-ripple = { module = "io.github.selimdawa:material-ripple-effect", version.ref = "materialRipple" }
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
 
 [plugins]

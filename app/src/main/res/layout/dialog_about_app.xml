@@ -28,7 +28,7 @@
             android:src="@drawable/logo"
             app:shapeAppearanceOverlay="@style/ShapeAppearance.App.Circle" />
 
-        <com.balysv.materialripple.MaterialRippleLayout
+        <io.selimdawa.rippleeffect.MaterialRippleEffect
             style="@style/RippleStyleWhite"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -45,13 +45,13 @@
                 android:textSize="24sp"
                 android:textStyle="bold" />
 
-        </com.balysv.materialripple.MaterialRippleLayout>
+        </io.selimdawa.rippleeffect.MaterialRippleEffect>
 
         <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <com.balysv.materialripple.MaterialRippleLayout
+            <io.selimdawa.rippleeffect.MaterialRippleEffect
                 style="@style/RippleStyleWhite"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -69,11 +69,11 @@
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
-            </com.balysv.materialripple.MaterialRippleLayout>
+            </io.selimdawa.rippleeffect.MaterialRippleEffect>
 
         </androidx.core.widget.NestedScrollView>
 
-        <com.balysv.materialripple.MaterialRippleLayout
+        <io.selimdawa.rippleeffect.MaterialRippleEffect
             android:id="@+id/website"
             style="@style/RippleStyleWhite"
             android:layout_width="match_parent"
@@ -105,9 +105,9 @@
                     android:textStyle="bold" />
             </LinearLayout>
 
-        </com.balysv.materialripple.MaterialRippleLayout>
+        </io.selimdawa.rippleeffect.MaterialRippleEffect>
 
-        <com.balysv.materialripple.MaterialRippleLayout
+        <io.selimdawa.rippleeffect.MaterialRippleEffect
             android:id="@+id/facebook"
             style="@style/RippleStyleWhite"
             android:layout_width="match_parent"
@@ -139,7 +139,7 @@
                     android:textStyle="bold" />
             </LinearLayout>
 
-        </com.balysv.materialripple.MaterialRippleLayout>
+        </io.selimdawa.rippleeffect.MaterialRippleEffect>
 
     </LinearLayout>
 
