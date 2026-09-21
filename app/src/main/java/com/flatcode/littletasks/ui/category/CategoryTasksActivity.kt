@@ -5,7 +5,9 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -51,14 +53,15 @@ class CategoryTasksActivity : AppCompatActivity(), TaskAdapter.TaskListener {
         binding.toolbar.nameSpace.text = name
         binding.toolbar.back.setOnClickListener { handleBackPressed() }
         binding.toolbar.close.setOnClickListener { handleBackPressed() }
-        binding.add.add.setText(R.string.add_task)
-        binding.add.add.setOnClickListener {
+        val addTask = (binding.filter.root.parent as ViewGroup).getChildAt(1) as TextView
+        addTask.setText(R.string.add_task)
+        addTask.setOnClickListener {
             context.openActivity<TaskAddActivity>(false, DATA.CATEGORY_ID to id)
         }
 
         binding.toolbar.search.setOnClickListener {
             binding.toolbar.root.getChildAt(0).visibility = View.GONE
-            binding.toolbar.toolbarSearch.visibility = View.VISIBLE
+            binding.toolbar.root.getChildAt(1).visibility = View.VISIBLE
             searchStatus = true
         }
 
@@ -91,7 +94,7 @@ class CategoryTasksActivity : AppCompatActivity(), TaskAdapter.TaskListener {
                 binding.filter.a2, DATA.AVAILABLE_POINTS
             )
         }
-        binding.filter.add.setOnClickListener {
+        binding.filter.root.findViewById<View>(R.id.add).setOnClickListener {
             toggleSortDirection(
                 binding.filter.a3, DATA.TIMESTAMP
             )
@@ -208,7 +211,7 @@ class CategoryTasksActivity : AppCompatActivity(), TaskAdapter.TaskListener {
     private fun handleBackPressed() {
         if (searchStatus) {
             binding.toolbar.root.getChildAt(0).visibility = View.VISIBLE
-            binding.toolbar.toolbarSearch.visibility = View.GONE
+            binding.toolbar.root.getChildAt(1).visibility = View.GONE
             searchStatus = false
             binding.toolbar.textSearch.setText(DATA.EMPTY)
         } else {

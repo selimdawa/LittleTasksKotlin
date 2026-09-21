@@ -67,7 +67,6 @@
     </com.google.android.material.appbar.MaterialToolbar>
 
     <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbarSearch"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="?mc_bg"
@@ -92,8 +91,8 @@
             android:gravity="center"
             android:hint="@string/search"
             android:inputType="text"
-            android:singleLine="true"
             android:maxLines="1"
+            android:singleLine="true"
             android:textColor="@color/white"
             android:textColorHint="@color/white"
             android:textSize="18sp" />

@@ -39,8 +39,9 @@ class TaskAdapter(
         } else {
             val constraint = query.toString().uppercase(Locale.getDefault())
             fullList.filter {
-                it.name?.uppercase(Locale.getDefault())?.contains(constraint) == true ||
-                        it.categoryName?.uppercase(Locale.getDefault())?.contains(constraint) == true
+                it.name?.uppercase(Locale.getDefault())
+                    ?.contains(constraint) == true || it.categoryName?.uppercase(Locale.getDefault())
+                    ?.contains(constraint) == true
             }
         }
         submitList(list)

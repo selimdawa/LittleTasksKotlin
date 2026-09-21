@@ -28,7 +28,6 @@
                 layout="@layout/item_switch_filter" />
 
             <include
-                android:id="@+id/add"
                 layout="@layout/item_add"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -72,7 +71,8 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_above="@+id/linearPoints"
-        android:background="@color/white" />
+        android:background="?attr/colorError"
+        android:visibility="gone" />
 
     <LinearLayout
         android:id="@+id/linearPoints"
