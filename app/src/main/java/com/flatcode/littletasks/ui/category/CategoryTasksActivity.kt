@@ -21,13 +21,12 @@ import com.flatcode.littletasks.ui.task.TaskEditActivity
 import com.flatcode.littletasks.utils.DATA
 import com.flatcode.littletasks.utils.dialogOptionDelete
 import com.flatcode.littletasks.utils.openActivity
+import com.flatcode.littletasks.utils.viewBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.text.MessageFormat
-
-import com.flatcode.littletasks.utils.viewBinding
 
 @AndroidEntryPoint
 class CategoryTasksActivity : AppCompatActivity(), TaskAdapter.TaskListener {
@@ -58,7 +57,7 @@ class CategoryTasksActivity : AppCompatActivity(), TaskAdapter.TaskListener {
         }
 
         binding.toolbar.search.setOnClickListener {
-            binding.toolbar.toolbar.visibility = View.GONE
+            binding.toolbar.root.getChildAt(0).visibility = View.GONE
             binding.toolbar.toolbarSearch.visibility = View.VISIBLE
             searchStatus = true
         }
@@ -66,7 +65,7 @@ class CategoryTasksActivity : AppCompatActivity(), TaskAdapter.TaskListener {
         binding.toolbar.textSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                adapter?.filter?.filter(s)
+                adapter?.filter(s)
             }
 
             override fun afterTextChanged(s: Editable?) {}
@@ -147,9 +146,7 @@ class CategoryTasksActivity : AppCompatActivity(), TaskAdapter.TaskListener {
             .setItems(options) { _, which ->
                 when (which) {
                     0 -> context.openActivity<TaskEditActivity>(
-                        false,
-                        DATA.TASK_ID to item.id,
-                        DATA.CATEGORY_ID to item.category
+                        false, DATA.TASK_ID to item.id, DATA.CATEGORY_ID to item.category
                     )
 
                     1 -> context.dialogOptionDelete(DATA.TASKS) {
@@ -176,9 +173,11 @@ class CategoryTasksActivity : AppCompatActivity(), TaskAdapter.TaskListener {
     }
 
     override fun isFavorite(taskId: String, userId: String, imageView: ImageView) {
+        val currentUid = DATA.firebaseUserUid
+        if (currentUid.isEmpty() || taskId.isEmpty()) return
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.observeFavoriteStatus(taskId, userId).collectLatest { isFav ->
+                viewModel.observeFavoriteStatus(taskId, currentUid).collectLatest { isFav ->
                     if (isFav) {
                         imageView.setImageResource(R.drawable.ic_remove)
                     } else {
@@ -208,7 +207,7 @@ class CategoryTasksActivity : AppCompatActivity(), TaskAdapter.TaskListener {
 
     private fun handleBackPressed() {
         if (searchStatus) {
-            binding.toolbar.toolbar.visibility = View.VISIBLE
+            binding.toolbar.root.getChildAt(0).visibility = View.VISIBLE
             binding.toolbar.toolbarSearch.visibility = View.GONE
             searchStatus = false
             binding.toolbar.textSearch.setText(DATA.EMPTY)

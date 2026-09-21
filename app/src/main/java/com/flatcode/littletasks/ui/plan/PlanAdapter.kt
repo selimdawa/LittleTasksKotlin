@@ -3,34 +3,41 @@ package com.flatcode.littletasks.ui.plan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Filter
-import android.widget.Filterable
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.flatcode.littletasks.databinding.ItemPlanBinding
-import com.flatcode.littletasks.filter.PlansFilter
 import com.flatcode.littletasks.model.Plan
 import com.flatcode.littletasks.ui.category.CategoryAddActivity
 import com.flatcode.littletasks.ui.objects.ObjectsPlanActivity
 import com.flatcode.littletasks.utils.DATA
 import com.flatcode.littletasks.utils.loadImage
 import com.flatcode.littletasks.utils.openActivity
+import java.util.Locale
 
 class PlanAdapter(
     var isNew: Boolean, private val listener: PlanListener
-) : ListAdapter<Plan, PlanAdapter.ViewHolder>(PlanDiffCallback()), Filterable {
+) : ListAdapter<Plan, PlanAdapter.ViewHolder>(PlanDiffCallback()) {
 
     interface PlanListener {
         fun onMoreClick(item: Plan)
     }
 
-    var fullList = ArrayList<Plan?>()
-    private var filter: PlansFilter? = null
+    private var fullList = listOf<Plan>()
 
     fun setFullList(newList: List<Plan?>) {
-        fullList = ArrayList(newList)
-        submitList(newList.filterNotNull())
+        fullList = newList.filterNotNull()
+        submitList(fullList)
+    }
+
+    fun filter(query: CharSequence?) {
+        val list = if (query.isNullOrEmpty()) {
+            fullList
+        } else {
+            val constraint = query.toString().uppercase(Locale.getDefault())
+            fullList.filter { it.name?.uppercase(Locale.getDefault())?.contains(constraint) == true }
+        }
+        submitList(list)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -65,13 +72,6 @@ class PlanAdapter(
                 )
             }
         }
-    }
-
-    override fun getFilter(): Filter {
-        if (filter == null) {
-            filter = PlansFilter(fullList, this)
-        }
-        return filter!!
     }
 
     class ViewHolder(val binding: ItemPlanBinding) : RecyclerView.ViewHolder(binding.root)

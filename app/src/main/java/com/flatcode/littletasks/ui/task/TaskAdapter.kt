@@ -3,23 +3,21 @@ package com.flatcode.littletasks.ui.task
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Filter
-import android.widget.Filterable
 import android.widget.ImageView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.flatcode.littletasks.R
 import com.flatcode.littletasks.databinding.ItemTaskBinding
-import com.flatcode.littletasks.filter.TaskCategoryFilter
 import com.flatcode.littletasks.model.Task
 import com.flatcode.littletasks.utils.DATA
 import com.flatcode.littletasks.utils.GetTimeAgo
 import com.flatcode.littletasks.utils.loadImage
+import java.util.Locale
 
 class TaskAdapter(
     private val listener: TaskListener
-) : ListAdapter<Task, TaskAdapter.ViewHolder>(TaskDiffCallback()), Filterable {
+) : ListAdapter<Task, TaskAdapter.ViewHolder>(TaskDiffCallback()) {
 
     interface TaskListener {
         fun onMoreClick(item: Task)
@@ -28,12 +26,24 @@ class TaskAdapter(
         fun isFavorite(taskId: String, userId: String, imageView: ImageView)
     }
 
-    var fullList = ArrayList<Task?>()
-    private var filter: TaskCategoryFilter? = null
+    private var fullList = listOf<Task>()
 
     fun setFullList(newList: List<Task?>) {
-        fullList = ArrayList(newList)
-        submitList(newList.filterNotNull())
+        fullList = newList.filterNotNull()
+        submitList(fullList)
+    }
+
+    fun filter(query: CharSequence?) {
+        val list = if (query.isNullOrEmpty()) {
+            fullList
+        } else {
+            val constraint = query.toString().uppercase(Locale.getDefault())
+            fullList.filter {
+                it.name?.uppercase(Locale.getDefault())?.contains(constraint) == true ||
+                        it.categoryName?.uppercase(Locale.getDefault())?.contains(constraint) == true
+            }
+        }
+        submitList(list)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -44,13 +54,6 @@ class TaskAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = getItem(position) ?: return
         holder.bind(item, listener)
-    }
-
-    override fun getFilter(): Filter {
-        if (filter == null) {
-            filter = TaskCategoryFilter(fullList, this)
-        }
-        return filter!!
     }
 
     class ViewHolder(val binding: ItemTaskBinding) : RecyclerView.ViewHolder(binding.root) {

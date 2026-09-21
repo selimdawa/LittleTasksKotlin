@@ -59,15 +59,11 @@ class CategoriesFragment : Fragment(R.layout.fragment_categories),
         context?.showMoreOptions(options) { which ->
             when (which) {
                 0 -> context?.openActivity<TaskAddActivity>(
-                    false,
-                    DATA.CATEGORY_ID to item.id,
-                    DATA.PLAN_ID to item.plan
+                    false, DATA.CATEGORY_ID to item.id, DATA.PLAN_ID to item.plan
                 )
 
                 1 -> context?.openActivity<CategoryEditActivity>(
-                    false,
-                    DATA.CATEGORY_ID to item.id,
-                    DATA.PLAN_ID to item.plan
+                    false, DATA.CATEGORY_ID to item.id, DATA.PLAN_ID to item.plan
                 )
 
                 2 -> context?.dialogOptionDelete(DATA.CATEGORIES) {

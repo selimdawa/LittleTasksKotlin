@@ -37,10 +37,8 @@ class LoginActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val loadingBinding = LayoutLoadingDialogBinding.inflate(layoutInflater)
-        dialog = AlertDialog.Builder(this)
-            .setView(loadingBinding.root)
-            .setCancelable(false)
-            .create()
+        dialog =
+            AlertDialog.Builder(this).setView(loadingBinding.root).setCancelable(false).create()
 
         binding.forget.setOnClickListener { context.openActivity<ForgetPasswordActivity>() }
         binding.noAccount.setOnClickListener { context.openActivity<RegisterActivity>() }

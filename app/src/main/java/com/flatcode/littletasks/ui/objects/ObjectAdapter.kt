@@ -3,30 +3,37 @@ package com.flatcode.littletasks.ui.objects
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Filter
-import android.widget.Filterable
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.flatcode.littletasks.databinding.ItemObjectBinding
-import com.flatcode.littletasks.filter.ObjectsFilter
 import com.flatcode.littletasks.model.TaskItem
 import com.flatcode.littletasks.utils.DATA
+import java.util.Locale
 
 class ObjectAdapter(
     private val listener: ObjectListener
-) : ListAdapter<TaskItem, ObjectAdapter.ViewHolder>(ObjectDiffCallback()), Filterable {
+) : ListAdapter<TaskItem, ObjectAdapter.ViewHolder>(ObjectDiffCallback()) {
 
     interface ObjectListener {
         fun onMoreClick(item: TaskItem)
     }
 
-    var fullList = ArrayList<TaskItem?>()
-    private var filter: ObjectsFilter? = null
+    private var fullList = listOf<TaskItem>()
 
     fun setFullList(newList: List<TaskItem?>) {
-        fullList = ArrayList(newList)
-        submitList(newList.filterNotNull())
+        fullList = newList.filterNotNull()
+        submitList(fullList)
+    }
+
+    fun filter(query: CharSequence?) {
+        val list = if (query.isNullOrEmpty()) {
+            fullList
+        } else {
+            val constraint = query.toString().uppercase(Locale.getDefault())
+            fullList.filter { it.name?.uppercase(Locale.getDefault())?.contains(constraint) == true }
+        }
+        submitList(list)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -37,13 +44,6 @@ class ObjectAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = getItem(position) ?: return
         holder.bind(item, listener)
-    }
-
-    override fun getFilter(): Filter {
-        if (filter == null) {
-            filter = ObjectsFilter(fullList, this)
-        }
-        return filter!!
     }
 
     class ViewHolder(val binding: ItemObjectBinding) : RecyclerView.ViewHolder(binding.root) {

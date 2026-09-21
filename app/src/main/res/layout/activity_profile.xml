@@ -5,8 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?mc_bg"
-    tools:context=".ui.profile.ProfileActivity"
-    android:fitsSystemWindows="true">
+    android:fitsSystemWindows="true"
+    tools:context=".ui.profile.ProfileActivity">
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scroll_progress"
@@ -22,14 +22,15 @@
 
             <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/profile"
-                android:layout_width="240dp"
-                android:layout_height="240dp"
+                android:layout_width="250dp"
+                android:layout_height="250dp"
+                android:background="@color/white"
+                android:padding="5dp"
                 android:scaleType="centerCrop"
                 android:src="@color/image_profile"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.App.Circle"
                 app:strokeColor="@color/white"
-                app:strokeWidth="5sp"
-                android:background="@color/white"
-                app:shapeAppearanceOverlay="@style/ShapeAppearance.App.Circle" />
+                app:strokeWidth="5sp" />
 
             <TextView
                 android:id="@+id/username"
@@ -52,9 +53,9 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_marginVertical="20sp"
+        android:baselineAligned="false"
         android:gravity="center"
         android:orientation="horizontal"
-        android:baselineAligned="false"
         tools:ignore="UseCompoundDrawables">
 
         <LinearLayout
@@ -175,8 +176,8 @@
         android:id="@+id/edit"
         android:layout_width="40sp"
         android:layout_height="40sp"
-        android:layout_alignParentTop="true"
         android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
         android:layout_margin="20sp"
         android:background="@drawable/round"
         android:backgroundTint="@color/white"
@@ -189,9 +190,9 @@
         android:id="@+id/back"
         android:layout_width="35sp"
         android:layout_height="35sp"
-        android:layout_alignParentEnd="true"
         android:layout_alignTop="@id/edit"
         android:layout_alignBottom="@id/edit"
+        android:layout_alignParentEnd="true"
         android:layout_marginEnd="20sp"
         android:background="@drawable/ic_back_white"
         android:gravity="center"

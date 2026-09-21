@@ -3,33 +3,40 @@ package com.flatcode.littletasks.ui.category
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Filter
-import android.widget.Filterable
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.flatcode.littletasks.databinding.ItemCategoriesBinding
-import com.flatcode.littletasks.filter.CategoriesFilter
 import com.flatcode.littletasks.model.Category
 import com.flatcode.littletasks.utils.DATA
 import com.flatcode.littletasks.utils.loadImage
 import com.flatcode.littletasks.utils.openActivity
 import java.text.MessageFormat
+import java.util.Locale
 
 class CategoriesAdapter(
     private val listener: CategoryListener
-) : ListAdapter<Category, CategoriesAdapter.ViewHolder>(CategoryDiffCallback()), Filterable {
+) : ListAdapter<Category, CategoriesAdapter.ViewHolder>(CategoryDiffCallback()) {
 
     interface CategoryListener {
         fun onMoreClick(item: Category)
     }
 
-    var fullList = ArrayList<Category?>()
-    private var filter: CategoriesFilter? = null
+    private var fullList = listOf<Category>()
 
     fun setFullList(newList: List<Category?>) {
-        fullList = ArrayList(newList)
-        submitList(newList.filterNotNull())
+        fullList = newList.filterNotNull()
+        submitList(fullList)
+    }
+
+    fun filter(query: CharSequence?) {
+        val list = if (query.isNullOrEmpty()) {
+            fullList
+        } else {
+            val constraint = query.toString().uppercase(Locale.getDefault())
+            fullList.filter { it.name?.uppercase(Locale.getDefault())?.contains(constraint) == true }
+        }
+        submitList(list)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -41,13 +48,6 @@ class CategoriesAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = getItem(position) ?: return
         holder.bind(item, listener)
-    }
-
-    override fun getFilter(): Filter {
-        if (filter == null) {
-            filter = CategoriesFilter(fullList, this)
-        }
-        return filter!!
     }
 
     class ViewHolder(private val binding: ItemCategoriesBinding) :

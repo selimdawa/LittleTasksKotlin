@@ -21,22 +21,22 @@ class AuthViewModel @Inject constructor(
 
     fun login(email: String, password: String) {
         auth.signInWithEmailAndPassword(email, password).addOnSuccessListener {
-                Timber.d("Login success for email: $email")
-                _authResult.value = Result.success(Unit)
-            }.addOnFailureListener {
-                Timber.e(it, "Login failed for email: $email")
-                _authResult.value = Result.failure(it)
-            }
+            Timber.d("Login success for email: $email")
+            _authResult.value = Result.success(Unit)
+        }.addOnFailureListener {
+            Timber.e(it, "Login failed for email: $email")
+            _authResult.value = Result.failure(it)
+        }
     }
 
     fun register(name: String, email: String, password: String) {
         auth.createUserWithEmailAndPassword(email, password).addOnSuccessListener {
-                Timber.d("Registration success for email: $email")
-                updateUserInfo(name, email)
-            }.addOnFailureListener {
-                Timber.e(it, "Registration failed for email: $email")
-                _authResult.value = Result.failure(it)
-            }
+            Timber.d("Registration success for email: $email")
+            updateUserInfo(name, email)
+        }.addOnFailureListener {
+            Timber.e(it, "Registration failed for email: $email")
+            _authResult.value = Result.failure(it)
+        }
     }
 
     private fun updateUserInfo(name: String, email: String) {
@@ -50,21 +50,21 @@ class AuthViewModel @Inject constructor(
         hashMap[DATA.VERSION] = DATA.CURRENT_VERSION
 
         database.getReference(DATA.USERS).child(id).setValue(hashMap).addOnSuccessListener {
-                Timber.d("User info update success for id: $id")
-                _authResult.value = Result.success(Unit)
-            }.addOnFailureListener {
-                Timber.e(it, "User info update failed for id: $id")
-                _authResult.value = Result.failure(it)
-            }
+            Timber.d("User info update success for id: $id")
+            _authResult.value = Result.success(Unit)
+        }.addOnFailureListener {
+            Timber.e(it, "User info update failed for id: $id")
+            _authResult.value = Result.failure(it)
+        }
     }
 
     fun recoverPassword(email: String) {
         auth.sendPasswordResetEmail(email).addOnSuccessListener {
-                Timber.d("Password reset email sent to: $email")
-                _authResult.value = Result.success(Unit)
-            }.addOnFailureListener {
-                Timber.e(it, "Password reset email failed for: $email")
-                _authResult.value = Result.failure(it)
-            }
+            Timber.d("Password reset email sent to: $email")
+            _authResult.value = Result.success(Unit)
+        }.addOnFailureListener {
+            Timber.e(it, "Password reset email failed for: $email")
+            _authResult.value = Result.failure(it)
+        }
     }
 }

@@ -3,6 +3,9 @@ package com.flatcode.littletasks.ui.category
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cloudinary.android.MediaManager
+import com.cloudinary.android.callback.ErrorInfo
+import com.cloudinary.android.callback.UploadCallback
 import com.flatcode.littletasks.model.Category
 import com.flatcode.littletasks.model.Plan
 import com.flatcode.littletasks.model.Task
@@ -14,9 +17,6 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.cloudinary.android.MediaManager
-import com.cloudinary.android.callback.ErrorInfo
-import com.cloudinary.android.callback.UploadCallback
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -71,24 +71,25 @@ class CategoryViewModel @Inject constructor(
 
     private fun fetchTaskCountsAndPost(categories: List<Category>) {
         val uid = auth.currentUser?.uid ?: return
-        database.getReference(DATA.TASKS).addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val taskMap = mutableMapOf<String, Int>()
-                for (data in snapshot.children) {
-                    val task = data.getValue(Task::class.java) ?: continue
-                    if (task.publisher == uid) {
-                        val catId = task.category ?: continue
-                        taskMap[catId] = (taskMap[catId] ?: 0) + 1
+        database.getReference(DATA.TASKS)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val taskMap = mutableMapOf<String, Int>()
+                    for (data in snapshot.children) {
+                        val task = data.getValue(Task::class.java) ?: continue
+                        if (task.publisher == uid) {
+                            val catId = task.category ?: continue
+                            taskMap[catId] = (taskMap[catId] ?: 0) + 1
+                        }
                     }
+                    categories.forEach { it.taskCount = taskMap[it.id] ?: 0 }
+                    _categories.value = categories.reversed()
                 }
-                categories.forEach { it.taskCount = taskMap[it.id] ?: 0 }
-                _categories.value = categories.reversed()
-            }
 
-            override fun onCancelled(error: DatabaseError) {
-                _categories.value = categories.reversed()
-            }
-        })
+                override fun onCancelled(error: DatabaseError) {
+                    _categories.value = categories.reversed()
+                }
+            })
     }
 
     fun loadPlanName(planId: String) {
@@ -110,10 +111,8 @@ class CategoryViewModel @Inject constructor(
         val ref = database.getReference(DATA.CATEGORIES)
         val id = ref.push().key ?: return
 
-        MediaManager.get().upload(imageUri)
-            .option("public_id", id)
-            .option("folder", "Images/Category")
-            .unsigned(DATA.CLOUDINARY_UPLOAD_PRESET)
+        MediaManager.get().upload(imageUri).option("public_id", id)
+            .option("folder", "Images/Category").unsigned(DATA.CLOUDINARY_UPLOAD_PRESET)
             .callback(object : UploadCallback {
                 override fun onStart(requestId: String?) {}
                 override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {}
@@ -205,10 +204,8 @@ class CategoryViewModel @Inject constructor(
             updateCategoryInDB(categoryId, name, null)
         } else {
             val publicId = "${categoryId}_${System.currentTimeMillis()}"
-            MediaManager.get().upload(imageUri)
-                .option("public_id", publicId)
-                .option("folder", "Images/Category")
-                .unsigned(DATA.CLOUDINARY_UPLOAD_PRESET)
+            MediaManager.get().upload(imageUri).option("public_id", publicId)
+                .option("folder", "Images/Category").unsigned(DATA.CLOUDINARY_UPLOAD_PRESET)
                 .callback(object : UploadCallback {
                     override fun onStart(requestId: String?) {}
                     override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {}
@@ -244,6 +241,7 @@ class CategoryViewModel @Inject constructor(
     }
 
     fun getCategoryTasks(categoryId: String, orderBy: String) {
+        if (categoryId.isEmpty()) return
         val uid = auth.currentUser?.uid ?: return
         database.getReference(DATA.CATEGORIES).child(categoryId)
             .addListenerForSingleValueEvent(object : ValueEventListener {

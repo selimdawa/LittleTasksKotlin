@@ -3,32 +3,39 @@ package com.flatcode.littletasks.ui.objects
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Filter
-import android.widget.Filterable
 import android.widget.ImageView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.flatcode.littletasks.databinding.ItemObjectBinding
-import com.flatcode.littletasks.filter.ObjectOptionFilter
 import com.flatcode.littletasks.model.TaskItem
 import com.flatcode.littletasks.utils.DATA
+import java.util.Locale
 
 class ObjectOptionAdapter(
     var planId: String?, private val listener: ObjectOptionListener
-) : ListAdapter<TaskItem, ObjectOptionAdapter.ViewHolder>(ObjectDiffCallback()), Filterable {
+) : ListAdapter<TaskItem, ObjectOptionAdapter.ViewHolder>(ObjectDiffCallback()) {
 
     interface ObjectOptionListener {
         fun onOptionClick(item: TaskItem)
         fun isPlan(objectId: String, planId: String, imageView: ImageView)
     }
 
-    var fullList = ArrayList<TaskItem?>()
-    private var filter: ObjectOptionFilter? = null
+    private var fullList = listOf<TaskItem>()
 
     fun setFullList(newList: List<TaskItem?>) {
-        fullList = ArrayList(newList)
-        submitList(newList.filterNotNull())
+        fullList = newList.filterNotNull()
+        submitList(fullList)
+    }
+
+    fun filter(query: CharSequence?) {
+        val list = if (query.isNullOrEmpty()) {
+            fullList
+        } else {
+            val constraint = query.toString().uppercase(Locale.getDefault())
+            fullList.filter { it.name?.uppercase(Locale.getDefault())?.contains(constraint) == true }
+        }
+        submitList(list)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -39,13 +46,6 @@ class ObjectOptionAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = getItem(position) ?: return
         holder.bind(item, planId, listener)
-    }
-
-    override fun getFilter(): Filter {
-        if (filter == null) {
-            filter = ObjectOptionFilter(fullList, this)
-        }
-        return filter!!
     }
 
     class ViewHolder(val binding: ItemObjectBinding) : RecyclerView.ViewHolder(binding.root) {

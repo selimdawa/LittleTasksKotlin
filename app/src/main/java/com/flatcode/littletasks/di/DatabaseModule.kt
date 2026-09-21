@@ -3,7 +3,12 @@ package com.flatcode.littletasks.di
 import android.content.Context
 import androidx.room.Room
 import com.flatcode.littletasks.db.AppDatabase
-import com.flatcode.littletasks.db.*
+import com.flatcode.littletasks.db.CategoryDao
+import com.flatcode.littletasks.db.PlanDao
+import com.flatcode.littletasks.db.SettingDao
+import com.flatcode.littletasks.db.TaskDao
+import com.flatcode.littletasks.db.TaskItemDao
+import com.flatcode.littletasks.db.UserDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -19,9 +24,7 @@ object DatabaseModule {
     @Singleton
     fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
         return Room.databaseBuilder(
-            context,
-            AppDatabase::class.java,
-            "little_tasks_db"
+            context, AppDatabase::class.java, "little_tasks_db"
         ).build()
     }
 

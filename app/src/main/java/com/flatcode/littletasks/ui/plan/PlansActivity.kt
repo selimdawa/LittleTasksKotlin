@@ -48,7 +48,7 @@ class PlansActivity : AppCompatActivity(), PlanAdapter.PlanListener {
         binding.add.add.setOnClickListener { context.openActivity<PlanAddActivity>() }
 
         binding.toolbar.search.setOnClickListener {
-            binding.toolbar.toolbar.visibility = View.GONE
+            binding.toolbar.root.getChildAt(0).visibility = View.GONE
             binding.toolbar.toolbarSearch.visibility = View.VISIBLE
             DATA.searchStatus = true
         }
@@ -56,7 +56,7 @@ class PlansActivity : AppCompatActivity(), PlanAdapter.PlanListener {
         binding.toolbar.textSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                adapter?.filter?.filter(s)
+                adapter?.filter(s)
             }
 
             override fun afterTextChanged(s: Editable?) {}
@@ -98,7 +98,7 @@ class PlansActivity : AppCompatActivity(), PlanAdapter.PlanListener {
 
     private fun handleBackPressed() {
         if (DATA.searchStatus) {
-            binding.toolbar.toolbar.visibility = View.VISIBLE
+            binding.toolbar.root.getChildAt(0).visibility = View.VISIBLE
             binding.toolbar.toolbarSearch.visibility = View.GONE
             DATA.searchStatus = false
             binding.toolbar.textSearch.setText(DATA.EMPTY)
