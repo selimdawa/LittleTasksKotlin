@@ -1,7 +1,10 @@
 package com.flatcode.littletasks.ui.plan
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
 import android.widget.Toast
@@ -10,6 +13,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.content.IntentCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -51,6 +55,29 @@ class PlanAddActivity : AppCompatActivity() {
             }
         }
 
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (isGranted) {
+                pickImageLauncher.launch("image/*")
+            } else {
+                Toast.makeText(context, "Permission denied...", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+    private fun checkPermissionAndPickImage() {
+        val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            Manifest.permission.READ_MEDIA_IMAGES
+        } else {
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        }
+
+        if (ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED) {
+            pickImageLauncher.launch("image/*")
+        } else {
+            requestPermissionLauncher.launch(permission)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
@@ -60,7 +87,7 @@ class PlanAddActivity : AppCompatActivity() {
         binding.toolbar.nameSpace.setText(R.string.add_new_plan)
         binding.toolbar.back.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
         binding.editImage.setOnClickListener {
-            pickImageLauncher.launch("image/*")
+            checkPermissionAndPickImage()
         }
         binding.toolbar.ok.setOnClickListener { validateData() }
 
