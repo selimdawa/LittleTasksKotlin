@@ -59,7 +59,7 @@
                     android:layout_gravity="top"
                     android:importantForAccessibility="no"
                     android:src="@drawable/ic___add"
-                    app:tint="?mc_tick" />
+                    app:tint="?mc_track" />
 
                 <ImageView
                     android:id="@+id/task"
@@ -69,7 +69,7 @@
                     android:layout_marginHorizontal="10dp"
                     android:importantForAccessibility="no"
                     android:src="@drawable/ic_star_unselected"
-                    app:tint="?mc_tick" />
+                    app:tint="?mc_track" />
 
                 <ImageView
                     android:id="@+id/more"
@@ -78,7 +78,7 @@
                     android:layout_gravity="top"
                     android:importantForAccessibility="no"
                     android:src="@drawable/ic_more"
-                    app:tint="?mc_tick" />
+                    app:tint="?mc_track" />
 
             </LinearLayout>
 
