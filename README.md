@@ -3,7 +3,7 @@
 <p align="center">
  <a><img alt="Min SDK" src="https://img.shields.io/badge/Min SDK-24-020290?logo=android&logoColor=white"/></a>
  <a><img alt="Target SDK" src="https://img.shields.io/badge/Target SDK-37-0EB265?logo=android&logoColor=0EB265"/></a>
- <a href="https://kotlinlang.org"><img alt="Kotlin" src="https://img.shields.io/badge/Kotlin-2.4.10-blue?logo=kotlin&logoColor=white"/></a>
+ <a href="https://kotlinlang.org"><img alt="Kotlin" src="https://img.shields.io/badge/Kotlin-2.4.20-blue?logo=kotlin&logoColor=white"/></a>
  <a href="https://opensource.org/licenses/MIT"><img alt="License" src="https://img.shields.io/badge/License-MIT-CC9900?logo=MIT&logoColor=white"/></a>
 </p>
 
@@ -75,15 +75,87 @@ Logout | Share App | Privacy Policy
 --- | --- | --- | 
 ![](https://blogger.googleusercontent.com/img/a/AVvXsEhmg1qeS7gLcSxNV35dm1afExd1A2uZykpEy5qdwvn5y_4WePoX9PNjXRqZhPNoFneZjs3bItZDyBw6_Z4jLBP9PLd6DEzsCvxwBffU3WCSLRXCbvS-LdQMdaPIq3ih9Suushm_Mv4mpFTQxEEqPMxje2ECAFgxFaTgXIS3HjQL_ubff3fGhF_cZs0rjg) | ![](https://blogger.googleusercontent.com/img/a/AVvXsEhjZ-aK271jnRqvO3frAp6wF6pY3pMYNvbMmCOK0IfdwuM5O_dFGLTYZ3jCb7ggcpDfFpOYgO3dDrci_vdxkvF0s9aIEc77Ace0Om-nZr0UQNwyY0e42gilQFhHNf9w90f_2TlfLmFebvKjW10NY3ImaaoIPzsyP4z4OB_IQbyGikLSo-NA0jl6hTDA-A) | ![](https://blogger.googleusercontent.com/img/a/AVvXsEh3GwAuOd5LoCCJQMB1Eb59NCrLZOS2S_0j3aE0yheinNSYZimc53RH3TmA_CaDg62-pRQck6iMkQymF27Sl4BVmDLjSfao0QtkpESkxYXeZ9HdLAOXDOQK604LUIKBT-jInuUPjCApQeiodGK3ajISGVrq46ByvBjMHKmacVipXqzjob8gOwLWSngl7w) | 
 
-<a href='https://play.google.com/store/apps/details?id=com.flatcode.littletasks'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' width="170px"/></a>
-<br />
+---
 
-- [Kotlin Old Code Version](https://github.com/selimdawa/LittleTasksKotlinOld/)
+### ✨ Core Functionalities
+*   **Robust Authentication Flow**: Secure identity management via **Firebase Authentication**.
+*   **Dynamic Task & Plan Orchestration**: Full CRUD operations for managing tasks, categories, and plans through a refined interface.
+*   **Granular Category & Object Management**: Organize tasks and plans effectively by categories and custom objects.
+*   **Context-Aware Theming**: Adaptive UI support for dark and light modes.
+*   **Resilient Offline Capabilities**: "Local-first" data strategy using **Room Database**.
+*   **Elastic Cloud Synchronization**: Distributed data persistence via **Firebase**.
 
-- [Java Old Code Version](https://github.com/selimdawa/LittleTasks/)
+---
+
+## 🛠️ Built With
+*   **Language:** [Kotlin](https://kotlinlang.org/)
+*   **UI Framework:** Material Design 3, ViewBinding
+*   **Database:** [Room](https://developer.android.com/training/data-storage/room)
+*   **Cloud Infrastructure:** [Firebase](https://firebase.google.com/) (Auth, Database)
+*   **Dependency Injection:** [Hilt](https://developer.android.com/training/dependency-injection/hilt-android)
+*   **Async Operations:** Coroutines & Flow
+
+---
+
+### 🏗️ Technical Architecture
+The application is engineered using **MVVM (Model-View-ViewModel)** architectural patterns, strictly adhering to **Clean Architecture** principles to promote modularity and ease of maintenance.
+
+```text
+app/src/main/java/com/flatcode/littletasks/
+├── db/                 # Room Database Configuration & DAOs
+├── di/                 # Dependency Injection (Hilt modules)
+├── model/              # Data Entities & Models
+├── repository/         # Repository Pattern Implementation
+├── ui/                 # Presentation Layer (Activities, Fragments & ViewModels)
+│   ├── auth/           # Authentication (Login, Register, Forget Password)
+│   ├── category/       # Category Management & Tasks
+│   ├── main/           # Main Dashboard, Home & Splash
+│   ├── objects/        # Objects Management
+│   ├── plan/           # Plan Operations
+│   ├── profile/        # Profile & Favorites
+│   ├── settings/       # Settings & Privacy Policy
+│   └── task/           # Task Operations (Add, Edit, View)
+└── utils/              # Extensions, Constants & Utility Classes
+```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+*   Android Studio Ladybug or newer.
+*   JDK 21.
+*   Android SDK Level 37 (Compile SDK).
+
+### Installation
+1.  Clone the repository:
+    ```bash
+    git clone https://github.com/selimdawa/LittleTasksKotlin.git
+    ```
+2.  Open the project in Android Studio.
+3.  Sync Project with Gradle Files.
+4.  Add your `google-services.json` file to the `app/` directory.
+5.  Run the app on your device or emulator.
+
+---
+
+### 🛠️ Technology Stack
+*   **Language**: Kotlin (Modern, expressive, and safe development).
+*   **Dependency Injection**: **Dagger Hilt** (Simplified, standard DI for Android).
+*   **Cloud Infrastructure**: **Firebase** (Scalable authentication and real-time NoSQL storage).
+*   **Local Persistence**: **Room** (SQLite abstraction layer for robust offline data).
+*   **Concurrency**: **Coroutines & Flow** (High-performance asynchronous data streams).
+*   **View Interop**: **ViewBinding** (Safe and efficient UI component interaction).
+
+---
+
+## 🔗 Links & Resources
+*   **Legacy Versions:**
+    *   [Kotlin Old Code Version](https://github.com/selimdawa/LittleTasksKotlinOld/)
+    *   [Java Old Code Version](https://github.com/selimdawa/LittleTasks/)
+*   **Author:** [Selim Dawa](https://github.com/selimdawa)
 
 ---
 
 ## 📜 License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
