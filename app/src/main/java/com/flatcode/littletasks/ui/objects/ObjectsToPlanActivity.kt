@@ -5,15 +5,14 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.ImageView
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.flatcode.littletasks.R
 import com.flatcode.littletasks.databinding.ActivityObjectsBinding
 import com.flatcode.littletasks.model.TaskItem
+import com.flatcode.littletasks.utils.BaseActivity
 import com.flatcode.littletasks.utils.DATA
 import com.flatcode.littletasks.utils.viewBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -22,7 +21,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class ObjectsToPlanActivity : AppCompatActivity(), ObjectOptionAdapter.ObjectOptionListener {
+class ObjectsToPlanActivity : BaseActivity(), ObjectOptionAdapter.ObjectOptionListener {
 
     private val binding by viewBinding(ActivityObjectsBinding::inflate)
 
@@ -31,7 +30,6 @@ class ObjectsToPlanActivity : AppCompatActivity(), ObjectOptionAdapter.ObjectOpt
     private val viewModel: ObjectsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         id = intent.getStringExtra(DATA.ID)

@@ -35,7 +35,6 @@
                 android:id="@+id/more"
                 android:layout_width="30sp"
                 android:layout_height="30sp"
-                android:layout_margin="5sp"
                 android:background="@drawable/button_more"
                 android:importantForAccessibility="no"
                 android:padding="2sp"

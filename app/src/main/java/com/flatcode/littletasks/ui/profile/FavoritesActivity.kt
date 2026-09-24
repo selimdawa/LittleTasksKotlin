@@ -6,9 +6,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.ImageView
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -17,6 +15,7 @@ import com.flatcode.littletasks.databinding.ActivityFavoritesBinding
 import com.flatcode.littletasks.model.Task
 import com.flatcode.littletasks.ui.task.TaskAdapter
 import com.flatcode.littletasks.ui.task.TaskEditActivity
+import com.flatcode.littletasks.utils.BaseActivity
 import com.flatcode.littletasks.utils.DATA
 import com.flatcode.littletasks.utils.dialogOptionDelete
 import com.flatcode.littletasks.utils.openActivity
@@ -27,7 +26,7 @@ import kotlinx.coroutines.launch
 import java.text.MessageFormat
 
 @AndroidEntryPoint
-class FavoritesActivity : AppCompatActivity(), TaskAdapter.TaskListener {
+class FavoritesActivity : BaseActivity(), TaskAdapter.TaskListener {
 
     private var _binding: ActivityFavoritesBinding? = null
     private val binding get() = _binding!!
@@ -39,7 +38,6 @@ class FavoritesActivity : AppCompatActivity(), TaskAdapter.TaskListener {
     private val viewModel: ProfileViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         _binding = ActivityFavoritesBinding.inflate(layoutInflater)
         setContentView(binding.root)

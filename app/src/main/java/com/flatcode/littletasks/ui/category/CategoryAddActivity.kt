@@ -8,11 +8,9 @@ import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.IntentCompat
 import androidx.lifecycle.Lifecycle
@@ -21,6 +19,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.flatcode.littletasks.R
 import com.flatcode.littletasks.databinding.ActivityCategoryAddBinding
 import com.flatcode.littletasks.databinding.LayoutLoadingDialogBinding
+import com.flatcode.littletasks.utils.BaseActivity
 import com.flatcode.littletasks.utils.DATA
 import com.flatcode.littletasks.utils.startCropActivity
 import dagger.hilt.android.AndroidEntryPoint
@@ -28,7 +27,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class CategoryAddActivity : AppCompatActivity() {
+class CategoryAddActivity : BaseActivity() {
 
     private var _binding: ActivityCategoryAddBinding? = null
     private val binding get() = _binding!!
@@ -81,7 +80,6 @@ class CategoryAddActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         _binding = ActivityCategoryAddBinding.inflate(layoutInflater)
         setContentView(binding.root)

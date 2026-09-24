@@ -8,11 +8,9 @@ import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.IntentCompat
 import androidx.lifecycle.Lifecycle
@@ -21,6 +19,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.flatcode.littletasks.R
 import com.flatcode.littletasks.databinding.ActivityPlanAddBinding
 import com.flatcode.littletasks.databinding.LayoutLoadingDialogBinding
+import com.flatcode.littletasks.utils.BaseActivity
 import com.flatcode.littletasks.utils.DATA
 import com.flatcode.littletasks.utils.loadImage
 import com.flatcode.littletasks.utils.startCropActivity
@@ -29,7 +28,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class PlanEditActivity : AppCompatActivity() {
+class PlanEditActivity : BaseActivity() {
 
     private var _binding: ActivityPlanAddBinding? = null
     private val binding get() = _binding!!
@@ -81,7 +80,6 @@ class PlanEditActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         _binding = ActivityPlanAddBinding.inflate(layoutInflater)
         setContentView(binding.root)

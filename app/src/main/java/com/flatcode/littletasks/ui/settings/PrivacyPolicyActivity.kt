@@ -2,20 +2,19 @@ package com.flatcode.littletasks.ui.settings
 
 import android.os.Bundle
 import android.view.View
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.flatcode.littletasks.R
 import com.flatcode.littletasks.databinding.ActivityPrivacyPolicyBinding
+import com.flatcode.littletasks.utils.BaseActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class PrivacyPolicyActivity : AppCompatActivity() {
+class PrivacyPolicyActivity : BaseActivity() {
 
     private var _binding: ActivityPrivacyPolicyBinding? = null
     private val binding get() = _binding!!
@@ -23,7 +22,6 @@ class PrivacyPolicyActivity : AppCompatActivity() {
     private val viewModel: SettingsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         _binding = ActivityPrivacyPolicyBinding.inflate(layoutInflater)
         setContentView(binding.root)

@@ -5,15 +5,14 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.flatcode.littletasks.R
 import com.flatcode.littletasks.databinding.ActivityPlansBinding
 import com.flatcode.littletasks.model.Plan
+import com.flatcode.littletasks.utils.BaseActivity
 import com.flatcode.littletasks.utils.DATA
 import com.flatcode.littletasks.utils.dialogOptionDelete
 import com.flatcode.littletasks.utils.openActivity
@@ -25,7 +24,7 @@ import kotlinx.coroutines.launch
 import java.text.MessageFormat
 
 @AndroidEntryPoint
-class PlansActivity : AppCompatActivity(), PlanAdapter.PlanListener {
+class PlansActivity : BaseActivity(), PlanAdapter.PlanListener {
 
     private val binding by viewBinding(ActivityPlansBinding::inflate)
 
@@ -35,7 +34,6 @@ class PlansActivity : AppCompatActivity(), PlanAdapter.PlanListener {
     private val viewModel: PlanViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         val newPlan = intent.getStringExtra(DATA.NEW_PLAN)
