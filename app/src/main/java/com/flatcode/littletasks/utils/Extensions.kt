@@ -1,24 +1,14 @@
 package com.flatcode.littletasks.utils
 
 import android.app.Activity
-import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.Context
-import android.content.DialogInterface
 import android.content.ContextWrapper
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.Color
 import android.net.Uri
-import android.os.Build
-import android.view.LayoutInflater
-import android.view.Window
-import android.view.WindowManager
 import android.widget.ImageView
-import androidx.appcompat.app.AlertDialog
 import androidx.core.graphics.createBitmap
-import androidx.core.graphics.drawable.toDrawable
 import androidx.core.graphics.scale
 import androidx.core.net.toUri
 import coil3.load
@@ -30,13 +20,7 @@ import coil3.request.transformations
 import coil3.size.Size
 import coil3.transform.Transformation
 import com.flatcode.littletasks.R
-import com.flatcode.littletasks.databinding.DialogAboutAppBinding
-import com.flatcode.littletasks.databinding.DialogCloseAppBinding
-import com.flatcode.littletasks.databinding.DialogLogoutBinding
-import com.flatcode.littletasks.ui.auth.AuthActivity
-import com.google.firebase.auth.FirebaseAuth
 import java.io.Serializable
-import java.text.MessageFormat
 
 inline fun <reified T : Activity> Context.openActivity(
     clear: Boolean = false, vararg extras: Pair<String, Any?>
@@ -62,118 +46,6 @@ fun Context.findActivity(): Activity? {
         context = context.baseContext
     }
     return null
-}
-
-fun Activity.closeApp() {
-    if (this.isFinishing || this.isDestroyed) return
-
-    val binding = DialogCloseAppBinding.inflate(LayoutInflater.from(this))
-    val dialog = Dialog(this)
-
-    dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-    dialog.setContentView(binding.root)
-    dialog.setCancelable(true)
-
-    dialog.window?.let { window ->
-        window.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
-        val lp = WindowManager.LayoutParams().apply {
-            copyFrom(window.attributes)
-            width = WindowManager.LayoutParams.WRAP_CONTENT
-            height = WindowManager.LayoutParams.WRAP_CONTENT
-        }
-        window.attributes = lp
-    }
-
-    binding.yes.setOnClickListener {
-        this.finish()
-    }
-
-    binding.no.setOnClickListener {
-        dialog.cancel()
-    }
-
-    dialog.show()
-}
-
-fun Activity.dialogLogout() {
-    if (this.isFinishing || this.isDestroyed) return
-
-    val binding = DialogLogoutBinding.inflate(LayoutInflater.from(this))
-    val dialog = Dialog(this)
-
-    dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-    dialog.setContentView(binding.root)
-    dialog.setCancelable(true)
-
-    dialog.window?.let { window ->
-        window.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
-        val lp = WindowManager.LayoutParams().apply {
-            copyFrom(window.attributes)
-            width = WindowManager.LayoutParams.WRAP_CONTENT
-            height = WindowManager.LayoutParams.WRAP_CONTENT
-        }
-        window.attributes = lp
-    }
-
-    binding.yes.setOnClickListener {
-        FirebaseAuth.getInstance().signOut()
-        this@dialogLogout.openActivity<AuthActivity>(true)
-        dialog.dismiss()
-    }
-
-    binding.no.setOnClickListener {
-        dialog.cancel()
-    }
-
-    dialog.show()
-}
-
-fun Activity.dialogAboutApp() {
-    if (this.isFinishing || this.isDestroyed) return
-
-    val binding = DialogAboutAppBinding.inflate(LayoutInflater.from(this))
-    val dialog = Dialog(this)
-
-    dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-    dialog.setContentView(binding.root)
-    dialog.setCancelable(true)
-
-    dialog.window?.let { window ->
-        window.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
-        val lp = WindowManager.LayoutParams().apply {
-            copyFrom(window.attributes)
-            width = WindowManager.LayoutParams.WRAP_CONTENT
-            height = WindowManager.LayoutParams.WRAP_CONTENT
-        }
-        window.attributes = lp
-    }
-
-    binding.website.setOnClickListener {
-        val intent = Intent(Intent.ACTION_VIEW, DATA.WEBSITE.toUri())
-        this@dialogAboutApp.startActivity(intent)
-    }
-
-    binding.facebook.setOnClickListener {
-        val facebookUri = try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                this@dialogAboutApp.packageManager.getPackageInfo(
-                    "com.facebook.katana", PackageManager.PackageInfoFlags.of(0)
-                )
-            } else {
-                @Suppress("DEPRECATION") this@dialogAboutApp.packageManager.getPackageInfo(
-                    "com.facebook.katana", 0
-                )
-            }
-            "fb://profile/${DATA.FB_ID}"
-        } catch (_: Exception) {
-            "https://facebook.com${DATA.FB_ID}"
-        }
-
-        val intent = Intent(Intent.ACTION_VIEW, facebookUri.toUri())
-        this@dialogAboutApp.startActivity(intent)
-    }
-
-    dialog.show()
 }
 
 fun Context.startCropActivity(
@@ -211,48 +83,6 @@ fun Context.rateApp() {
     } catch (_: ActivityNotFoundException) {
         this.startActivity(Intent(Intent.ACTION_VIEW, webUri))
     }
-}
-
-fun Context.dialogOptionDelete(database: String?, onDelete: () -> Unit) {
-    val binding = DialogLogoutBinding.inflate(LayoutInflater.from(this))
-    val dialog = Dialog(this)
-    dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-    dialog.setContentView(binding.root)
-    dialog.setCancelable(true)
-    dialog.window?.let { window ->
-        window.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
-        val lp = WindowManager.LayoutParams().apply {
-            copyFrom(window.attributes)
-            width = WindowManager.LayoutParams.WRAP_CONTENT
-            height = WindowManager.LayoutParams.WRAP_CONTENT
-        }
-        window.attributes = lp
-    }
-
-    binding.title.setText(R.string.do_you_want_to_delete_the)
-    val baseTitle: String = binding.title.text.toString()
-
-    binding.title.text = when (database) {
-        DATA.CATEGORIES -> MessageFormat.format("{0} Category?", baseTitle)
-        DATA.OBJECTS -> MessageFormat.format("{0} Object?", baseTitle)
-        DATA.TASKS -> MessageFormat.format("{0} Task?", baseTitle)
-        DATA.PLANS -> MessageFormat.format("{0} Plan?", baseTitle)
-        else -> baseTitle
-    }
-
-    binding.yes.setOnClickListener {
-        onDelete()
-        dialog.dismiss()
-    }
-    binding.no.setOnClickListener { dialog.dismiss() }
-    dialog.show()
-}
-
-fun Context.showMoreOptions(options: Array<String>, onOptionSelected: (Int) -> Unit) {
-    AlertDialog.Builder(this).setTitle("Choose Options")
-        .setItems(options) { _: DialogInterface?, which: Int ->
-            onOptionSelected(which)
-        }.show()
 }
 
 fun ImageView.loadImage(isUser: Boolean, url: String?) {
