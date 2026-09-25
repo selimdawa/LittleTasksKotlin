@@ -3,14 +3,18 @@ package com.flatcode.littletasks.repository
 import com.flatcode.littletasks.db.TaskDao
 import com.flatcode.littletasks.model.Task
 import com.flatcode.littletasks.utils.DATA
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -31,13 +35,17 @@ interface TaskRepository {
 
     // Room operations
     fun getAllTasksLocal(): Flow<List<Task>>
+    fun getTasksByCategoryLocal(categoryId: String): Flow<List<Task>>
+    fun syncTasks()
     suspend fun insertTaskLocal(task: Task)
     suspend fun deleteTaskLocal(task: Task)
 }
 
 @Singleton
 class TaskRepositoryImpl @Inject constructor(
-    private val database: FirebaseDatabase, private val taskDao: TaskDao
+    private val auth: FirebaseAuth,
+    private val database: FirebaseDatabase,
+    private val taskDao: TaskDao
 ) : TaskRepository {
 
     override fun isFavorite(taskId: String, userId: String): Flow<Boolean> = callbackFlow {
@@ -142,9 +150,12 @@ class TaskRepositoryImpl @Inject constructor(
     override suspend fun deleteTask(databaseName: String, id: String): Result<Unit> {
         return try {
             database.getReference(databaseName).child(id).removeValue().await()
-            // Also delete locally if it's a task
             if (databaseName == DATA.TASKS) {
                 taskDao.deleteTaskById(id)
+                val uid = auth.currentUser?.uid
+                if (uid != null) {
+                    database.getReference(DATA.FAVORITES).child(uid).child(id).removeValue().await()
+                }
             }
             Result.success(Unit)
         } catch (e: Exception) {
@@ -174,6 +185,30 @@ class TaskRepositoryImpl @Inject constructor(
     }
 
     override fun getAllTasksLocal(): Flow<List<Task>> = taskDao.getAllTasks()
+
+    override fun getTasksByCategoryLocal(categoryId: String): Flow<List<Task>> =
+        taskDao.getTasksByCategory(categoryId)
+
+    override fun syncTasks() {
+        val uid = auth.currentUser?.uid ?: return
+        database.getReference(DATA.TASKS)
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val list = mutableListOf<Task>()
+                    for (data in snapshot.children) {
+                        val item = data.getValue(Task::class.java) ?: continue
+                        if (item.publisher == uid) {
+                            list.add(item)
+                        }
+                    }
+                    CoroutineScope(Dispatchers.IO).launch {
+                        taskDao.insertTasks(list)
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {}
+            })
+    }
 
     override suspend fun insertTaskLocal(task: Task) {
         taskDao.insertTask(task)

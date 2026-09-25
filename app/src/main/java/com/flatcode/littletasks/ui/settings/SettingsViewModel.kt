@@ -91,9 +91,26 @@ class SettingsViewModel @Inject constructor(
 
         database.getReference(DATA.FAVORITES).child(uid)
             .addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    counts[DATA.FAVORITES] = snapshot.childrenCount.toInt()
-                    if (counts.size == 4) _itemCounts.value = counts
+                override fun onDataChange(favSnapshot: DataSnapshot) {
+                    val favoriteKeys = favSnapshot.children.mapNotNull { it.key }
+                    database.getReference(DATA.TASKS)
+                        .addListenerForSingleValueEvent(object : ValueEventListener {
+                            override fun onDataChange(tasksSnapshot: DataSnapshot) {
+                                var count = 0
+                                for (data in tasksSnapshot.children) {
+                                    val task = data.getValue(Task::class.java) ?: continue
+                                    if (task.id in favoriteKeys && task.publisher == uid) {
+                                        count++
+                                    }
+                                }
+                                counts[DATA.FAVORITES] = count
+                                if (counts.size == 4) _itemCounts.value = counts
+                            }
+
+                            override fun onCancelled(error: DatabaseError) {
+                                Timber.e(error.toException(), "Error counting tasks for favorites")
+                            }
+                        })
                 }
 
                 override fun onCancelled(error: DatabaseError) {
