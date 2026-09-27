@@ -131,7 +131,7 @@ class ProfileViewModel @Inject constructor(
 
     fun fetchFavoriteTasks(tasksType: String, orderBy: String) {
         val uid = auth.currentUser?.uid ?: return
-        database.getReference(DATA.CATEGORIES)
+database.getReference(DATA.CATEGORIES)
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(catSnapshot: DataSnapshot) {
                     val categoriesMap = mutableMapOf<String, Category>()
@@ -222,8 +222,7 @@ class ProfileViewModel @Inject constructor(
                 task.start != 0L -> repository.setTaskEnd(taskId, task.points)
                 else -> repository.setTaskStart(taskId)
             }
-        }
-    }
+        }    }
 
     fun deleteTask(databaseName: String, id: String) {
         viewModelScope.launch {

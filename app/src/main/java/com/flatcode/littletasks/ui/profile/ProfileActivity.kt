@@ -73,10 +73,10 @@ class ProfileActivity : BaseActivity() {
     private fun init() {
         val id = profileId ?: return
         viewModel.loadUserInfo(id)
-        viewModel.getNrItems(DATA.TASKS, id)
-        viewModel.getNrItems(DATA.PLANS, id)
-        viewModel.getNrItems(DATA.OBJECTS, id)
-        viewModel.getNrItems(DATA.CATEGORIES, id)
+        viewModel.getNrItems(DATA.TASKS)
+        viewModel.getNrItems(DATA.PLANS)
+        viewModel.getNrItems(DATA.OBJECTS)
+        viewModel.getNrItems(DATA.CATEGORIES)
     }
 
     override fun onResume() {
