@@ -7,8 +7,9 @@ import com.cloudinary.android.MediaManager
 import com.cloudinary.android.callback.ErrorInfo
 import com.cloudinary.android.callback.UploadCallback
 import com.flatcode.littletasks.model.Plan
-import com.flatcode.littletasks.repository.TaskRepository
+import com.flatcode.littletasks.repository.PlanRepository
 import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.utils.Resource
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -18,6 +19,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -26,11 +28,11 @@ import javax.inject.Inject
 class PlanViewModel @Inject constructor(
     private val auth: FirebaseAuth,
     private val database: FirebaseDatabase,
-    private val repository: TaskRepository
+    private val planRepository: PlanRepository
 ) : ViewModel() {
 
-    private val _plans = MutableStateFlow<List<Plan>>(emptyList())
-    val plans: StateFlow<List<Plan>> = _plans.asStateFlow()
+    private val _plans = MutableStateFlow<Resource<List<Plan>>>(Resource.Idle)
+    val plans: StateFlow<Resource<List<Plan>>> = _plans.asStateFlow()
 
     private val _planInfo = MutableStateFlow<Plan?>(null)
     val planInfo: StateFlow<Plan?> = _planInfo.asStateFlow()
@@ -39,22 +41,11 @@ class PlanViewModel @Inject constructor(
     val actionResult: StateFlow<Result<String>?> = _actionResult.asStateFlow()
 
     fun loadPlans() {
-        val uid = auth.currentUser?.uid ?: return
-        database.getReference(DATA.PLANS).orderByChild("publisher").equalTo(uid)
-            .addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val list = mutableListOf<Plan>()
-                    for (data in snapshot.children) {
-                        val item = data.getValue(Plan::class.java) ?: continue
-                        list.add(item)
-                    }
-                    _plans.value = list
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    Timber.e(error.toException(), "Error loading plans for uid: $uid")
-                }
-            })
+        viewModelScope.launch {
+            planRepository.getPlans().collectLatest {
+                _plans.value = it
+            }
+        }
     }
 
     fun loadPlanInfo(planId: String) {
@@ -151,7 +142,7 @@ class PlanViewModel @Inject constructor(
 
     fun deletePlan(id: String) {
         viewModelScope.launch {
-            repository.deleteTask(DATA.PLANS, id)
+            planRepository.deletePlan(DATA.PLANS, id)
         }
     }
 }

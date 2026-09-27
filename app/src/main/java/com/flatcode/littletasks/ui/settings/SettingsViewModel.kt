@@ -1,9 +1,15 @@
 package com.flatcode.littletasks.ui.settings
 
 import androidx.lifecycle.ViewModel
-import com.flatcode.littletasks.model.Task
+import androidx.lifecycle.viewModelScope
+import com.flatcode.littletasks.db.CategoryDao
+import com.flatcode.littletasks.db.PlanDao
+import com.flatcode.littletasks.db.TaskDao
+import com.flatcode.littletasks.db.TaskItemDao
 import com.flatcode.littletasks.model.User
+import com.flatcode.littletasks.repository.UserRepository
 import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.utils.Resource
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -13,12 +19,20 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val auth: FirebaseAuth, private val database: FirebaseDatabase
+    private val auth: FirebaseAuth,
+    private val database: FirebaseDatabase,
+    private val userRepository: UserRepository,
+    private val categoryDao: CategoryDao,
+    private val planDao: PlanDao,
+    private val taskItemDao: TaskItemDao,
+    private val taskDao: TaskDao
 ) : ViewModel() {
 
     private val _userInfo = MutableStateFlow<User?>(null)
@@ -35,86 +49,66 @@ class SettingsViewModel @Inject constructor(
 
     fun loadUserInfo() {
         val uid = auth.currentUser?.uid ?: return
-        database.getReference(DATA.USERS).child(uid)
-            .addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val user = snapshot.getValue(User::class.java) ?: return
-                    _userInfo.value = user
+        viewModelScope.launch {
+            userRepository.getUserInfo(uid).collectLatest { resource ->
+                if (resource is Resource.Success) {
+                    _userInfo.value = resource.data
                 }
-
-                override fun onCancelled(error: DatabaseError) {
-                    Timber.e(error.toException(), "Error loading user info for settings")
-                }
-            })
+            }
+        }
     }
 
     fun loadPoints() {
-        database.getReference(DATA.TASKS).addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
+        viewModelScope.launch {
+            taskDao.getAllTasks().collectLatest { taskList ->
                 var total = 0
                 var av = 0
-                for (data in snapshot.children) {
-                    val task = data.getValue(Task::class.java) ?: continue
+                for (task in taskList) {
                     total += task.points
                     av += task.aVPoints
                 }
                 val level = levelPoint(av)
                 _pointsSummary.value = Triple(total, av, level)
             }
-
-            override fun onCancelled(error: DatabaseError) {
-                Timber.e(error.toException(), "Error loading points summary")
-            }
-        })
+        }
     }
 
     fun loadItemCounts() {
         val uid = auth.currentUser?.uid ?: return
         val counts = mutableMapOf<String, Int>()
-
-        val refs = listOf(DATA.CATEGORIES, DATA.PLANS, DATA.OBJECTS)
-        refs.forEach { ref ->
-            database.getReference(ref).addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val count = snapshot.children.count {
-                        it.child("publisher").getValue(String::class.java) == uid
-                    }
-                    counts[ref] = count
-                    if (counts.size == 4) _itemCounts.value = counts
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    Timber.e(error.toException(), "Error counting items in $ref")
-                }
-            })
+        viewModelScope.launch {
+            categoryDao.getCategoriesCount().collectLatest { count ->
+                counts[DATA.CATEGORIES] = count
+                _itemCounts.value = counts.toMap()
+            }
         }
-
+        viewModelScope.launch {
+            planDao.getPlansCount().collectLatest { count ->
+                counts[DATA.PLANS] = count
+                _itemCounts.value = counts.toMap()
+            }
+        }
+        viewModelScope.launch {
+            taskItemDao.getTaskItemsCount().collectLatest { count ->
+                counts[DATA.OBJECTS] = count
+                _itemCounts.value = counts.toMap()
+            }
+        }
         database.getReference(DATA.FAVORITES).child(uid)
-            .addListenerForSingleValueEvent(object : ValueEventListener {
+            .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(favSnapshot: DataSnapshot) {
                     val favoriteKeys = favSnapshot.children.mapNotNull { it.key }
-                    database.getReference(DATA.TASKS)
-                        .addListenerForSingleValueEvent(object : ValueEventListener {
-                            override fun onDataChange(tasksSnapshot: DataSnapshot) {
-                                var count = 0
-                                for (data in tasksSnapshot.children) {
-                                    val task = data.getValue(Task::class.java) ?: continue
-                                    if (task.id in favoriteKeys && task.publisher == uid) {
-                                        count++
-                                    }
-                                }
-                                counts[DATA.FAVORITES] = count
-                                if (counts.size == 4) _itemCounts.value = counts
-                            }
-
-                            override fun onCancelled(error: DatabaseError) {
-                                Timber.e(error.toException(), "Error counting tasks for favorites")
-                            }
-                        })
+                    viewModelScope.launch {
+                        taskDao.getAllTasks().collectLatest { tasks ->
+                            val count = tasks.count { it.id in favoriteKeys && it.publisher == uid }
+                            counts[DATA.FAVORITES] = count
+                            _itemCounts.value = counts.toMap()
+                        }
+                    }
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    Timber.e(error.toException(), "Error counting favorites")
+                    Timber.e(error.toException(), "Error loading favorites count")
                 }
             })
     }

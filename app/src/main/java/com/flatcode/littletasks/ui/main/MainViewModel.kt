@@ -1,22 +1,22 @@
 package com.flatcode.littletasks.ui.main
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.flatcode.littletasks.repository.UserRepository
 import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.utils.Resource
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import timber.log.Timber
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val auth: FirebaseAuth, private val database: FirebaseDatabase
+    private val auth: FirebaseAuth, private val userRepository: UserRepository
 ) : ViewModel() {
 
     private val _profileImage = MutableStateFlow("")
@@ -24,16 +24,12 @@ class MainViewModel @Inject constructor(
 
     fun loadUserInfo() {
         val uid = auth.currentUser?.uid ?: return
-        database.getReference(DATA.USERS).child(uid)
-            .addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val image = DATA.EMPTY + snapshot.child(DATA.PROFILE_IMAGE).value
-                    _profileImage.value = image
+        viewModelScope.launch {
+            userRepository.getUserInfo(uid).collectLatest { resource ->
+                if (resource is Resource.Success && resource.data != null) {
+                    _profileImage.value = resource.data.profileImage ?: DATA.EMPTY
                 }
-
-                override fun onCancelled(error: DatabaseError) {
-                    Timber.e(error.toException(), "Error loading user info for uid: $uid")
-                }
-            })
+            }
+        }
     }
 }

@@ -10,8 +10,10 @@ import com.flatcode.littletasks.model.Category
 import com.flatcode.littletasks.model.Plan
 import com.flatcode.littletasks.model.Task
 import com.flatcode.littletasks.model.TaskItem
+import com.flatcode.littletasks.repository.CategoryRepository
 import com.flatcode.littletasks.repository.TaskRepository
 import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.utils.Resource
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -21,6 +23,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
@@ -30,11 +33,12 @@ import javax.inject.Inject
 class CategoryViewModel @Inject constructor(
     private val auth: FirebaseAuth,
     private val database: FirebaseDatabase,
-    private val repository: TaskRepository
+    private val repository: TaskRepository,
+    private val categoryRepository: CategoryRepository
 ) : ViewModel() {
 
-    private val _categories = MutableStateFlow<List<Category>>(emptyList())
-    val categories: StateFlow<List<Category>> = _categories.asStateFlow()
+    private val _categories = MutableStateFlow<Resource<List<Category>>>(Resource.Idle)
+    val categories: StateFlow<Resource<List<Category>>> = _categories.asStateFlow()
 
     private val _planName = MutableStateFlow("")
     val planName: StateFlow<String> = _planName.asStateFlow()
@@ -49,47 +53,11 @@ class CategoryViewModel @Inject constructor(
     val pointsSummary: StateFlow<Triple<Int, Int, Int>> = _pointsSummary.asStateFlow()
 
     fun getCategories(orderBy: String) {
-        val uid = auth.currentUser?.uid ?: return
-        database.getReference(DATA.CATEGORIES).orderByChild(orderBy)
-            .addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val list = mutableListOf<Category>()
-                    for (data in snapshot.children) {
-                        val item = data.getValue(Category::class.java) ?: continue
-                        if (item.publisher == uid) {
-                            list.add(item)
-                        }
-                    }
-                    fetchTaskCountsAndPost(list)
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    Timber.e(error.toException(), "Error fetching categories")
-                }
-            })
-    }
-
-    private fun fetchTaskCountsAndPost(categories: List<Category>) {
-        val uid = auth.currentUser?.uid ?: return
-        database.getReference(DATA.TASKS)
-            .addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val taskMap = mutableMapOf<String, Int>()
-                    for (data in snapshot.children) {
-                        val task = data.getValue(Task::class.java) ?: continue
-                        if (task.publisher == uid) {
-                            val catId = task.category ?: continue
-                            taskMap[catId] = (taskMap[catId] ?: 0) + 1
-                        }
-                    }
-                    categories.forEach { it.taskCount = taskMap[it.id] ?: 0 }
-                    _categories.value = categories.reversed()
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    _categories.value = categories.reversed()
-                }
-            })
+        viewModelScope.launch {
+            categoryRepository.getCategories(orderBy).collectLatest {
+                _categories.value = it
+            }
+        }
     }
 
     fun loadPlanName(planId: String) {
@@ -321,7 +289,11 @@ class CategoryViewModel @Inject constructor(
 
     fun deleteTask(databaseName: String, id: String) {
         viewModelScope.launch {
-            repository.deleteTask(databaseName, id)
+            if (databaseName == DATA.CATEGORIES) {
+                categoryRepository.deleteCategory(databaseName, id)
+            } else {
+                repository.deleteTask(databaseName, id)
+            }
         }
     }
 

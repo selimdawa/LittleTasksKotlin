@@ -3,11 +3,17 @@ package com.flatcode.littletasks.ui.profile
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.flatcode.littletasks.db.CategoryDao
+import com.flatcode.littletasks.db.PlanDao
+import com.flatcode.littletasks.db.TaskDao
+import com.flatcode.littletasks.db.TaskItemDao
 import com.flatcode.littletasks.model.Category
 import com.flatcode.littletasks.model.Task
 import com.flatcode.littletasks.model.User
 import com.flatcode.littletasks.repository.TaskRepository
+import com.flatcode.littletasks.repository.UserRepository
 import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.utils.Resource
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -20,6 +26,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
@@ -29,7 +36,12 @@ import javax.inject.Inject
 class ProfileViewModel @Inject constructor(
     private val auth: FirebaseAuth,
     private val database: FirebaseDatabase,
-    private val repository: TaskRepository
+    private val repository: TaskRepository,
+    private val userRepository: UserRepository,
+    private val categoryDao: CategoryDao,
+    private val planDao: PlanDao,
+    private val taskItemDao: TaskItemDao,
+    private val taskDao: TaskDao
 ) : ViewModel() {
 
     private val _userInfo = MutableStateFlow<User?>(null)
@@ -54,43 +66,24 @@ class ProfileViewModel @Inject constructor(
     val actionResult: StateFlow<Result<String>?> = _actionResult.asStateFlow()
 
     fun loadUserInfo(userId: String) {
-        database.getReference(DATA.USERS).child(userId)
-            .addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val user = snapshot.getValue(User::class.java) ?: return
-                    _userInfo.value = user
+        viewModelScope.launch {
+            userRepository.getUserInfo(userId).collectLatest { resource ->
+                if (resource is Resource.Success) {
+                    _userInfo.value = resource.data
                 }
-
-                override fun onCancelled(error: DatabaseError) {
-                    Timber.e(error.toException(), "Error loading user info for userId: $userId")
-                }
-            })
+            }
+        }
     }
 
-    fun getNrItems(databaseName: String, userId: String) {
-        database.getReference(databaseName)
-            .addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    var i = 0
-                    for (data in snapshot.children) {
-                        val publisher = data.child("publisher").getValue(String::class.java)
-                        if (publisher == userId) i++
-                    }
-                    when (databaseName) {
-                        DATA.TASKS -> _nrTasks.value = i
-                        DATA.PLANS -> _nrPlans.value = i
-                        DATA.OBJECTS -> _nrObjects.value = i
-                        DATA.CATEGORIES -> _nrCategories.value = i
-                    }
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    Timber.e(
-                        error.toException(),
-                        "Error counting items in $databaseName for userId: $userId"
-                    )
-                }
-            })
+    fun getNrItems(databaseName: String) {
+        viewModelScope.launch {
+            when (databaseName) {
+                DATA.TASKS -> taskDao.getTasksCount().collectLatest { _nrTasks.value = it }
+                DATA.PLANS -> planDao.getPlansCount().collectLatest { _nrPlans.value = it }
+                DATA.OBJECTS -> taskItemDao.getTaskItemsCount().collectLatest { _nrObjects.value = it }
+                DATA.CATEGORIES -> categoryDao.getCategoriesCount().collectLatest { _nrCategories.value = it }
+            }
+        }
     }
 
     fun updateProfile(username: String, imageUri: Uri?) {

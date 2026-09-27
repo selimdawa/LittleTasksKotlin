@@ -13,6 +13,9 @@ interface TaskDao {
     @Query("SELECT * FROM tasks ORDER BY timestamp DESC")
     fun getAllTasks(): Flow<List<Task>>
 
+    @Query("SELECT COUNT(*) FROM tasks")
+    fun getTasksCount(): Flow<Int>
+
     @Query("SELECT * FROM tasks WHERE category = :categoryId")
     fun getTasksByCategory(categoryId: String): Flow<List<Task>>
 

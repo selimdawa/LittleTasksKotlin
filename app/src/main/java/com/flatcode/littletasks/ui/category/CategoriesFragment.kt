@@ -12,6 +12,7 @@ import com.flatcode.littletasks.databinding.FragmentCategoriesBinding
 import com.flatcode.littletasks.model.Category
 import com.flatcode.littletasks.ui.task.TaskAddActivity
 import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.utils.Resource
 import com.flatcode.littletasks.utils.dialogOptionDelete
 import com.flatcode.littletasks.utils.openActivity
 import com.flatcode.littletasks.utils.showMoreOptions
@@ -37,21 +38,39 @@ class CategoriesFragment : Fragment(R.layout.fragment_categories),
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.categories.collectLatest { newList ->
-                    adapter?.submitList(newList)
+                viewModel.categories.collectLatest { resource ->
+                    when (resource) {
+                        is Resource.Loading -> {
+                            binding.bar.visibility = if (resource.isLoading) View.VISIBLE else View.GONE
+                            resource.data?.let { updateUI(it) }
+                        }
 
-                    binding.bar.visibility = View.GONE
-                    if (newList.isNotEmpty()) {
-                        binding.recyclerView.visibility = View.VISIBLE
-                        binding.emptyText.visibility = View.GONE
-                    } else {
-                        binding.recyclerView.visibility = View.GONE
-                        binding.emptyText.visibility = View.VISIBLE
+                        is Resource.Success -> {
+                            binding.bar.visibility = View.GONE
+                            updateUI(resource.data ?: emptyList())
+                        }
+
+                        is Resource.Error -> {
+                            binding.bar.visibility = View.GONE
+                            updateUI(resource.data ?: emptyList())
+                        }
+
+                        is Resource.Idle -> {}
                     }
                 }
             }
         }
+    }
 
+    private fun updateUI(newList: List<Category>) {
+        adapter?.submitList(newList)
+        if (newList.isNotEmpty()) {
+            binding.recyclerView.visibility = View.VISIBLE
+            binding.emptyText.visibility = View.GONE
+        } else {
+            binding.recyclerView.visibility = View.GONE
+            binding.emptyText.visibility = View.VISIBLE
+        }
     }
 
     override fun onMoreClick(item: Category) {

@@ -5,6 +5,7 @@
 
     <!-- Internet Access -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <!-- Legacy Storage (Required for Android 9 and below) -->
     <uses-permission

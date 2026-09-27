@@ -3,6 +3,7 @@ package com.flatcode.littletasks.repository
 import com.flatcode.littletasks.db.TaskDao
 import com.flatcode.littletasks.model.Task
 import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.utils.Resource
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -13,6 +14,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -36,6 +39,7 @@ interface TaskRepository {
     // Room operations
     fun getAllTasksLocal(): Flow<List<Task>>
     fun getTasksByCategoryLocal(categoryId: String): Flow<List<Task>>
+    fun getTasksByCategory(categoryId: String): Flow<Resource<List<Task>>>
     fun syncTasks()
     suspend fun insertTaskLocal(task: Task)
     suspend fun deleteTaskLocal(task: Task)
@@ -188,6 +192,45 @@ class TaskRepositoryImpl @Inject constructor(
 
     override fun getTasksByCategoryLocal(categoryId: String): Flow<List<Task>> =
         taskDao.getTasksByCategory(categoryId)
+
+    override fun getTasksByCategory(categoryId: String): Flow<Resource<List<Task>>> = channelFlow {
+        val localJob = launch {
+            taskDao.getTasksByCategory(categoryId).collectLatest { localList ->
+                send(Resource.Success(localList))
+            }
+        }
+
+        val uid = auth.currentUser?.uid
+        if (uid == null) {
+            localJob.join()
+            return@channelFlow
+        }
+
+        val ref = database.getReference(DATA.TASKS)
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val list = mutableListOf<Task>()
+                for (data in snapshot.children) {
+                    val item = data.getValue(Task::class.java) ?: continue
+                    if (item.category == categoryId && item.publisher == uid) {
+                        list.add(item)
+                    }
+                }
+                CoroutineScope(Dispatchers.IO).launch {
+                    taskDao.insertTasks(list)
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {}
+        }
+
+        ref.addValueEventListener(listener)
+
+        awaitClose {
+            ref.removeEventListener(listener)
+            localJob.cancel()
+        }
+    }
 
     override fun syncTasks() {
         val uid = auth.currentUser?.uid ?: return

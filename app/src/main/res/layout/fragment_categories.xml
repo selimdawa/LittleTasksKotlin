@@ -27,8 +27,6 @@
                 android:padding="10sp"
                 android:visibility="gone"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                app:reverseLayout="true"
-                app:stackFromEnd="true"
                 tools:listitem="@layout/item_category" />
 
         </LinearLayout>

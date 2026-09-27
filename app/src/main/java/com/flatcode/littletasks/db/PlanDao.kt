@@ -13,6 +13,9 @@ interface PlanDao {
     @Query("SELECT * FROM plans ORDER BY timestamp DESC")
     fun getAllPlans(): Flow<List<Plan>>
 
+    @Query("SELECT COUNT(*) FROM plans")
+    fun getPlansCount(): Flow<Int>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPlans(plans: List<Plan>)
 
@@ -21,6 +24,9 @@ interface PlanDao {
 
     @Delete
     suspend fun deletePlan(plan: Plan)
+
+    @Query("DELETE FROM plans WHERE id = :id")
+    suspend fun deletePlanById(id: String)
 
     @Query("DELETE FROM plans")
     suspend fun deleteAllPlans()

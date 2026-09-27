@@ -16,6 +16,7 @@ import com.flatcode.littletasks.ui.plan.PlansActivity
 import com.flatcode.littletasks.ui.task.TaskAddActivity
 import com.flatcode.littletasks.utils.BaseActivity
 import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.utils.Resource
 import com.flatcode.littletasks.utils.dialogOptionDelete
 import com.flatcode.littletasks.utils.openActivity
 import com.flatcode.littletasks.utils.showMoreOptions
@@ -66,22 +67,42 @@ class CategoriesActivity : BaseActivity(), CategoriesAdapter.CategoryListener {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.categories.collectLatest { newList ->
-                    list.clear()
-                    list.addAll(newList)
-                    adapter?.setFullList(newList)
+                viewModel.categories.collectLatest { resource ->
+                    when (resource) {
+                        is Resource.Loading -> {
+                            binding.bar.visibility = if (resource.isLoading) View.VISIBLE else View.GONE
+                            resource.data?.let { updateUI(it) }
+                        }
 
-                    binding.toolbar.number.text = MessageFormat.format("( {0} )", list.size)
-                    binding.bar.visibility = View.GONE
-                    if (list.isNotEmpty()) {
-                        binding.recyclerView.visibility = View.VISIBLE
-                        binding.emptyText.visibility = View.GONE
-                    } else {
-                        binding.recyclerView.visibility = View.GONE
-                        binding.emptyText.visibility = View.VISIBLE
+                        is Resource.Success -> {
+                            binding.bar.visibility = View.GONE
+                            updateUI(resource.data ?: emptyList())
+                        }
+
+                        is Resource.Error -> {
+                            binding.bar.visibility = View.GONE
+                            updateUI(resource.data ?: emptyList())
+                        }
+
+                        is Resource.Idle -> {}
                     }
                 }
             }
+        }
+    }
+
+    private fun updateUI(newList: List<Category>) {
+        list.clear()
+        list.addAll(newList)
+        adapter?.setFullList(newList)
+
+        binding.toolbar.number.text = MessageFormat.format("( {0} )", list.size)
+        if (list.isNotEmpty()) {
+            binding.recyclerView.visibility = View.VISIBLE
+            binding.emptyText.visibility = View.GONE
+        } else {
+            binding.recyclerView.visibility = View.GONE
+            binding.emptyText.visibility = View.VISIBLE
         }
     }
 
