@@ -42,10 +42,17 @@ class FavoritesActivity : BaseActivity(), TaskAdapter.TaskListener {
         _binding = ActivityFavoritesBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        tasksType = intent.getStringExtra(DATA.TASK_TYPE) ?: DATA.TASKS_ALL
+        tasksType = intent.getStringExtra(DATA.TASK_TYPE) ?: DATA.FAVORITES
         currentSortType = DATA.TIMESTAMP
 
-        binding.toolbar.nameSpace.setText(R.string.favorites)
+        val titleRes = when (tasksType) {
+            DATA.TASKS_UN_STARTED -> R.string.tasks_not_started
+            DATA.TASKS_STARTED -> R.string.tasks_started
+            DATA.TASKS_COMPLETED -> R.string.tasks_done
+            DATA.TASKS_ALL -> R.string.all_tasks
+            else -> R.string.favorites
+        }
+        binding.toolbar.nameSpace.setText(titleRes)
         binding.toolbar.back.setOnClickListener { handleBackPressed() }
         binding.toolbar.close.setOnClickListener { handleBackPressed() }
 
@@ -104,8 +111,13 @@ class FavoritesActivity : BaseActivity(), TaskAdapter.TaskListener {
                     binding.toolbar.number.text = MessageFormat.format("( {0} )", newList.size)
                     binding.bar.visibility = View.GONE
                     if (newList.isNotEmpty()) {
-                        binding.recyclerView.visibility = View.VISIBLE
-                        binding.recyclerViewReverse.visibility = View.GONE
+                        if (binding.recyclerViewReverse.visibility == View.VISIBLE) {
+                            binding.recyclerView.visibility = View.GONE
+                            binding.recyclerViewReverse.visibility = View.VISIBLE
+                        } else {
+                            binding.recyclerView.visibility = View.VISIBLE
+                            binding.recyclerViewReverse.visibility = View.GONE
+                        }
                         binding.emptyText.visibility = View.GONE
                     } else {
                         binding.recyclerView.visibility = View.GONE

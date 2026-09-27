@@ -3,7 +3,11 @@ package com.flatcode.littletasks.ui.profile
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cloudinary.android.MediaManager
+import com.cloudinary.android.callback.ErrorInfo
+import com.cloudinary.android.callback.UploadCallback
 import com.flatcode.littletasks.db.CategoryDao
+import com.flatcode.littletasks.db.FavoritesTaskDao
 import com.flatcode.littletasks.db.PlanDao
 import com.flatcode.littletasks.db.TaskDao
 import com.flatcode.littletasks.db.TaskItemDao
@@ -19,14 +23,13 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.cloudinary.android.MediaManager
-import com.cloudinary.android.callback.ErrorInfo
-import com.cloudinary.android.callback.UploadCallback
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
@@ -41,7 +44,8 @@ class ProfileViewModel @Inject constructor(
     private val categoryDao: CategoryDao,
     private val planDao: PlanDao,
     private val taskItemDao: TaskItemDao,
-    private val taskDao: TaskDao
+    private val taskDao: TaskDao,
+    private val favoritesTaskDao: FavoritesTaskDao
 ) : ViewModel() {
 
     private val _userInfo = MutableStateFlow<User?>(null)
@@ -62,6 +66,9 @@ class ProfileViewModel @Inject constructor(
     private val _favoriteTasks = MutableStateFlow<List<Task>>(emptyList())
     val favoriteTasks: StateFlow<List<Task>> = _favoriteTasks.asStateFlow()
 
+    private val _favoriteKeys = MutableStateFlow<Set<String>>(emptySet())
+    private var favoriteTasksJob: Job? = null
+
     private val _actionResult = MutableStateFlow<Result<String>?>(null)
     val actionResult: StateFlow<Result<String>?> = _actionResult.asStateFlow()
 
@@ -80,8 +87,11 @@ class ProfileViewModel @Inject constructor(
             when (databaseName) {
                 DATA.TASKS -> taskDao.getTasksCount().collectLatest { _nrTasks.value = it }
                 DATA.PLANS -> planDao.getPlansCount().collectLatest { _nrPlans.value = it }
-                DATA.OBJECTS -> taskItemDao.getTaskItemsCount().collectLatest { _nrObjects.value = it }
-                DATA.CATEGORIES -> categoryDao.getCategoriesCount().collectLatest { _nrCategories.value = it }
+                DATA.OBJECTS -> taskItemDao.getTaskItemsCount()
+                    .collectLatest { _nrObjects.value = it }
+
+                DATA.CATEGORIES -> categoryDao.getCategoriesCount()
+                    .collectLatest { _nrCategories.value = it }
             }
         }
     }
@@ -92,10 +102,8 @@ class ProfileViewModel @Inject constructor(
             updateProfileInDB(uid, username, null)
         } else {
             val publicId = "${uid}_${System.currentTimeMillis()}"
-            MediaManager.get().upload(imageUri)
-                .option("public_id", publicId)
-                .option("folder", "Images/Profile")
-                .unsigned(DATA.CLOUDINARY_UPLOAD_PRESET)
+            MediaManager.get().upload(imageUri).option("public_id", publicId)
+                .option("folder", "Images/Profile").unsigned(DATA.CLOUDINARY_UPLOAD_PRESET)
                 .callback(object : UploadCallback {
                     override fun onStart(requestId: String?) {}
                     override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {}
@@ -131,70 +139,105 @@ class ProfileViewModel @Inject constructor(
 
     fun fetchFavoriteTasks(tasksType: String, orderBy: String) {
         val uid = auth.currentUser?.uid ?: return
-database.getReference(DATA.CATEGORIES)
-            .addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(catSnapshot: DataSnapshot) {
-                    val categoriesMap = mutableMapOf<String, Category>()
-                    for (data in catSnapshot.children) {
-                        val cat = data.getValue(Category::class.java) ?: continue
-                        categoriesMap[cat.id] = cat
+
+        val isFavoritePage = tasksType == DATA.FAVORITES || tasksType == DATA.FAVORITES_ID
+        if (isFavoritePage) {
+            database.getReference(DATA.FAVORITES).child(uid)
+                .addValueEventListener(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val keys = snapshot.children.mapNotNull { it.key }.toSet()
+                        _favoriteKeys.value = keys
                     }
 
-                    database.getReference(DATA.FAVORITES).child(uid)
+                    override fun onCancelled(error: DatabaseError) {
+                        Timber.e(error.toException(), "Error fetching favorite keys for uid: $uid")
+                    }
+                })
+        }
+
+        val tasksFlow = when (tasksType) {
+            DATA.TASKS_UN_STARTED -> favoritesTaskDao.getUnstartedTasksByPublisher(uid)
+            DATA.TASKS_STARTED -> favoritesTaskDao.getStartedTasksByPublisher(uid)
+            DATA.TASKS_COMPLETED -> favoritesTaskDao.getCompletedTasksByPublisher(uid)
+            else -> favoritesTaskDao.getAllTasksByPublisher(uid)
+        }
+
+        favoriteTasksJob?.cancel()
+        favoriteTasksJob = viewModelScope.launch {
+            combine(
+                tasksFlow, categoryDao.getAllCategories(), _favoriteKeys
+            ) { localTasks, categoriesList, favKeys ->
+                val categoriesMap = categoriesList.associateBy { it.id }
+                val resultList = mutableListOf<Task>()
+                for (task in localTasks) {
+                    if (isFavoritePage && task.id !in favKeys) {
+                        continue
+                    }
+                    val cat = categoriesMap[task.category]
+                    task.categoryName = cat?.name ?: task.categoryName
+                    task.categoryImage = cat?.image ?: task.categoryImage
+                    resultList.add(task)
+                }
+                sortTasks(resultList, orderBy)
+            }.collectLatest { resultList ->
+                _favoriteTasks.value = resultList
+            }
+        }
+
+        syncFavoritesFromFirebase(uid)
+    }
+
+    private fun syncFavoritesFromFirebase(uid: String) {
+        database.getReference(DATA.CATEGORIES)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(catSnapshot: DataSnapshot) {
+                    val catList = mutableListOf<Category>()
+                    for (data in catSnapshot.children) {
+                        val cat = data.getValue(Category::class.java) ?: continue
+                        catList.add(cat)
+                    }
+                    viewModelScope.launch {
+                        categoryDao.insertCategories(catList)
+                    }
+
+                    database.getReference(DATA.TASKS)
                         .addListenerForSingleValueEvent(object : ValueEventListener {
-                            override fun onDataChange(snapshot: DataSnapshot) {
-                                val favoriteKeys = snapshot.children.mapNotNull { it.key }
-                                database.getReference(DATA.TASKS).orderByChild(orderBy)
-                                    .addListenerForSingleValueEvent(object : ValueEventListener {
-                                        override fun onDataChange(tasksSnapshot: DataSnapshot) {
-                                            val list = mutableListOf<Task>()
-                                            for (data in tasksSnapshot.children) {
-                                                val task = data.getValue(Task::class.java) ?: continue
-                                                if (task.id in favoriteKeys && task.publisher == uid) {
-                                                    val category = categoriesMap[task.category]
-                                                    task.categoryName = category?.name
-                                                    task.categoryImage = category?.image
-                                                    when (tasksType) {
-                                                        DATA.TASKS_ALL -> list.add(task)
-                                                        DATA.TASKS_UN_STARTED -> if (task.start == 0L && task.end == 0L) list.add(
-                                                            task
-                                                        )
-
-                                                        DATA.TASKS_STARTED -> if (task.start != 0L && task.end == 0L) list.add(
-                                                            task
-                                                        )
-
-                                                        DATA.TASKS_COMPLETED -> if (task.start != 0L && task.end != 0L) list.add(
-                                                            task
-                                                        )
-                                                    }
-                                                }
-                                            }
-                                            _favoriteTasks.value = list
-                                        }
-
-                                        override fun onCancelled(error: DatabaseError) {
-                                            Timber.e(
-                                                error.toException(),
-                                                "Error fetching tasks for favorites"
-                                            )
-                                        }
-                                    })
+                            override fun onDataChange(tasksSnapshot: DataSnapshot) {
+                                val remoteTasks = mutableListOf<Task>()
+                                for (data in tasksSnapshot.children) {
+                                    val task = data.getValue(Task::class.java) ?: continue
+                                    if (task.publisher == uid) {
+                                        remoteTasks.add(task)
+                                    }
+                                }
+                                viewModelScope.launch {
+                                    taskDao.insertTasks(remoteTasks)
+                                }
                             }
 
                             override fun onCancelled(error: DatabaseError) {
                                 Timber.e(
-                                    error.toException(),
-                                    "Error fetching favorite keys for uid: $uid"
+                                    error.toException(), "Error fetching tasks for favorites sync"
                                 )
                             }
                         })
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    Timber.e(error.toException(), "Error fetching categories for favorites mapping")
+                    Timber.e(error.toException(), "Error fetching categories for favorites sync")
                 }
             })
+    }
+
+    private fun sortTasks(list: List<Task>, orderBy: String): List<Task> {
+        return when (orderBy) {
+            DATA.POINTS -> list.sortedBy { it.points }
+            DATA.AVAILABLE_POINTS -> list.sortedBy { it.aVPoints }
+            DATA.START -> list.sortedBy { it.start }
+            DATA.END -> list.sortedBy { it.end }
+            DATA.TIMESTAMP -> list.sortedBy { it.timestamp }
+            else -> list
+        }
     }
 
     fun toggleFavorite(task: Task) {
@@ -222,7 +265,8 @@ database.getReference(DATA.CATEGORIES)
                 task.start != 0L -> repository.setTaskEnd(taskId, task.points)
                 else -> repository.setTaskStart(taskId)
             }
-        }    }
+        }
+    }
 
     fun deleteTask(databaseName: String, id: String) {
         viewModelScope.launch {

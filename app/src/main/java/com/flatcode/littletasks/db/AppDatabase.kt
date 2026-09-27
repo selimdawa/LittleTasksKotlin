@@ -17,6 +17,7 @@ import com.flatcode.littletasks.model.User
 abstract class AppDatabase : RoomDatabase() {
     abstract fun categoryDao(): CategoryDao
     abstract fun taskDao(): TaskDao
+    abstract fun favoritesTaskDao(): FavoritesTaskDao
     abstract fun planDao(): PlanDao
     abstract fun userDao(): UserDao
     abstract fun settingDao(): SettingDao

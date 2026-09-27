@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.flatcode.littletasks.db.AppDatabase
 import com.flatcode.littletasks.db.CategoryDao
+import com.flatcode.littletasks.db.FavoritesTaskDao
 import com.flatcode.littletasks.db.PlanDao
 import com.flatcode.littletasks.db.SettingDao
 import com.flatcode.littletasks.db.TaskDao
@@ -33,6 +34,9 @@ object DatabaseModule {
 
     @Provides
     fun provideTaskDao(db: AppDatabase): TaskDao = db.taskDao()
+
+    @Provides
+    fun provideFavoritesTaskDao(db: AppDatabase): FavoritesTaskDao = db.favoritesTaskDao()
 
     @Provides
     fun providePlanDao(db: AppDatabase): PlanDao = db.planDao()
