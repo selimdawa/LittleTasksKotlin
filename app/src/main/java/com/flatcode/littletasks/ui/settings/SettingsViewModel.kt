@@ -3,6 +3,7 @@ package com.flatcode.littletasks.ui.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.flatcode.littletasks.db.CategoryDao
+import com.flatcode.littletasks.db.FavoriteDao
 import com.flatcode.littletasks.db.PlanDao
 import com.flatcode.littletasks.db.TaskDao
 import com.flatcode.littletasks.db.TaskItemDao
@@ -32,7 +33,8 @@ class SettingsViewModel @Inject constructor(
     private val categoryDao: CategoryDao,
     private val planDao: PlanDao,
     private val taskItemDao: TaskItemDao,
-    private val taskDao: TaskDao
+    private val taskDao: TaskDao,
+    private val favoriteDao: FavoriteDao
 ) : ViewModel() {
 
     private val _userInfo = MutableStateFlow<User?>(null)
@@ -94,23 +96,12 @@ class SettingsViewModel @Inject constructor(
                 _itemCounts.value = counts.toMap()
             }
         }
-        database.getReference(DATA.FAVORITES).child(uid)
-            .addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(favSnapshot: DataSnapshot) {
-                    val favoriteKeys = favSnapshot.children.mapNotNull { it.key }
-                    viewModelScope.launch {
-                        taskDao.getAllTasks().collectLatest { tasks ->
-                            val count = tasks.count { it.id in favoriteKeys && it.publisher == uid }
-                            counts[DATA.FAVORITES] = count
-                            _itemCounts.value = counts.toMap()
-                        }
-                    }
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    Timber.e(error.toException(), "Error loading favorites count")
-                }
-            })
+        viewModelScope.launch {
+            favoriteDao.getFavoriteCount(uid).collectLatest { count ->
+                counts[DATA.FAVORITES] = count
+                _itemCounts.value = counts.toMap()
+            }
+        }
     }
 
     fun loadPrivacyPolicy() {

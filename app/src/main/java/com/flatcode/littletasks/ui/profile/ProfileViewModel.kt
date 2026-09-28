@@ -7,7 +7,7 @@ import com.cloudinary.android.MediaManager
 import com.cloudinary.android.callback.ErrorInfo
 import com.cloudinary.android.callback.UploadCallback
 import com.flatcode.littletasks.db.CategoryDao
-import com.flatcode.littletasks.db.FavoritesTaskDao
+import com.flatcode.littletasks.db.FavoriteDao
 import com.flatcode.littletasks.db.PlanDao
 import com.flatcode.littletasks.db.TaskDao
 import com.flatcode.littletasks.db.TaskItemDao
@@ -45,7 +45,7 @@ class ProfileViewModel @Inject constructor(
     private val planDao: PlanDao,
     private val taskItemDao: TaskItemDao,
     private val taskDao: TaskDao,
-    private val favoritesTaskDao: FavoritesTaskDao
+    private val favoriteDao: FavoriteDao
 ) : ViewModel() {
 
     private val _userInfo = MutableStateFlow<User?>(null)
@@ -66,7 +66,6 @@ class ProfileViewModel @Inject constructor(
     private val _favoriteTasks = MutableStateFlow<List<Task>>(emptyList())
     val favoriteTasks: StateFlow<List<Task>> = _favoriteTasks.asStateFlow()
 
-    private val _favoriteKeys = MutableStateFlow<Set<String>>(emptySet())
     private var favoriteTasksJob: Job? = null
 
     private val _actionResult = MutableStateFlow<Result<String>?>(null)
@@ -137,42 +136,18 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun fetchFavoriteTasks(tasksType: String, orderBy: String) {
+    fun fetchFavoriteTasks(orderBy: String) {
         val uid = auth.currentUser?.uid ?: return
-
-        val isFavoritePage = tasksType == DATA.FAVORITES || tasksType == DATA.FAVORITES_ID
-        if (isFavoritePage) {
-            database.getReference(DATA.FAVORITES).child(uid)
-                .addValueEventListener(object : ValueEventListener {
-                    override fun onDataChange(snapshot: DataSnapshot) {
-                        val keys = snapshot.children.mapNotNull { it.key }.toSet()
-                        _favoriteKeys.value = keys
-                    }
-
-                    override fun onCancelled(error: DatabaseError) {
-                        Timber.e(error.toException(), "Error fetching favorite keys for uid: $uid")
-                    }
-                })
-        }
-
-        val tasksFlow = when (tasksType) {
-            DATA.TASKS_UN_STARTED -> favoritesTaskDao.getUnstartedTasksByPublisher(uid)
-            DATA.TASKS_STARTED -> favoritesTaskDao.getStartedTasksByPublisher(uid)
-            DATA.TASKS_COMPLETED -> favoritesTaskDao.getCompletedTasksByPublisher(uid)
-            else -> favoritesTaskDao.getAllTasksByPublisher(uid)
-        }
 
         favoriteTasksJob?.cancel()
         favoriteTasksJob = viewModelScope.launch {
             combine(
-                tasksFlow, categoryDao.getAllCategories(), _favoriteKeys
-            ) { localTasks, categoriesList, favKeys ->
+                favoriteDao.getFavoriteTasks(uid),
+                categoryDao.getAllCategories()
+            ) { favTasks, categoriesList ->
                 val categoriesMap = categoriesList.associateBy { it.id }
                 val resultList = mutableListOf<Task>()
-                for (task in localTasks) {
-                    if (isFavoritePage && task.id !in favKeys) {
-                        continue
-                    }
+                for (task in favTasks) {
                     val cat = categoriesMap[task.category]
                     task.categoryName = cat?.name ?: task.categoryName
                     task.categoryImage = cat?.image ?: task.categoryImage
@@ -183,7 +158,6 @@ class ProfileViewModel @Inject constructor(
                 _favoriteTasks.value = resultList
             }
         }
-
         syncFavoritesFromFirebase(uid)
     }
 

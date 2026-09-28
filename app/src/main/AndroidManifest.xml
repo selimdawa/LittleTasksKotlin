@@ -117,6 +117,10 @@
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />
         <activity
+            android:name=".ui.task.TasksActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
             android:name=".ui.objects.ObjectsToPlanActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />

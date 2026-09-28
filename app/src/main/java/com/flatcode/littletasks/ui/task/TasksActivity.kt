@@ -1,4 +1,4 @@
-package com.flatcode.littletasks.ui.profile
+package com.flatcode.littletasks.ui.task
 
 import android.content.Context
 import android.os.Bundle
@@ -14,8 +14,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.flatcode.littletasks.R
 import com.flatcode.littletasks.databinding.ActivityFavoritesBinding
 import com.flatcode.littletasks.model.Task
-import com.flatcode.littletasks.ui.task.TaskAdapter
-import com.flatcode.littletasks.ui.task.TaskEditActivity
 import com.flatcode.littletasks.utils.BaseActivity
 import com.flatcode.littletasks.utils.DATA
 import com.flatcode.littletasks.utils.dialogOptionDelete
@@ -27,24 +25,32 @@ import kotlinx.coroutines.launch
 import java.text.MessageFormat
 
 @AndroidEntryPoint
-class FavoritesActivity : BaseActivity(), TaskAdapter.TaskListener {
+class TasksActivity : BaseActivity(), TaskAdapter.TaskListener {
 
     private var _binding: ActivityFavoritesBinding? = null
     private val binding get() = _binding!!
 
-    private val context: Context = this@FavoritesActivity
+    private val context: Context = this@TasksActivity
     private var adapter: TaskAdapter? = null
     private var currentSortType = DATA.TIMESTAMP
-    private val viewModel: ProfileViewModel by viewModels()
+    private var tasksType: String? = null
+    private val viewModel: TasksViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         _binding = ActivityFavoritesBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        tasksType = intent.getStringExtra(DATA.TASK_TYPE) ?: DATA.TASKS_ALL
         currentSortType = DATA.TIMESTAMP
 
-        binding.toolbar.nameSpace.setText(R.string.favorites)
+        val titleRes = when (tasksType) {
+            DATA.TASKS_UN_STARTED -> R.string.tasks_not_started
+            DATA.TASKS_STARTED -> R.string.tasks_started
+            DATA.TASKS_COMPLETED -> R.string.tasks_done
+            else -> R.string.all_tasks
+        }
+        binding.toolbar.nameSpace.setText(titleRes)
         binding.toolbar.back.setOnClickListener { handleBackPressed() }
         binding.toolbar.close.setOnClickListener { handleBackPressed() }
 
@@ -69,7 +75,7 @@ class FavoritesActivity : BaseActivity(), TaskAdapter.TaskListener {
 
         binding.filter.all.setOnClickListener {
             currentSortType = DATA.TIMESTAMP
-            viewModel.fetchFavoriteTasks(currentSortType)
+            viewModel.fetchTasks(tasksType!!, currentSortType)
             binding.recyclerView.visibility = View.VISIBLE
             binding.recyclerViewReverse.visibility = View.GONE
         }
@@ -97,7 +103,7 @@ class FavoritesActivity : BaseActivity(), TaskAdapter.TaskListener {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.favoriteTasks.collectLatest { newList ->
+                viewModel.tasks.collectLatest { newList ->
                     adapter?.setFullList(newList)
 
                     binding.toolbar.number.text = MessageFormat.format("( {0} )", newList.size)
@@ -175,13 +181,13 @@ class FavoritesActivity : BaseActivity(), TaskAdapter.TaskListener {
     private fun toggleSortDirection(imageView: ImageView, targetSortType: String) {
         currentSortType = targetSortType
         if (imageView.tag == "up") {
-            viewModel.fetchFavoriteTasks(currentSortType)
+            viewModel.fetchTasks(tasksType!!, currentSortType)
             binding.recyclerView.visibility = View.VISIBLE
             binding.recyclerViewReverse.visibility = View.GONE
             imageView.tag = "down"
             imageView.setImageResource(R.drawable.ic_down)
         } else {
-            viewModel.fetchFavoriteTasks(currentSortType)
+            viewModel.fetchTasks(tasksType!!, currentSortType)
             binding.recyclerView.visibility = View.GONE
             binding.recyclerViewReverse.visibility = View.VISIBLE
             imageView.tag = "up"
@@ -202,7 +208,7 @@ class FavoritesActivity : BaseActivity(), TaskAdapter.TaskListener {
 
     override fun onResume() {
         super.onResume()
-        viewModel.fetchFavoriteTasks(currentSortType)
+        viewModel.fetchTasks(tasksType!!, currentSortType)
     }
 
     override fun onDestroy() {

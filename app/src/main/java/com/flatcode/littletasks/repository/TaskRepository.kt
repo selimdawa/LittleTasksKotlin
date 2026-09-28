@@ -1,6 +1,8 @@
 package com.flatcode.littletasks.repository
 
+import com.flatcode.littletasks.db.FavoriteDao
 import com.flatcode.littletasks.db.TaskDao
+import com.flatcode.littletasks.model.FavoriteEntity
 import com.flatcode.littletasks.model.Task
 import com.flatcode.littletasks.utils.DATA
 import com.flatcode.littletasks.utils.Resource
@@ -49,7 +51,8 @@ interface TaskRepository {
 class TaskRepositoryImpl @Inject constructor(
     private val auth: FirebaseAuth,
     private val database: FirebaseDatabase,
-    private val taskDao: TaskDao
+    private val taskDao: TaskDao,
+    private val favoriteDao: FavoriteDao
 ) : TaskRepository {
 
     override fun isFavorite(taskId: String, userId: String): Flow<Boolean> = callbackFlow {
@@ -74,12 +77,19 @@ class TaskRepositoryImpl @Inject constructor(
             val ref = database.getReference(DATA.FAVORITES).child(userId).child(taskId)
             if (isFavorite) {
                 ref.setValue(true).await()
+                favoriteDao.insertFavorite(FavoriteEntity(userId, taskId))
             } else {
                 ref.removeValue().await()
+                favoriteDao.deleteFavorite(userId, taskId)
             }
             Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
+        } catch (_: Exception) {
+            if (isFavorite) {
+                favoriteDao.insertFavorite(FavoriteEntity(userId, taskId))
+            } else {
+                favoriteDao.deleteFavorite(userId, taskId)
+            }
+            Result.success(Unit)
         }
     }
 
@@ -246,6 +256,19 @@ class TaskRepositoryImpl @Inject constructor(
                     }
                     CoroutineScope(Dispatchers.IO).launch {
                         taskDao.insertTasks(list)
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {}
+            })
+
+        database.getReference(DATA.FAVORITES).child(uid)
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val favList = snapshot.children.mapNotNull { it.key }.map { FavoriteEntity(uid, it) }
+                    CoroutineScope(Dispatchers.IO).launch {
+                        favoriteDao.deleteAllFavoritesForUser(uid)
+                        favoriteDao.insertFavorites(favList)
                     }
                 }
 
