@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -131,15 +132,37 @@ class TaskRepositoryImpl @Inject constructor(
     ): Result<Unit> {
         return try {
             val hashMap = HashMap<String, Any>()
-            if (startStatus) hashMap[DATA.START] = DATA.ZERO
-            if (endStatus) hashMap[DATA.END] = DATA.ZERO
+            if (startStatus) {
+                hashMap[DATA.START] = DATA.ZERO
+                hashMap[DATA.END] = DATA.ZERO
+            } else if (endStatus) {
+                hashMap[DATA.END] = DATA.ZERO
+            }
 
             if (hashMap.isNotEmpty()) {
                 database.getReference(DATA.TASKS).child(taskId).updateChildren(hashMap).await()
             }
+            taskDao.getTaskById(taskId).firstOrNull()?.let { task ->
+                if (startStatus) {
+                    task.start = 0L
+                    task.end = 0L
+                } else if (endStatus) {
+                    task.end = 0L
+                }
+                taskDao.insertTask(task)
+            }
             Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
+        } catch (_: Exception) {
+            taskDao.getTaskById(taskId).firstOrNull()?.let { task ->
+                if (startStatus) {
+                    task.start = 0L
+                    task.end = 0L
+                } else if (endStatus) {
+                    task.end = 0L
+                }
+                taskDao.insertTask(task)
+            }
+            Result.success(Unit)
         }
     }
 
@@ -178,23 +201,43 @@ class TaskRepositoryImpl @Inject constructor(
     }
 
     override suspend fun setTaskStart(taskId: String): Result<Unit> {
+        val now = System.currentTimeMillis()
         return try {
             database.getReference(DATA.TASKS).child(taskId).child(DATA.START)
-                .setValue(System.currentTimeMillis()).await()
+                .setValue(now).await()
+            taskDao.getTaskById(taskId).firstOrNull()?.let { task ->
+                task.start = now
+                taskDao.insertTask(task)
+            }
             Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
+        } catch (_: Exception) {
+            taskDao.getTaskById(taskId).firstOrNull()?.let { task ->
+                task.start = now
+                taskDao.insertTask(task)
+            }
+            Result.success(Unit)
         }
     }
 
     override suspend fun setTaskEnd(taskId: String, points: Int): Result<Unit> {
+        val now = System.currentTimeMillis()
         return try {
             val taskRef = database.getReference(DATA.TASKS).child(taskId)
-            taskRef.child(DATA.END).setValue(System.currentTimeMillis()).await()
+            taskRef.child(DATA.END).setValue(now).await()
             taskRef.child(DATA.AVAILABLE_POINTS).setValue(points).await()
+            taskDao.getTaskById(taskId).firstOrNull()?.let { task ->
+                task.end = now
+                task.aVPoints = points
+                taskDao.insertTask(task)
+            }
             Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
+        } catch (_: Exception) {
+            taskDao.getTaskById(taskId).firstOrNull()?.let { task ->
+                task.end = now
+                task.aVPoints = points
+                taskDao.insertTask(task)
+            }
+            Result.success(Unit)
         }
     }
 

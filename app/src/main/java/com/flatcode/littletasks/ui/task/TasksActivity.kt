@@ -131,8 +131,8 @@ class TasksActivity : BaseActivity(), TaskAdapter.TaskListener {
         val options = when {
             item.start == 0L && item.end == 0L -> arrayOf("Edit", "Delete")
             item.start != 0L && item.end == 0L -> arrayOf("Edit", "Delete", "Start Again")
-            item.start != 0L -> arrayOf("Edit", "Delete", "Start Again", "Not End")
-            else -> arrayOf()
+            item.start != 0L && item.end != 0L -> arrayOf("Edit", "Delete", "Start Again", "Not End")
+            else -> arrayOf("Edit", "Delete", "Start Again")
         }
 
         MaterialAlertDialogBuilder(context).setTitle("Choose Options")
