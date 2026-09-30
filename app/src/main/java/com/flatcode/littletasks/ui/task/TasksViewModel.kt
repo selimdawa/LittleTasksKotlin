@@ -55,11 +55,18 @@ class TasksViewModel @Inject constructor(
                 tasksFlow,
                 categoryDao.getAllCategories()
             ) { localTasks, categoriesList ->
-                val categoriesMap = categoriesList.associateBy { it.id }
+                val categoriesById = categoriesList.associateBy { it.id }
+                val categoriesByName = categoriesList.associateBy { it.name }
                 val list = mutableListOf<Task>()
                 for (task in localTasks) {
-                    val cat = categoriesMap[task.category]
-                    task.categoryName = cat?.name ?: task.categoryName
+                    val cat = categoriesById[task.category] ?: categoriesByName[task.category]
+                    val displayCatName = when {
+                        cat != null -> cat.name
+                        !task.categoryName.isNullOrEmpty() -> task.categoryName
+                        task.category?.startsWith("-") == true -> ""
+                        else -> task.category
+                    }
+                    task.categoryName = displayCatName
                     task.categoryImage = cat?.image ?: task.categoryImage
                     list.add(task)
                 }
@@ -74,7 +81,7 @@ class TasksViewModel @Inject constructor(
 
     private fun syncTasksFromFirebase() {
         database.getReference(DATA.CATEGORIES)
-            .addListenerForSingleValueEvent(object : ValueEventListener {
+            .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(catSnapshot: DataSnapshot) {
                     val catList = mutableListOf<Category>()
                     for (data in catSnapshot.children) {
@@ -84,23 +91,23 @@ class TasksViewModel @Inject constructor(
                     viewModelScope.launch {
                         categoryDao.insertCategories(catList)
                     }
-
-                    database.getReference(DATA.TASKS)
-                        .addListenerForSingleValueEvent(object : ValueEventListener {
-                            override fun onDataChange(tasksSnapshot: DataSnapshot) {
-                                viewModelScope.launch {
-                                    repository.syncTasks()
-                                }
-                            }
-
-                            override fun onCancelled(error: DatabaseError) {
-                                Timber.e(error.toException(), "Error syncing tasks")
-                            }
-                        })
                 }
 
                 override fun onCancelled(error: DatabaseError) {
                     Timber.e(error.toException(), "Error syncing categories")
+                }
+            })
+
+        database.getReference(DATA.TASKS)
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(tasksSnapshot: DataSnapshot) {
+                    viewModelScope.launch {
+                        repository.syncTasks()
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Timber.e(error.toException(), "Error syncing tasks")
                 }
             })
     }

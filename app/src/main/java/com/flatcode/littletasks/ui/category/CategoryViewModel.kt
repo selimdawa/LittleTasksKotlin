@@ -6,11 +6,14 @@ import androidx.lifecycle.viewModelScope
 import com.cloudinary.android.MediaManager
 import com.cloudinary.android.callback.ErrorInfo
 import com.cloudinary.android.callback.UploadCallback
+import com.flatcode.littletasks.db.CategoryDao
+import com.flatcode.littletasks.db.TaskDao
 import com.flatcode.littletasks.model.Category
 import com.flatcode.littletasks.model.Plan
 import com.flatcode.littletasks.model.Task
 import com.flatcode.littletasks.model.TaskItem
 import com.flatcode.littletasks.repository.CategoryRepository
+import com.flatcode.littletasks.repository.PlanRepository
 import com.flatcode.littletasks.repository.TaskRepository
 import com.flatcode.littletasks.utils.DATA
 import com.flatcode.littletasks.utils.Resource
@@ -20,10 +23,12 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
@@ -34,7 +39,10 @@ class CategoryViewModel @Inject constructor(
     private val auth: FirebaseAuth,
     private val database: FirebaseDatabase,
     private val repository: TaskRepository,
-    private val categoryRepository: CategoryRepository
+    private val categoryRepository: CategoryRepository,
+    private val planRepository: PlanRepository,
+    private val taskDao: TaskDao,
+    private val categoryDao: CategoryDao
 ) : ViewModel() {
 
     private val _categories = MutableStateFlow<Resource<List<Category>>>(Resource.Idle)
@@ -60,12 +68,32 @@ class CategoryViewModel @Inject constructor(
         }
     }
 
+    fun setPlanName(name: String) {
+        if (name.isNotEmpty()) {
+            _planName.value = name
+        }
+    }
+
     fun loadPlanName(planId: String) {
+        if (planId.isEmpty()) return
+
+        viewModelScope.launch {
+            val localPlan = planRepository.getPlanById(planId)
+            localPlan?.name?.let { name ->
+                if (name.isNotEmpty()) {
+                    _planName.value = name
+                }
+            }
+        }
+
         database.getReference(DATA.PLANS).child(planId)
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val plan = snapshot.getValue(Plan::class.java) ?: return
-                    _planName.value = plan.name ?: ""
+                    val name = plan.name ?: ""
+                    if (name.isNotEmpty()) {
+                        _planName.value = name
+                    }
                 }
 
                 override fun onCancelled(error: DatabaseError) {
@@ -208,47 +236,83 @@ class CategoryViewModel @Inject constructor(
             }
     }
 
+    private var categoryTasksJob: Job? = null
+
     fun getCategoryTasks(categoryId: String, orderBy: String) {
         if (categoryId.isEmpty()) return
         val uid = auth.currentUser?.uid ?: return
-        database.getReference(DATA.CATEGORIES).child(categoryId)
-            .addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(catSnapshot: DataSnapshot) {
-                    val category = catSnapshot.getValue(Category::class.java)
-                    database.getReference(DATA.TASKS).orderByChild(orderBy)
-                        .addValueEventListener(object : ValueEventListener {
-                            override fun onDataChange(snapshot: DataSnapshot) {
-                                val list = mutableListOf<Task>()
-                                var totalPoints = 0
-                                var avPoints = 0
-                                for (data in snapshot.children) {
-                                    val item = data.getValue(Task::class.java) ?: continue
-                                    if (item.category == categoryId && item.publisher == uid) {
-                                        item.categoryName = category?.name
-                                        item.categoryImage = category?.image
-                                        list.add(item)
-                                        totalPoints += item.points
-                                        avPoints += item.aVPoints
-                                    }
-                                }
-                                _categoryTasks.value = list
-                                val level = levelPoint(avPoints)
-                                _pointsSummary.value = Triple(totalPoints, avPoints, level)
-                            }
 
-                            override fun onCancelled(error: DatabaseError) {
-                                Timber.e(
-                                    error.toException(),
-                                    "Error fetching tasks for category: $categoryId"
-                                )
-                            }
-                        })
+        categoryTasksJob?.cancel()
+        categoryTasksJob = viewModelScope.launch {
+            combine(
+                taskDao.getTasksByCategory(categoryId),
+                categoryDao.getAllCategories()
+            ) { localTasks, categoriesList ->
+                val categoriesById = categoriesList.associateBy { it.id }
+                val categoriesByName = categoriesList.associateBy { it.name }
+                val category = categoriesById[categoryId] ?: categoriesByName[categoryId]
+                var totalPoints = 0
+                var avPoints = 0
+                val filteredList = mutableListOf<Task>()
+                for (task in localTasks) {
+                    if (task.publisher == uid) {
+                        val taskCat = categoriesById[task.category] ?: categoriesByName[task.category] ?: category
+                        val displayCatName = when {
+                            taskCat != null -> taskCat.name
+                            !task.categoryName.isNullOrEmpty() -> task.categoryName
+                            task.category?.startsWith("-") == true -> category?.name ?: ""
+                            else -> task.category
+                        }
+                        task.categoryName = displayCatName
+                        task.categoryImage = taskCat?.image ?: task.categoryImage ?: category?.image
+                        filteredList.add(task)
+                        totalPoints += task.points
+                        avPoints += task.aVPoints
+                    }
+                }
+                val sorted = sortTasks(filteredList, orderBy)
+                val level = levelPoint(avPoints)
+                Pair(sorted, Triple(totalPoints, avPoints, level))
+            }.collectLatest { (sortedTasks, summary) ->
+                _categoryTasks.value = sortedTasks
+                _pointsSummary.value = summary
+            }
+        }
+
+        syncCategoryTasksFromFirebase(orderBy, uid)
+    }
+
+    private fun syncCategoryTasksFromFirebase(orderBy: String, uid: String) {
+        database.getReference(DATA.TASKS).orderByChild(orderBy)
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val remoteTasks = mutableListOf<Task>()
+                    for (data in snapshot.children) {
+                        val item = data.getValue(Task::class.java) ?: continue
+                        if (item.publisher == uid) {
+                            remoteTasks.add(item)
+                        }
+                    }
+                    viewModelScope.launch {
+                        taskDao.insertTasks(remoteTasks)
+                    }
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    Timber.e(error.toException(), "Error fetching category for tasks")
+                    Timber.e(error.toException(), "Error syncing category tasks")
                 }
             })
+    }
+
+    private fun sortTasks(list: List<Task>, orderBy: String): List<Task> {
+        return when (orderBy) {
+            DATA.POINTS -> list.sortedBy { it.points }
+            DATA.AVAILABLE_POINTS -> list.sortedBy { it.aVPoints }
+            DATA.START -> list.sortedBy { it.start }
+            DATA.END -> list.sortedBy { it.end }
+            DATA.TIMESTAMP -> list.sortedBy { it.timestamp }
+            else -> list
+        }
     }
 
     fun toggleFavorite(task: Task) {

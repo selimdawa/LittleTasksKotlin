@@ -14,6 +14,7 @@ import com.flatcode.littletasks.databinding.ActivityObjectEditBinding
 import com.flatcode.littletasks.databinding.LayoutLoadingDialogBinding
 import com.flatcode.littletasks.utils.BaseActivity
 import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.utils.isNetworkAvailable
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -94,6 +95,8 @@ class ObjectEditActivity : BaseActivity() {
             Toast.makeText(context, "Enter name...", Toast.LENGTH_SHORT).show()
         } else if (TextUtils.isEmpty(pointsStr)) {
             Toast.makeText(context, "Enter points...", Toast.LENGTH_SHORT).show()
+        } else if (!isNetworkAvailable()) {
+            Toast.makeText(context, getString(R.string.no_internet_connection), Toast.LENGTH_SHORT).show()
         } else {
             showLoading()
             val points = pointsStr.toIntOrNull() ?: 0

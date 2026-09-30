@@ -65,7 +65,9 @@ class PlanAdapter(
         holder.binding.more.setOnClickListener { listener.onMoreClick(item) }
         holder.binding.item.setOnClickListener {
             if (isNew) {
-                holder.itemView.context.openActivity<CategoryAddActivity>(false, DATA.ID to id)
+                holder.itemView.context.openActivity<CategoryAddActivity>(
+                    false, DATA.ID to id, DATA.PLAN_ID to id, DATA.NAME to name
+                )
             } else {
                 holder.itemView.context.openActivity<ObjectsPlanActivity>(
                     false, DATA.ID to id, DATA.NAME to name

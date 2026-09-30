@@ -16,6 +16,9 @@ interface PlanDao {
     @Query("SELECT COUNT(*) FROM plans")
     fun getPlansCount(): Flow<Int>
 
+    @Query("SELECT * FROM plans WHERE id = :id")
+    suspend fun getPlanById(id: String): Plan?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPlans(plans: List<Plan>)
 

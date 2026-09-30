@@ -21,6 +21,7 @@ import com.flatcode.littletasks.databinding.ActivityCategoryAddBinding
 import com.flatcode.littletasks.databinding.LayoutLoadingDialogBinding
 import com.flatcode.littletasks.utils.BaseActivity
 import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.utils.isNetworkAvailable
 import com.flatcode.littletasks.utils.startCropActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -72,7 +73,10 @@ class CategoryAddActivity : BaseActivity() {
             Manifest.permission.READ_EXTERNAL_STORAGE
         }
 
-        if (ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                context, permission
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
             pickImageLauncher.launch("image/*")
         } else {
             requestPermissionLauncher.launch(permission)
@@ -84,7 +88,13 @@ class CategoryAddActivity : BaseActivity() {
         _binding = ActivityCategoryAddBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        planId = intent.getStringExtra(DATA.ID)
+        planId = intent.getStringExtra(DATA.ID) ?: intent.getStringExtra(DATA.PLAN_ID)
+
+        val initialPlanName = intent.getStringExtra(DATA.NAME)
+        if (!initialPlanName.isNullOrEmpty()) {
+            binding.plan.text = initialPlanName
+            viewModel.setPlanName(initialPlanName)
+        }
 
         binding.toolbar.nameSpace.setText(R.string.add_new_category)
         binding.toolbar.back.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
@@ -143,6 +153,9 @@ class CategoryAddActivity : BaseActivity() {
             Toast.makeText(context, "Enter Title...", Toast.LENGTH_SHORT).show()
         } else if (imageUri == null) {
             Toast.makeText(context, "Pick Image...", Toast.LENGTH_SHORT).show()
+        } else if (!isNetworkAvailable()) {
+            Toast.makeText(context, getString(R.string.no_internet_connection), Toast.LENGTH_SHORT)
+                .show()
         } else {
             showLoading()
             viewModel.addCategory(title, planId ?: "", imageUri!!)

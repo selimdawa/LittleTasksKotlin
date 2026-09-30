@@ -22,6 +22,7 @@ import javax.inject.Singleton
 
 interface PlanRepository {
     fun getPlans(): Flow<Resource<List<Plan>>>
+    suspend fun getPlanById(id: String): Plan?
     suspend fun deletePlan(databaseName: String, id: String): Result<Unit>
 }
 
@@ -69,6 +70,10 @@ class PlanRepositoryImpl @Inject constructor(
             plansRef.removeEventListener(listener)
             localJob.cancel()
         }
+    }
+
+    override suspend fun getPlanById(id: String): Plan? {
+        return planDao.getPlanById(id)
     }
 
     override suspend fun deletePlan(databaseName: String, id: String): Result<Unit> {

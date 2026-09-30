@@ -20,6 +20,7 @@ import com.flatcode.littletasks.R
 import com.flatcode.littletasks.databinding.ActivityPlanAddBinding
 import com.flatcode.littletasks.databinding.LayoutLoadingDialogBinding
 import com.flatcode.littletasks.utils.BaseActivity
+import com.flatcode.littletasks.utils.isNetworkAvailable
 import com.flatcode.littletasks.utils.startCropActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -129,6 +130,8 @@ class PlanAddActivity : BaseActivity() {
             Toast.makeText(context, "Enter Title...", Toast.LENGTH_SHORT).show()
         } else if (imageUri == null) {
             Toast.makeText(context, "Pick Image...", Toast.LENGTH_SHORT).show()
+        } else if (!isNetworkAvailable()) {
+            Toast.makeText(context, getString(R.string.no_internet_connection), Toast.LENGTH_SHORT).show()
         } else {
             showLoading()
             viewModel.addPlan(title, imageUri!!)

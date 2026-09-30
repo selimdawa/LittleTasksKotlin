@@ -22,6 +22,7 @@ import com.flatcode.littletasks.databinding.LayoutLoadingDialogBinding
 import com.flatcode.littletasks.model.Category
 import com.flatcode.littletasks.utils.BaseActivity
 import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.utils.isNetworkAvailable
 import com.flatcode.littletasks.utils.loadImage
 import com.flatcode.littletasks.utils.startCropActivity
 import com.google.firebase.database.DataSnapshot
@@ -92,6 +93,12 @@ class CategoryEditActivity : BaseActivity() {
         categoryId = intent.getStringExtra(DATA.CATEGORY_ID)
         planId = intent.getStringExtra(DATA.PLAN_ID)
 
+        val initialPlanName = intent.getStringExtra(DATA.NAME)
+        if (!initialPlanName.isNullOrEmpty()) {
+            binding.plan.text = initialPlanName
+            viewModel.setPlanName(initialPlanName)
+        }
+
         loadCategoryInfo()
         planId?.let { viewModel.loadPlanName(it) }
 
@@ -147,6 +154,8 @@ class CategoryEditActivity : BaseActivity() {
         val name = binding.categoryEt.text.toString().trim()
         if (TextUtils.isEmpty(name)) {
             Toast.makeText(context, "Enter name...", Toast.LENGTH_SHORT).show()
+        } else if (!isNetworkAvailable()) {
+            Toast.makeText(context, getString(R.string.no_internet_connection), Toast.LENGTH_SHORT).show()
         } else {
             showLoading()
             viewModel.updateCategory(categoryId ?: "", name, imageUri)

@@ -21,6 +21,7 @@ import com.flatcode.littletasks.databinding.ActivityPlanAddBinding
 import com.flatcode.littletasks.databinding.LayoutLoadingDialogBinding
 import com.flatcode.littletasks.utils.BaseActivity
 import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.utils.isNetworkAvailable
 import com.flatcode.littletasks.utils.loadImage
 import com.flatcode.littletasks.utils.startCropActivity
 import dagger.hilt.android.AndroidEntryPoint
@@ -145,6 +146,8 @@ class PlanEditActivity : BaseActivity() {
         val name = binding.planEt.text.toString().trim()
         if (TextUtils.isEmpty(name)) {
             Toast.makeText(context, "Enter name...", Toast.LENGTH_SHORT).show()
+        } else if (!isNetworkAvailable()) {
+            Toast.makeText(context, getString(R.string.no_internet_connection), Toast.LENGTH_SHORT).show()
         } else {
             showLoading()
             viewModel.updatePlan(id ?: "", name, imageUri)

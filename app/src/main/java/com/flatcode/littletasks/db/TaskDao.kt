@@ -16,7 +16,7 @@ interface TaskDao {
     @Query("SELECT COUNT(*) FROM tasks")
     fun getTasksCount(): Flow<Int>
 
-    @Query("SELECT * FROM tasks WHERE category = :categoryId")
+    @Query("SELECT * FROM tasks WHERE category = :categoryId OR category IN (SELECT name FROM categories WHERE id = :categoryId)")
     fun getTasksByCategory(categoryId: String): Flow<List<Task>>
 
     @Query("SELECT * FROM tasks WHERE id = :taskId")

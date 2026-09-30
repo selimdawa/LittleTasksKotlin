@@ -7,6 +7,7 @@ import com.flatcode.littletasks.db.FavoriteDao
 import com.flatcode.littletasks.db.PlanDao
 import com.flatcode.littletasks.db.TaskDao
 import com.flatcode.littletasks.db.TaskItemDao
+import com.flatcode.littletasks.model.Setting
 import com.flatcode.littletasks.model.User
 import com.flatcode.littletasks.repository.UserRepository
 import com.flatcode.littletasks.utils.DATA
@@ -16,6 +17,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.flatcode.littletasks.db.SettingDao
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -34,7 +36,8 @@ class SettingsViewModel @Inject constructor(
     private val planDao: PlanDao,
     private val taskItemDao: TaskItemDao,
     private val taskDao: TaskDao,
-    private val favoriteDao: FavoriteDao
+    private val favoriteDao: FavoriteDao,
+    private val settingDao: SettingDao
 ) : ViewModel() {
 
     private val _userInfo = MutableStateFlow<User?>(null)
@@ -105,10 +108,29 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun loadPrivacyPolicy() {
+        viewModelScope.launch {
+            settingDao.getSettingById(DATA.PRIVACY_POLICY).collectLatest { setting ->
+                if (setting != null && !setting.type.isNullOrEmpty()) {
+                    _privacyPolicy.value = setting.type.orEmpty()
+                }
+            }
+        }
+
         database.getReference(DATA.TOOLS).child(DATA.PRIVACY_POLICY)
-            .addListenerForSingleValueEvent(object : ValueEventListener {
+            .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    _privacyPolicy.value = snapshot.value?.toString().orEmpty()
+                    val text = snapshot.value?.toString().orEmpty()
+                    if (text.isNotEmpty()) {
+                        _privacyPolicy.value = text
+                        viewModelScope.launch {
+                            settingDao.insertSetting(
+                                Setting(
+                                    id = DATA.PRIVACY_POLICY,
+                                    type = text
+                                )
+                            )
+                        }
+                    }
                 }
 
                 override fun onCancelled(error: DatabaseError) {

@@ -14,6 +14,7 @@ import com.flatcode.littletasks.databinding.ActivityTaskAddBinding
 import com.flatcode.littletasks.databinding.LayoutLoadingDialogBinding
 import com.flatcode.littletasks.utils.BaseActivity
 import com.flatcode.littletasks.utils.DATA
+import com.flatcode.littletasks.utils.isNetworkAvailable
 import com.flatcode.littletasks.utils.loadImage
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -95,6 +96,8 @@ class TaskAddActivity : BaseActivity() {
             Toast.makeText(context, "Enter Name...", Toast.LENGTH_SHORT).show()
         } else if (TextUtils.isEmpty(pointsStr)) {
             Toast.makeText(context, "Enter Points...", Toast.LENGTH_SHORT).show()
+        } else if (!isNetworkAvailable()) {
+            Toast.makeText(context, getString(R.string.no_internet_connection), Toast.LENGTH_SHORT).show()
         } else {
             showLoading()
             val points = pointsStr.toIntOrNull() ?: 0

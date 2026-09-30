@@ -12,6 +12,7 @@ import com.flatcode.littletasks.R
 import com.flatcode.littletasks.databinding.ActivityObjectAddBinding
 import com.flatcode.littletasks.model.TaskItem
 import com.flatcode.littletasks.utils.BaseActivity
+import com.flatcode.littletasks.utils.isNetworkAvailable
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -63,9 +64,10 @@ class ObjectAddActivity : BaseActivity(), ObjectAddAdapter.ObjectAddListener {
             Toast.makeText(context, "Enter Name...", Toast.LENGTH_SHORT).show()
         } else if (points.isEmpty()) {
             Toast.makeText(context, "Enter Points...", Toast.LENGTH_SHORT).show()
+        } else if (!isNetworkAvailable()) {
+            Toast.makeText(context, getString(R.string.no_internet_connection), Toast.LENGTH_SHORT).show()
         } else {
             viewModel.addObject(name, points.toIntOrNull() ?: 0)
-            // UI update for individual item (immediate feedback)
             add.visibility = View.GONE
             ok.visibility = View.VISIBLE
         }
