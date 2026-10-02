@@ -27,7 +27,7 @@ object DatabaseModule {
     fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
         return Room.databaseBuilder(
             context, AppDatabase::class.java, "little_tasks_db"
-        ).fallbackToDestructiveMigration(true).build()
+        ).build()
     }
 
     @Provides
