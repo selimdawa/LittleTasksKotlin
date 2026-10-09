@@ -1,4 +1,4 @@
-[versions]
+﻿[versions]
 agp = "9.4.1"
 androidImageCropper = "4.5.0"
 bubbleBottom = "1.0.3"
@@ -13,7 +13,7 @@ materialRipple = "1.0.2"
 googleServices = "4.5.0"
 navigation = "2.10.2"
 multicolors = "1.1.0"
-kotlin = "2.4.20"
+kotlin = "2.4.21"
 hilt = "2.60.1"
 coroutines = "1.11.0"
 room = "2.8.5"
