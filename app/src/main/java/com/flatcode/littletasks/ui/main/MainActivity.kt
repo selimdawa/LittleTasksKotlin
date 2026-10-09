@@ -21,6 +21,7 @@ import com.flatcode.littletasks.utils.loadImage
 import com.flatcode.littletasks.utils.openActivity
 import dagger.hilt.android.AndroidEntryPoint
 import io.selimdawa.bubblebottom.BubbleBottomNavigation
+import io.selimdawa.bubblebottom.Model
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -89,9 +90,9 @@ class MainActivity : BaseActivity() {
     }
 
     fun BubbleBottomNavigation.setupAppMenu() {
-        add(BubbleBottomNavigation.Model(R.id.settingsFragment, R.drawable.ic_settings))
-        add(BubbleBottomNavigation.Model(R.id.homeFragment, R.drawable.ic_home))
-        add(BubbleBottomNavigation.Model(R.id.categoriesFragment, R.drawable.ic_group))
+        add(Model(R.id.settingsFragment, R.drawable.ic_settings))
+        add(Model(R.id.homeFragment, R.drawable.ic_home))
+        add(Model(R.id.categoriesFragment, R.drawable.ic_group))
         show(R.id.homeFragment, true)
     }
 }

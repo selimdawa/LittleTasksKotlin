@@ -13,8 +13,6 @@
     <string name="settings">Settings</string>
     <string name="home">Home</string>
     <string name="plans">Plans</string>
-    <!-- Theme -->
-    <!-- Needed -->
     <string name="none_display">There are no items to display</string>
     <string name="add_new_object">Add New Object</string>
     <string name="do_you_want_to_logout">Do you want to logout?</string>
@@ -22,7 +20,6 @@
     <string name="yes">YES</string>
     <string name="do_you_want_to_exit">Do you want to Exit ?</string>
     <string name="about_app">The application was designed by "Flat Code"</string>
-    <!-- Pages -->
     <string name="favorites">Favorites</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="all">All</string>
