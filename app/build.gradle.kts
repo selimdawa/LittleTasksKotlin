@@ -17,8 +17,8 @@ android {
         applicationId = "com.flatcode.littletasks"
         minSdk = 24
         targetSdk = 37
-        versionCode = 8
-        versionName = "1.38"
+        versionCode = 9
+        versionName = "1.39"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
