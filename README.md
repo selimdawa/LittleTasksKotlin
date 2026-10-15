@@ -77,7 +77,7 @@ Logout | Share App | Privacy Policy
 
 ---
 
-### âœ¨ Core Functionalities
+### ✨ Core Functionalities
 *   **Robust Authentication Flow**: Secure identity management via **Firebase Authentication**.
 *   **Dynamic Task & Plan Orchestration**: Full CRUD operations for managing tasks, categories, and plans through a refined interface.
 *   **Granular Category & Object Management**: Organize tasks and plans effectively by categories and custom objects.
@@ -87,7 +87,7 @@ Logout | Share App | Privacy Policy
 
 ---
 
-## ðŸ› ï¸ Built With
+## 🛠️ Built With
 *   **Language:** [Kotlin](https://kotlinlang.org/)
 *   **UI Framework:** Material Design 3, ViewBinding
 *   **Database:** [Room](https://developer.android.com/training/data-storage/room)
@@ -97,30 +97,30 @@ Logout | Share App | Privacy Policy
 
 ---
 
-### ðŸ—ï¸ Technical Architecture
+### 🏗️ Technical Architecture
 The application is engineered using **MVVM (Model-View-ViewModel)** architectural patterns, strictly adhering to **Clean Architecture** principles to promote modularity and ease of maintenance.
 
 ```text
 app/src/main/java/com/flatcode/littletasks/
-â”œâ”€â”€ db/                 # Room Database Configuration & DAOs
-â”œâ”€â”€ di/                 # Dependency Injection (Hilt modules)
-â”œâ”€â”€ model/              # Data Entities & Models
-â”œâ”€â”€ repository/         # Repository Pattern Implementation
-â”œâ”€â”€ ui/                 # Presentation Layer (Activities, Fragments & ViewModels)
-â”‚   â”œâ”€â”€ auth/           # Authentication (Login, Register, Forget Password)
-â”‚   â”œâ”€â”€ category/       # Category Management & Tasks
-â”‚   â”œâ”€â”€ main/           # Main Dashboard, Home & Splash
-â”‚   â”œâ”€â”€ objects/        # Objects Management
-â”‚   â”œâ”€â”€ plan/           # Plan Operations
-â”‚   â”œâ”€â”€ profile/        # Profile & Favorites
-â”‚   â”œâ”€â”€ settings/       # Settings & Privacy Policy
-â”‚   â””â”€â”€ task/           # Task Operations (Add, Edit, View)
-â””â”€â”€ utils/              # Extensions, Constants & Utility Classes
+├── db/                 # Room Database Configuration & DAOs
+├── di/                 # Dependency Injection (Hilt modules)
+├── model/              # Data Entities & Models
+├── repository/         # Repository Pattern Implementation
+├── ui/                 # Presentation Layer (Activities, Fragments & ViewModels)
+│   ├── auth/           # Authentication (Login, Register, Forget Password)
+│   ├── category/       # Category Management & Tasks
+│   ├── main/           # Main Dashboard, Home & Splash
+│   ├── objects/        # Objects Management
+│   ├── plan/           # Plan Operations
+│   ├── profile/        # Profile & Favorites
+│   ├── settings/       # Settings & Privacy Policy
+│   └── task/           # Task Operations (Add, Edit, View)
+└── utils/              # Extensions, Constants & Utility Classes
 ```
 
 ---
 
-## ðŸš€ Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 *   Android Studio Ladybug or newer.
@@ -139,7 +139,7 @@ app/src/main/java/com/flatcode/littletasks/
 
 ---
 
-### ðŸ› ï¸ Technology Stack
+### 🛠️ Technology Stack
 *   **Language**: Kotlin (Modern, expressive, and safe development).
 *   **Dependency Injection**: **Dagger Hilt** (Simplified, standard DI for Android).
 *   **Cloud Infrastructure**: **Firebase** (Scalable authentication and real-time NoSQL storage).
@@ -149,7 +149,7 @@ app/src/main/java/com/flatcode/littletasks/
 
 ---
 
-## ðŸ”— Links & Resources
+## 🔗 Links & Resources
 *   **Legacy Versions:**
     *   [Kotlin Old Code Version](https://github.com/selimdawa/LittleTasksKotlinOld/)
     *   [Java Old Code Version](https://github.com/selimdawa/LittleTasks/)
@@ -157,6 +157,5 @@ app/src/main/java/com/flatcode/littletasks/
 
 ---
 
-## ðŸ“œ License
+## 📜 License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
